@@ -55,6 +55,11 @@ interface AppState {
   // Notification Actions
   addNotification: (title: string, description: string, type?: 'info' | 'success' | 'warning' | 'error') => void;
   markNotificationsAsRead: () => void;
+
+  // Facebook Feed Configuration
+  fbPageId: string;
+  fbAccessToken: string;
+  setFacebookConfig: (pageId: string, accessToken: string) => void;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -63,6 +68,10 @@ export const useAppStore = create<AppState>((set, get) => ({
   viewMode: 'citizen',
   theme: 'light',
   sidebarOpen: false,
+
+  // Facebook Feed Config (persisted via localStorage key 'fb-config')
+  fbPageId: typeof window !== 'undefined' ? (localStorage.getItem('fb-page-id') || '') : '',
+  fbAccessToken: typeof window !== 'undefined' ? (localStorage.getItem('fb-access-token') || '') : '',
   
   feedbacks: mockFeedbacks,
   activeFeedbackId: null,
@@ -286,5 +295,13 @@ export const useAppStore = create<AppState>((set, get) => ({
     set((state) => ({
       notifications: state.notifications.map((n) => ({ ...n, read: true }))
     }));
+  },
+
+  setFacebookConfig: (pageId: string, accessToken: string) => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('fb-page-id', pageId);
+      localStorage.setItem('fb-access-token', accessToken);
+    }
+    set({ fbPageId: pageId, fbAccessToken: accessToken });
   }
 }));

@@ -10,6 +10,12 @@ import {
   Briefcase, Mail, ShieldAlert, Compass
 } from 'lucide-react';
 
+const FbIcon = ({ className = 'h-4 w-4' }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+  </svg>
+);
+
 export default function Sidebar() {
   const { currentRoute, setCurrentRoute, viewMode, setViewMode, sidebarOpen, toggleSidebar } = useAppStore();
   const router = useRouter();
@@ -22,6 +28,9 @@ export default function Sidebar() {
         { group: "Nghiệp vụ cán bộ", items: [
           { id: '/cong-lam-viec-can-bo', label: "Tổng quan điều hành", icon: Briefcase },
           { id: '/tong-dai-ai', label: "Trợ lý Hành chính AI", icon: Bot },
+        ]},
+        { group: "Quản lý nội dung", items: [
+          { id: '/quan-ly-facebook', label: "Kết nối Fanpage FB", icon: FbIcon },
         ]}
       ]
     : [

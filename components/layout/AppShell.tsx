@@ -25,7 +25,7 @@ export default function AppShell({ children }: AppShellProps) {
   useEffect(() => {
     if (pathname) {
       setCurrentRoute(pathname);
-      if (['/cong-lam-viec-can-bo', '/thong-ke'].includes(pathname)) {
+      if (['/cong-lam-viec-can-bo', '/thong-ke', '/quan-ly-facebook'].includes(pathname)) {
         setViewMode('staff');
       } else {
         setViewMode('citizen');
