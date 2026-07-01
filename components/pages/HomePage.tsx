@@ -20,7 +20,7 @@ const fadeUpProps = (i = 0) => ({
 });
 
 /* ─── Google Form link (thay link này khi có form chính thức) ─── */
-const GOOGLE_FORM_URL = 'https://docs.google.com/forms/d/e/YOUR_FORM_ID/viewform';
+const GOOGLE_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSflI6uajykE5zW3Ula8BSUFQelEbyXF04AnJfjTZ87sluz7ag/viewform';
 /* ─── Google Drive link tài liệu ─── */
 const DRIVE_FOLDER_URL = 'https://drive.google.com/drive/folders/YOUR_FOLDER_ID';
 /* ─── Facebook Page ─── */

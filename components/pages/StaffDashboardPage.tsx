@@ -13,6 +13,7 @@ import DonutChart from '../charts/DonutChart';
 import LineChart from '../charts/LineChart';
 import BarChart from '../charts/BarChart';
 import HeatMapMock from '../charts/HeatMapMock';
+import GoogleSheetSchedule from '../ui/GoogleSheetSchedule';
 import { useAppStore } from '@/store/useAppStore';
 import { mockStaffTasks } from '@/lib/mockData';
 import {
@@ -317,6 +318,11 @@ export default function StaffDashboardPage() {
         <StatCard title="Đã xử lý" value="892" change="+20%" trend="up" description="Đã giải quyết phản hồi" icon={<CheckCircle2 className="h-4.5 w-4.5 text-emerald-500" />} />
         <StatCard title="Đúng hạn / Hài lòng" value="96.5%" change="4.8/5 ★" trend="up" description="Đánh giá của bà con" icon={<Award className="h-4.5 w-4.5 text-rose-500" />} />
       </div>
+
+      {/* ── Lịch làm việc Google Sheets (realtime) ── */}
+      <GlassCard hoverable={false} className="p-5 mb-6 bg-white/50 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/50">
+        <GoogleSheetSchedule />
+      </GlassCard>
 
       {/* 2. Quy trình xử lý kiến nghị 6 bước */}
       <GlassCard hoverable={false} className="p-5 bg-white/50 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/50 mb-6">
