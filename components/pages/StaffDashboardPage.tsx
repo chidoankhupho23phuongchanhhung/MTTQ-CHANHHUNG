@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PageContainer from '../layout/PageContainer';
 import SectionTitle from '../ui/SectionTitle';
 import GlassCard from '../ui/GlassCard';
@@ -15,15 +15,190 @@ import BarChart from '../charts/BarChart';
 import HeatMapMock from '../charts/HeatMapMock';
 import { useAppStore } from '@/store/useAppStore';
 import { mockStaffTasks } from '@/lib/mockData';
-import { 
+import {
   ShieldCheck, FilePlus, Hourglass, CheckCircle2, ClipboardList,
   Sparkles, FileText, AlertTriangle, ArrowRight, UserCheck, Bot,
-  Award, CornerDownRight, Check, Eye, Briefcase
+  Award, CornerDownRight, Check, Eye, Briefcase,
+  Database, Inbox, BarChart3, Settings, Search, Bell,
+  Upload, Download, RefreshCw, Globe, Lock, Save
 } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 import { StaffWorkItem, FeedbackItem } from '@/lib/types';
 
+/* ── Tab-section sub-page renderers ── */
+function TabQuanLySo() {
+  return (
+    <PageContainer>
+      <SectionTitle title="Quản lý số" subtitle="Quản lý dữ liệu số hoá, kết nối Fanpage, đồng bộ thông tin" />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <StatCard title="Bài đăng Fanpage" value="184" change="+12%" trend="up" description="tháng này" icon={<Globe className="h-4 w-4 text-blue-500" />} />
+        <StatCard title="Lượt tương tác" value="12.4K" change="+28%" trend="up" description="lượt like & share" icon={<Bell className="h-4 w-4 text-purple-500" />} />
+        <StatCard title="Dữ liệu đồng bộ" value="98.2%" change="+0.4%" trend="up" description="tỉ lệ đồng bộ" icon={<RefreshCw className="h-4 w-4 text-emerald-500" />} />
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <GlassCard className="p-5 flex flex-col gap-4">
+          <h3 className="text-xs font-black text-slate-700 dark:text-white uppercase tracking-wider">Kết nối Fanpage Facebook</h3>
+          <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">Trạng thái: <span className="text-emerald-600 font-bold">Đang chờ cấu hình</span>. Truy cập <a href="/quan-ly-facebook" className="text-blue-600 underline font-bold">Quản lý Facebook</a> để thiết lập.</p>
+          <Button onClick={() => window.location.href='/quan-ly-facebook'} size="sm" className="w-fit">Cấu hình ngay</Button>
+        </GlassCard>
+        <GlassCard className="p-5 flex flex-col gap-4">
+          <h3 className="text-xs font-black text-slate-700 dark:text-white uppercase tracking-wider">Xuất / Nhập dữ liệu</h3>
+          <div className="flex flex-col gap-2">
+            <Button size="sm" className="flex items-center gap-2 w-full justify-center"><Download className="h-3.5 w-3.5" /> Xuất báo cáo Excel</Button>
+            <Button size="sm" variant="secondary" className="flex items-center gap-2 w-full justify-center"><Upload className="h-3.5 w-3.5" /> Nhập danh sách CSV</Button>
+          </div>
+        </GlassCard>
+      </div>
+    </PageContainer>
+  );
+}
+
+function TabGiaiQuyet({ feedbacks, updateFeedbackStatus, addNotification }: { feedbacks: FeedbackItem[]; updateFeedbackStatus: (...args: any[]) => void; addNotification: (...args: any[]) => void }) {
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const pending = feedbacks.filter(f => f.status !== 'Hoàn tất' && f.status !== 'Đã phản hồi');
+  const selected = feedbacks.find(f => f.id === selectedId) || pending[0];
+  return (
+    <PageContainer>
+      <SectionTitle title="Giải quyết – Tiếp nhận" subtitle="Tiếp nhận, phân loại và xử lý kiến nghị, phản ánh của người dân" />
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <StatCard title="Chờ tiếp nhận" value={feedbacks.filter(f=>f.status==='Mới tiếp nhận').length.toString()} trend="up" change="" description="" icon={<FilePlus className="h-4 w-4 text-blue-500"/>} />
+        <StatCard title="Đang xử lý" value={feedbacks.filter(f=>f.status==='Đang xử lý').length.toString()} trend="up" change="" description="" icon={<Hourglass className="h-4 w-4 text-amber-500"/>} />
+        <StatCard title="Đã hoàn thành" value={feedbacks.filter(f=>f.status==='Hoàn tất'||f.status==='Đã phản hồi').length.toString()} trend="up" change="" description="" icon={<CheckCircle2 className="h-4 w-4 text-emerald-500"/>} />
+        <StatCard title="Tổng kiến nghị" value={feedbacks.length.toString()} trend="up" change="" description="" icon={<ClipboardList className="h-4 w-4 text-purple-500"/>} />
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="lg:col-span-2 flex flex-col gap-3">
+          {pending.slice(0, 6).map(fb => (
+            <GlassCard key={fb.id} onClick={() => setSelectedId(fb.id)} className={`p-4 cursor-pointer flex items-center gap-3 ${selected?.id === fb.id ? 'ring-2 ring-blue-500/40' : ''}`}>
+              <div className="flex-1 min-w-0 text-left">
+                <h4 className="text-xs font-bold text-slate-800 dark:text-white truncate">{fb.title}</h4>
+                <span className="text-[10px] text-slate-400">{fb.senderName} • {fb.datetime}</span>
+              </div>
+              <Badge variant={fb.status === 'Mới tiếp nhận' ? 'info' : fb.status === 'Đang xử lý' ? 'warning' : 'success'}>{fb.status}</Badge>
+            </GlassCard>
+          ))}
+        </div>
+        {selected && (
+          <GlassCard className="p-5 flex flex-col gap-3 text-left">
+            <h3 className="text-xs font-black text-slate-800 dark:text-white">{selected.title}</h3>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">{selected.content}</p>
+            <Badge variant="info">{selected.status}</Badge>
+            <Button size="sm" onClick={() => { updateFeedbackStatus(selected.id, 'Đang xử lý', 'Đã tiếp nhận và phân công xử lý', 'Nguyễn Văn An'); addNotification('Cập nhật trạng thái', `Đã chuyển "${selected.title}" sang Đang xử lý`, 'success'); }}>
+              Chuyển Đang xử lý
+            </Button>
+            <Button size="sm" variant="primary" onClick={() => { updateFeedbackStatus(selected.id, 'Hoàn tất', 'Đã hoàn tất xử lý và phản hồi người dân.', 'Nguyễn Văn An'); addNotification('Hoàn tất', `Đã giải quyết "${selected.title}"`, 'success'); }}>
+              Đánh dấu Hoàn tất
+            </Button>
+          </GlassCard>
+        )}
+      </div>
+    </PageContainer>
+  );
+}
+
+function TabVanThu() {
+  const docs = [
+    { id: 1, title: 'Nghị quyết HĐND phường Q8 2026', date: '28/06/2026', type: 'Nghị quyết', status: 'Đã ban hành' },
+    { id: 2, title: 'Kế hoạch phòng chống tệ nạn xã hội 2026', date: '20/06/2026', type: 'Kế hoạch', status: 'Dự thảo' },
+    { id: 3, title: 'Quyết định thành lập Ban kiểm tra MTTQ', date: '15/06/2026', type: 'Quyết định', status: 'Đã ban hành' },
+    { id: 4, title: 'Báo cáo hoạt động tháng 6/2026', date: '01/07/2026', type: 'Báo cáo', status: 'Đang soạn' },
+    { id: 5, title: 'Tờ trình xin ý kiến cấp trên về dự án sân thể thao', date: '10/06/2026', type: 'Tờ trình', status: 'Chờ duyệt' },
+  ];
+  return (
+    <PageContainer>
+      <SectionTitle title="Văn thư" subtitle="Quản lý hệ thống văn bản đến, văn bản đi và biểu mẫu hành chính" />
+      <div className="flex flex-col gap-3">
+        {docs.map(doc => (
+          <GlassCard key={doc.id} className="flex items-center gap-4 p-4">
+            <div className="p-2.5 bg-blue-100 dark:bg-blue-950/30 rounded-xl flex-shrink-0">
+              <FileText className="h-4 w-4 text-blue-600" />
+            </div>
+            <div className="flex-1 min-w-0 text-left">
+              <h4 className="text-xs font-bold text-slate-800 dark:text-white truncate">{doc.title}</h4>
+              <span className="text-[10px] text-slate-400">{doc.type} • {doc.date}</span>
+            </div>
+            <Badge variant={doc.status === 'Đã ban hành' ? 'success' : doc.status === 'Chờ duyệt' ? 'warning' : 'info'}>{doc.status}</Badge>
+            <Button size="sm" variant="ghost">Xem</Button>
+          </GlassCard>
+        ))}
+      </div>
+    </PageContainer>
+  );
+}
+
+function TabBaoCao() {
+  return (
+    <PageContainer>
+      <SectionTitle title="Báo cáo tiến độ" subtitle="Thống kê KPI, tỉ lệ xử lý phản ánh và hiệu suất hoạt động MTTQ" />
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <StatCard title="Tỉ lệ xử lý" value="96.5%" change="+1.2%" trend="up" description="hoàn thành đúng hạn" icon={<BarChart3 className="h-4 w-4 text-emerald-500"/>} />
+        <StatCard title="Thời gian TB" value="2.4 ngày" change="-0.3 ngày" trend="up" description="xử lý mỗi vụ việc" icon={<Hourglass className="h-4 w-4 text-amber-500"/>} />
+        <StatCard title="Hài lòng" value="94.8%" change="+2.1%" trend="up" description="đánh giá từ người dân" icon={<Award className="h-4 w-4 text-purple-500"/>} />
+        <StatCard title="Tổng vụ T6" value="312" change="+18%" trend="up" description="phản ánh tháng 6" icon={<ClipboardList className="h-4 w-4 text-blue-500"/>} />
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <GlassCard hoverable={false} className="p-5">
+          <h3 className="text-xs font-black text-slate-700 dark:text-white mb-4 uppercase tracking-wider">Xu hướng tiếp nhận</h3>
+          <LineChart data={[{name:'T1',submissions:48,resolved:40},{name:'T2',submissions:62,resolved:55},{name:'T3',submissions:55,resolved:50},{name:'T4',submissions:78,resolved:70},{name:'T5',submissions:90,resolved:84},{name:'T6',submissions:105,resolved:98}]} />
+        </GlassCard>
+        <GlassCard hoverable={false} className="p-5">
+          <h3 className="text-xs font-black text-slate-700 dark:text-white mb-4 uppercase tracking-wider">Phân bổ lĩnh vực</h3>
+          <BarChart data={[{name:'Đô thị',value:85},{name:'Môi trường',value:62},{name:'An ninh',value:44},{name:'Xã hội',value:38},{name:'Khác',value:18}]} />
+        </GlassCard>
+      </div>
+    </PageContainer>
+  );
+}
+
+function TabTuyChinh() {
+  return (
+    <PageContainer>
+      <SectionTitle title="Tuỳ chỉnh" subtitle="Cấu hình hệ thống, phân quyền cán bộ và cài đặt thông báo" />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <GlassCard className="p-5 flex flex-col gap-4">
+          <h3 className="text-xs font-black text-slate-700 dark:text-white uppercase tracking-wider flex items-center gap-2"><Lock className="h-4 w-4 text-blue-500"/>Bảo mật & Tài khoản</h3>
+          <div className="flex flex-col gap-2 text-xs">
+            <div className="flex justify-between py-2 border-b border-slate-100 dark:border-slate-800">
+              <span className="text-slate-500">Tên cán bộ</span><span className="font-bold text-slate-800 dark:text-white">Nguyễn Văn An</span>
+            </div>
+            <div className="flex justify-between py-2 border-b border-slate-100 dark:border-slate-800">
+              <span className="text-slate-500">Chức vụ</span><span className="font-bold text-slate-800 dark:text-white">Chuyên viên MTTQ</span>
+            </div>
+            <div className="flex justify-between py-2">
+              <span className="text-slate-500">Phân quyền</span><Badge variant="success">Cán bộ chuyên viên</Badge>
+            </div>
+          </div>
+          <Button size="sm" className="flex items-center gap-2 w-fit"><Save className="h-3.5 w-3.5"/> Đổi mật khẩu</Button>
+        </GlassCard>
+        <GlassCard className="p-5 flex flex-col gap-4">
+          <h3 className="text-xs font-black text-slate-700 dark:text-white uppercase tracking-wider flex items-center gap-2"><Bell className="h-4 w-4 text-amber-500"/>Thông báo</h3>
+          {[['Nhận thông báo phản ánh mới', true],['Email báo cáo tuần', true],['Thông báo SMS khẩn cấp', false],['Thông báo qua Zalo', true]].map(([label, on]) => (
+            <div key={label as string} className="flex items-center justify-between text-xs">
+              <span className="text-slate-600 dark:text-slate-300">{label as string}</span>
+              <span className={`px-2 py-0.5 rounded-full text-[9px] font-black ${on ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400' : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'}`}>{on ? 'BẬT' : 'TẮT'}</span>
+            </div>
+          ))}
+          <Button size="sm" variant="secondary" className="w-fit">Lưu cài đặt</Button>
+        </GlassCard>
+        <GlassCard className="p-5 md:col-span-2 flex flex-col gap-3">
+          <h3 className="text-xs font-black text-slate-700 dark:text-white uppercase tracking-wider flex items-center gap-2"><Globe className="h-4 w-4 text-indigo-500"/>Tích hợp ngoài</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {[{name:'Facebook Fanpage',status:'Chưa kết nối',route:'/quan-ly-facebook'},{name:'Zalo Official Account',status:'Chưa kết nối',route:'#'},{name:'Cổng DVCQG',status:'Đang phát triển',route:'#'}].map(item=>(
+              <div key={item.name} className="flex flex-col gap-2 p-3 rounded-2xl bg-white/40 dark:bg-slate-900/40 border border-slate-200/40 dark:border-slate-800/40">
+                <span className="text-xs font-bold text-slate-700 dark:text-white">{item.name}</span>
+                <span className="text-[10px] text-slate-400">{item.status}</span>
+                <Button size="sm" variant="ghost" onClick={()=>window.location.href=item.route}>Cấu hình</Button>
+              </div>
+            ))}
+          </div>
+        </GlassCard>
+      </div>
+    </PageContainer>
+  );
+}
+
 export default function StaffDashboardPage() {
+
   const { feedbacks, updateFeedbackStatus, addNotification } = useAppStore();
   const [selectedFbId, setSelectedFbId] = useState<string | null>(null);
   
@@ -101,15 +276,37 @@ export default function StaffDashboardPage() {
     { name: 'Lĩnh vực khác', value: feedbacks.filter(f => f.field === 'Khác').length || 1 }
   ];
 
+  // Read active tab from URL on client-side only
+  const [activeTab, setActiveTab] = useState('tong-quan');
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setActiveTab(params.get('tab') || 'tong-quan');
+    // Listen for popstate if user navigates with browser back/forward
+    const onPop = () => {
+      const p = new URLSearchParams(window.location.search);
+      setActiveTab(p.get('tab') || 'tong-quan');
+    };
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, []);
+
+  // Route to sub-tab components
+  if (activeTab === 'quan-ly-so') return <TabQuanLySo />;
+  if (activeTab === 'giai-quyet') return <TabGiaiQuyet feedbacks={feedbacks} updateFeedbackStatus={updateFeedbackStatus} addNotification={addNotification} />;
+  if (activeTab === 'van-thu') return <TabVanThu />;
+  if (activeTab === 'bao-cao') return <TabBaoCao />;
+  if (activeTab === 'tuy-chinh') return <TabTuyChinh />;
+
+  // Default: Tổng quan tab
   return (
     <PageContainer>
       <SectionTitle
-        title="Cổng làm việc cán bộ - Chuyên viên"
+        title="Tổng quan điều hành"
         subtitle="Hệ thống tổng hợp chỉ đạo, tiếp nhận ý kiến phản ánh, quản lý công việc và báo cáo an sinh xã hội nội bộ"
       >
         <div className="inline-flex items-center gap-1 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200/40 dark:border-emerald-900/30 py-1.5 px-3 rounded-xl text-xs font-bold text-emerald-600 dark:text-emerald-400">
           <ShieldCheck className="h-4 w-4" />
-          <span>Phiên đăng nhập cán bộ</span>
+          <span>Nguyễn Văn An — Chuyên viên MTTQ</span>
         </div>
       </SectionTitle>
 
