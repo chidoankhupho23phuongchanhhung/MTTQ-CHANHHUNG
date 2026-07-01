@@ -34,35 +34,36 @@ function timeAgo(dateStr: string): string {
   return `${Math.floor(diff / 86400)} ngày trước`;
 }
 
-/* Mock posts shown when no token is configured */
+/* Real MTTQ Chánh Hưng Fanpage */
+const REAL_FB_PAGE = 'https://www.facebook.com/profile.php?id=61580661372890';
 const MOCK_POSTS: FbPost[] = [
   {
     id: 'mock-1',
     message: '🎉 Ủy ban MTTQ Việt Nam Phường Chánh Hưng tổ chức thành công Hội nghị hiệp thương lần thứ nhất bầu cử đại biểu HĐND phường nhiệm kỳ 2026-2031. Xin trân trọng cảm ơn sự tham gia đóng góp của bà con nhân dân!',
     full_picture: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=600&auto=format&fit=crop&q=70',
     created_time: new Date(Date.now() - 2 * 3600 * 1000).toISOString(),
-    permalink_url: '#'
+    permalink_url: REAL_FB_PAGE
   },
   {
     id: 'mock-2',
     message: '🌸 Phong trào "Thành phố Muôn Sắc Hoa" — MTTQ Phường Chánh Hưng kêu gọi bà con trồng hoa, cây xanh trước nhà, góp phần làm đẹp cảnh quan khu phố. Đăng ký tham gia tại văn phòng UBND Phường.',
     full_picture: 'https://images.unsplash.com/photo-1490750967868-88df5691cc52?w=600&auto=format&fit=crop&q=70',
     created_time: new Date(Date.now() - 18 * 3600 * 1000).toISOString(),
-    permalink_url: '#'
+    permalink_url: REAL_FB_PAGE
   },
   {
     id: 'mock-3',
     message: '🛡️ Thông báo: Phường Chánh Hưng ra quân tổng kiểm tra an ninh trật tự khu phố 2, 3, 5 vào ngày 05/07/2026. Bà con nhân dân tích cực phối hợp với lực lượng Công an và MTTQ phường.',
     full_picture: 'https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?w=600&auto=format&fit=crop&q=70',
     created_time: new Date(Date.now() - 36 * 3600 * 1000).toISOString(),
-    permalink_url: '#'
+    permalink_url: REAL_FB_PAGE
   },
   {
     id: 'mock-4',
     message: '💚 Chương trình "An sinh xã hội" tháng 7/2026: MTTQ Phường Chánh Hưng phối hợp trao 45 phần quà (500.000đ/phần) cho hộ khó khăn, gia đình chính sách. Đăng ký nhận hỗ trợ tại Ban Công tác Mặt trận Khu phố.',
     full_picture: 'https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=600&auto=format&fit=crop&q=70',
     created_time: new Date(Date.now() - 2 * 86400 * 1000).toISOString(),
-    permalink_url: '#'
+    permalink_url: REAL_FB_PAGE
   }
 ];
 
