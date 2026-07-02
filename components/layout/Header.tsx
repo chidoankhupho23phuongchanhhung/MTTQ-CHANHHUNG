@@ -78,11 +78,8 @@ export default function Header() {
   };
 
   return (
-    <header className={cn(
-      "sticky top-0 z-30 w-full flex flex-col justify-center bg-white/70 dark:bg-slate-900/70 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-800/50 shadow-sm transition-all",
-      isStaff ? "h-16" : "h-16 md:h-28"
-    )}>
-      {/* Top Row: Brand Logo, search and profile controls */}
+    <header className="sticky top-0 z-30 w-full flex flex-col justify-center bg-white/70 dark:bg-slate-900/70 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-800/50 shadow-sm transition-all h-16">
+      {/* Brand Logo, horizontal navigation menu, and profile controls */}
       <div className="w-full flex items-center justify-between px-4 sm:px-6 h-16">
         
         {/* Left brand logo & Hamburger */}
@@ -121,7 +118,28 @@ export default function Header() {
             </div>
         </div>
 
-        {/* Middle Search Bar (Removed as requested) */}
+        {/* Center Horizontal Navigation Bar (Only for Citizen layout, hidden on Staff) */}
+        {!isStaff && (
+          <div className="hidden md:flex items-center justify-center flex-1 mx-4 gap-1 sm:gap-1.5 overflow-x-auto no-scrollbar">
+            {navItems.map((item) => {
+              const isActive = pathname === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => handleNavigate(item.id)}
+                  className={cn(
+                    "px-3 py-1.5 text-xs font-black transition-all rounded-full cursor-pointer select-none border whitespace-nowrap",
+                    isActive 
+                      ? "bg-blue-600/10 text-blue-600 border-blue-500/20 dark:bg-blue-500/15 dark:text-blue-400 dark:border-blue-400/20 shadow-xs" 
+                      : "text-slate-500 hover:text-slate-850 dark:text-slate-400 dark:hover:text-slate-200 bg-transparent border-transparent hover:bg-slate-100/60 dark:hover:bg-slate-800/50"
+                  )}
+                >
+                  {item.label}
+                </button>
+              );
+            })}
+          </div>
+        )}
 
         {/* Right Controls */}
         <div className="flex items-center gap-2 sm:gap-3">
@@ -238,28 +256,6 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Bottom Row: Horizontal Navigation Bar (Only for Citizen layout, hidden on Staff) */}
-      {!isStaff && (
-        <div className="hidden md:flex w-full h-12 border-t border-slate-200/40 dark:border-slate-800/40 px-4 sm:px-6 items-center justify-center overflow-x-auto no-scrollbar gap-2">
-          {navItems.map((item) => {
-            const isActive = pathname === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => handleNavigate(item.id)}
-                className={cn(
-                  "px-4 py-1.5 text-xs font-bold transition-all rounded-full cursor-pointer select-none border",
-                  isActive 
-                    ? "bg-blue-600/10 text-blue-600 border-blue-500/20 dark:bg-blue-500/15 dark:text-blue-400 dark:border-blue-400/20 shadow-xs" 
-                    : "text-slate-500 hover:text-slate-850 dark:text-slate-400 dark:hover:text-slate-200 bg-transparent border-transparent hover:bg-slate-100/60 dark:hover:bg-slate-800/50"
-                )}
-              >
-                {item.label}
-              </button>
-            );
-          })}
-        </div>
-      )}
     </header>
   );
 }
