@@ -83,18 +83,18 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-gradient-to-br from-red-900/75 via-red-700/55 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#0b0f19]/85 via-transparent to-transparent" />
 
-        <div className="relative z-10 flex flex-col items-center justify-center text-center gap-4 px-5 sm:px-10 pt-10 pb-16 md:py-14">
+        <div className="relative z-10 flex flex-col items-center justify-center text-center gap-5 px-5 sm:px-10 pt-10 pb-16 md:py-16">
           <motion.img
             src="/mttq-logo.png"
             alt="Logo MTTQ"
-            className="w-16 h-16 sm:w-20 sm:h-20 object-contain filter drop-shadow-2xl"
+            className="w-24 h-24 sm:w-32 sm:h-32 object-contain filter drop-shadow-2xl mb-2"
             initial={{ opacity: 0, scale: 0.75 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, ease: 'easeOut' }}
           />
 
           <motion.div
-            className="flex flex-col items-center gap-3 max-w-2xl"
+            className="flex flex-col items-center gap-3.5 max-w-3xl"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.15, ease: 'easeOut' }}
@@ -104,7 +104,7 @@ export default function HomePage() {
               Cổng thông tin chính thức — Phường Chánh Hưng
             </span>
 
-            <h1 className="text-2xl sm:text-4xl font-black text-white leading-tight uppercase drop-shadow-lg tracking-tight text-center">
+            <h1 className="text-3xl sm:text-5xl md:text-6xl font-black text-white leading-tight uppercase drop-shadow-2xl tracking-tight text-center">
               MẶT TRẬN SỐ<br />
               <span className="text-yellow-300">Phường Chánh Hưng</span>
             </h1>
@@ -112,26 +112,6 @@ export default function HomePage() {
             <p className="text-xs sm:text-sm font-semibold text-yellow-200 italic border-l-2 border-yellow-400 pl-3 leading-relaxed text-left">
               "Đoàn kết – Dân chủ – Đổi mới – Phát triển"
             </p>
-
-            <div className="flex flex-wrap gap-3 mt-1 justify-center">
-              <motion.button
-                whileTap={{ scale: 0.94 }} whileHover={{ scale: 1.04 }}
-                onClick={() => handleExternal(GOOGLE_FORM_URL)}
-                className="px-5 py-2.5 rounded-full bg-white text-red-700 font-black text-xs uppercase tracking-wider shadow-lg transition-all"
-              >
-                Gửi kiến nghị ngay
-              </motion.button>
-              <motion.button
-                whileTap={{ scale: 0.94 }} whileHover={{ scale: 1.04 }}
-                onClick={() => handleExternal(FB_PAGE_URL)}
-                className="flex items-center gap-1.5 px-5 py-2.5 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white font-bold text-xs uppercase tracking-wider transition-all"
-              >
-                <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
-                </svg>
-                Fanpage MTTQ
-              </motion.button>
-            </div>
           </motion.div>
         </div>
       </div>
