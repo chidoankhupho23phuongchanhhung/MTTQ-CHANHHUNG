@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils';
 import {
   MessageSquare, Bot, PhoneCall, Compass, BookOpen,
   Shield, Flower2, ChevronRight, FileText, ExternalLink,
-  PenLine, SpellCheck, ChevronDown, ChevronUp, Users
+  PenLine, SpellCheck, ChevronDown, ChevronUp, Users, ArrowRight
 } from 'lucide-react';
 
 /* ─── per-index fade-up ─── */
@@ -128,194 +128,155 @@ export default function HomePage() {
             ROW 1 — 2 full-width tiles side-by-side
             Không gian Hồ Chí Minh  |  Tài liệu sinh hoạt
         ═══════════════════════════════════════════ */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-5">
 
-          {/* Tile 1: Không gian Văn hóa Hồ Chí Minh — with Bác Hồ image */}
+          {/* Card 1: Không gian Văn hóa Hồ Chí Minh */}
           <motion.button
             {...fadeUpProps(0)}
-            whileHover={{ scale: 1.025, y: -3 }}
-            whileTap={{ scale: 0.96 }}
+            whileHover={{ scale: 1.03, y: -4 }}
+            whileTap={{ scale: 0.97 }}
             onClick={() => handleNav('/khong-gian-van-hoa-hcm')}
-            className="relative overflow-hidden rounded-3xl h-36 sm:h-44 flex flex-col items-start justify-end p-4 sm:p-5 shadow-xl cursor-pointer group border border-white/10 text-left"
+            className="flex flex-col items-center justify-between p-5 rounded-3xl border border-slate-200/50 dark:border-slate-800/50 bg-white/60 dark:bg-slate-900/40 backdrop-blur-md cursor-pointer transition-all duration-300 hover:shadow-lg hover:shadow-red-500/5 min-h-[220px] text-center w-full group"
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-red-800 via-red-900 to-amber-950" />
-            {/* Bác Hồ vector portrait */}
-            <img
-              src="https://upload.wikimedia.org/wikipedia/commons/e/ec/Ho_Chi_Minh_Vector_%28positive%29.svg"
-              alt="Chủ tịch Hồ Chí Minh"
-              className="absolute right-0 bottom-0 h-[105%] w-auto object-contain object-right-bottom transition-transform duration-500 group-hover:scale-105 opacity-40 dark:opacity-30 pointer-events-none"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-red-950/90 via-red-900/30 to-transparent" />
-            <div className="relative z-10 flex flex-col gap-1">
-              <div className="flex items-center gap-2 mb-1">
-                <div className="p-1.5 bg-white/15 backdrop-blur-sm rounded-lg">
-                  <Compass className="h-4 w-4 text-white" />
-                </div>
-                <span className="text-[8px] font-black text-yellow-300 uppercase tracking-widest">Tham quan số</span>
+            {/* Icon Container */}
+            <div className="p-3.5 bg-red-500/10 text-red-600 dark:bg-red-500/20 dark:text-red-400 rounded-2xl group-hover:scale-110 transition-transform duration-300 shadow-sm border border-red-100/50 dark:border-red-900/25">
+              <Compass className="h-6 w-6" />
+            </div>
+
+            {/* Title */}
+            <span className="text-[13px] font-black text-slate-800 dark:text-white uppercase leading-snug tracking-tight text-center my-auto flex-1 flex items-center justify-center min-h-[48px] px-1 select-none">
+              Không gian Văn hóa<br />Hồ Chí Minh
+            </span>
+
+            {/* Button Box */}
+            <div className="w-full mt-3">
+              <div className="flex items-center justify-center gap-1 w-full py-2 px-3 rounded-2xl text-[11px] font-black bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700/80 dark:text-slate-200 transition-all border border-slate-200/30 dark:border-slate-700/30 group-hover:border-red-500/20 group-hover:text-red-600 dark:group-hover:text-red-400">
+                <span>Tham quan</span>
+                <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
               </div>
-              <span className="text-sm sm:text-base font-black text-white drop-shadow leading-tight">
-                Không gian Văn hóa<br />
-                <span className="text-yellow-300">Hồ Chí Minh</span>
-              </span>
-              <span className="text-[10px] text-white/70 font-medium">Tư liệu & di sản Bác Hồ</span>
             </div>
           </motion.button>
 
-          {/* Tile 2: Tài liệu Sinh hoạt — Google Drive */}
+          {/* Card 2: Tài liệu Sinh hoạt & Tuyên truyền */}
           <motion.button
             {...fadeUpProps(1)}
-            whileHover={{ scale: 1.025, y: -3 }}
-            whileTap={{ scale: 0.96 }}
+            whileHover={{ scale: 1.03, y: -4 }}
+            whileTap={{ scale: 0.97 }}
             onClick={() => handleExternal(DRIVE_FOLDER_URL)}
-            className="relative overflow-hidden rounded-3xl h-36 sm:h-44 flex flex-col items-start justify-end p-4 sm:p-5 shadow-xl cursor-pointer group border border-white/10 text-left"
+            className="flex flex-col items-center justify-between p-5 rounded-3xl border border-slate-200/50 dark:border-slate-800/50 bg-white/60 dark:bg-slate-900/40 backdrop-blur-md cursor-pointer transition-all duration-300 hover:shadow-lg hover:shadow-amber-500/5 min-h-[220px] text-center w-full group"
           >
-            <img
-              src="https://images.unsplash.com/photo-1568992687947-868a62a9f521?w=400&auto=format&fit=crop&q=60"
-              alt="Tài liệu"
-              className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-              style={{ filter: 'brightness(0.45)' }}
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-amber-900/92 via-orange-800/50 to-transparent" />
-            <div className="relative z-10 flex flex-col gap-1">
-              <div className="flex items-center gap-2 mb-1">
-                <div className="p-1.5 bg-white/15 backdrop-blur-sm rounded-lg">
-                  <BookOpen className="h-4 w-4 text-white" />
-                </div>
-                <span className="flex items-center gap-1 text-[8px] font-black text-yellow-300 uppercase tracking-widest">
-                  <ExternalLink className="h-2.5 w-2.5" /> Google Drive
-                </span>
-              </div>
-              <span className="text-sm sm:text-base font-black text-white drop-shadow leading-tight">Tài liệu Sinh hoạt<br /><span className="text-yellow-300">& Tuyên truyền</span></span>
-              <span className="text-[10px] text-white/70 font-medium">Bấm để mở thư mục Drive</span>
+            {/* Icon Container */}
+            <div className="p-3.5 bg-amber-500/10 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400 rounded-2xl group-hover:scale-110 transition-transform duration-300 shadow-sm border border-amber-100/50 dark:border-amber-900/25">
+              <BookOpen className="h-6 w-6" />
             </div>
-            {/* Drive badge */}
-            <span className="absolute top-3 right-3 flex items-center gap-1 bg-white/90 text-slate-700 text-[8px] font-black px-2 py-1 rounded-full">
-              <svg className="h-2.5 w-2.5" viewBox="0 0 24 24" fill="none">
-                <path d="M4.5 20.5L9 12l4.5 8H4.5z" fill="#1DA462"/>
-                <path d="M14 12l-4.5-8H19L14 12z" fill="#FBBC04"/>
-                <path d="M14 12H9L4.5 20.5h9.5L19 12h-5z" fill="#4285F4"/>
-              </svg>
-              Drive
+
+            {/* Title */}
+            <span className="text-[13px] font-black text-slate-800 dark:text-white uppercase leading-snug tracking-tight text-center my-auto flex-1 flex items-center justify-center min-h-[48px] px-1 select-none">
+              Tài liệu Sinh hoạt<br />& Tuyên truyền
             </span>
+
+            {/* Button Box */}
+            <div className="w-full mt-3">
+              <div className="flex items-center justify-center gap-1 w-full py-2 px-3 rounded-2xl text-[11px] font-black bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700/80 dark:text-slate-200 transition-all border border-slate-200/30 dark:border-slate-700/30 group-hover:border-amber-500/20 group-hover:text-amber-600 dark:group-hover:text-amber-400">
+                <span>Mở tài liệu</span>
+                <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+              </div>
+            </div>
           </motion.button>
-        </div>
 
-        {/* ═══════════════════════════════════════════
-            ROW 2 — Grouped AI Button (col-span-2) + Kiến nghị
-        ═══════════════════════════════════════════ */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
-
-          {/* Grouped AI Card - Prominent (col-span-2) */}
+          {/* Card 3: Trợ lý AI Mặt trận số */}
           <motion.button
             {...fadeUpProps(2)}
-            whileHover={{ scale: 1.02, y: -3 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.03, y: -4 }}
+            whileTap={{ scale: 0.97 }}
             onClick={() => handleNav('/tong-dai-ai')}
-            className="relative overflow-hidden rounded-2xl sm:rounded-3xl h-32 sm:h-40 sm:col-span-2 flex flex-col items-start justify-end p-4 sm:p-5 shadow-lg cursor-pointer group border border-white/10 text-left"
+            className="flex flex-col items-center justify-between p-5 rounded-3xl border border-slate-200/50 dark:border-slate-800/50 bg-white/60 dark:bg-slate-900/40 backdrop-blur-md cursor-pointer transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/5 min-h-[220px] text-center w-full group"
           >
-            <img
-              src="https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=600&auto=format&fit=crop&q=80"
-              alt="Tổng đài AI Mặt trận số" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-              style={{ filter: 'brightness(0.35) saturate(1.3)' }}
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-950/95 via-indigo-900/80 to-transparent" />
-            <span className="absolute top-3 right-3 bg-yellow-400 text-yellow-950 text-[8.5px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider shadow-sm">AI MẶT TRẬN</span>
-            
-            <div className="relative z-10 flex flex-col gap-1 max-w-lg">
-              <div className="flex items-center gap-2 mb-0.5">
-                <div className="p-1.5 bg-blue-500/30 border border-blue-400/30 backdrop-blur-sm rounded-xl text-blue-200">
-                  <Bot className="h-4.5 w-4.5 animate-pulse" />
-                </div>
-                <span className="text-[9px] font-black text-blue-300 uppercase tracking-wider">Trợ lý Số hóa Mặt trận Tổ quốc</span>
+            {/* Icon Container */}
+            <div className="p-3.5 bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400 rounded-2xl group-hover:scale-110 transition-transform duration-300 shadow-sm border border-blue-100/50 dark:border-blue-900/25">
+              <Bot className="h-6 w-6 animate-pulse" />
+            </div>
+
+            {/* Title */}
+            <span className="text-[13px] font-black text-slate-800 dark:text-white uppercase leading-snug tracking-tight text-center my-auto flex-1 flex items-center justify-center min-h-[48px] px-1 select-none">
+              Trợ lý AI<br />Mặt trận số
+            </span>
+
+            {/* Button Box */}
+            <div className="w-full mt-3">
+              <div className="flex items-center justify-center gap-1 w-full py-2 px-3 rounded-2xl text-[11px] font-black bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700/80 dark:text-slate-200 transition-all border border-slate-200/30 dark:border-slate-700/30 group-hover:border-blue-500/20 group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                <span>Dùng Trợ lý AI</span>
+                <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
               </div>
-              <span className="text-sm sm:text-base font-black text-white drop-shadow leading-tight">
-                Trợ lý AI Mặt trận số — <span className="text-yellow-300">Tổng đài AI đa năng</span>
-              </span>
-              <span className="text-[10px] text-white/70 font-medium">Soạn thảo kế hoạch công tác & Kiểm tra lỗi chính tả, thể thức văn bản hành chính</span>
             </div>
           </motion.button>
 
-          {/* Kiến nghị & Phản ánh → Google Form */}
+          {/* Card 4: Kiến nghị & Phản ánh */}
+          <motion.button
+            {...fadeUpProps(3)}
+            whileHover={{ scale: 1.03, y: -4 }}
+            whileTap={{ scale: 0.97 }}
+            onClick={() => handleExternal(GOOGLE_FORM_URL)}
+            className="flex flex-col items-center justify-between p-5 rounded-3xl border border-slate-200/50 dark:border-slate-800/50 bg-white/60 dark:bg-slate-900/40 backdrop-blur-md cursor-pointer transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/5 min-h-[220px] text-center w-full group"
+          >
+            {/* Icon Container */}
+            <div className="p-3.5 bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 rounded-2xl group-hover:scale-110 transition-transform duration-300 shadow-sm border border-emerald-100/50 dark:border-emerald-900/25">
+              <MessageSquare className="h-6 w-6" />
+            </div>
+
+            {/* Title */}
+            <span className="text-[13px] font-black text-slate-800 dark:text-white uppercase leading-snug tracking-tight text-center my-auto flex-1 flex items-center justify-center min-h-[48px] px-1 select-none">
+              Kiến nghị<br />& Phản ánh
+            </span>
+
+            {/* Button Box */}
+            <div className="w-full mt-3">
+              <div className="flex items-center justify-center gap-1 w-full py-2 px-3 rounded-2xl text-[11px] font-black bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700/80 dark:text-slate-200 transition-all border border-slate-200/30 dark:border-slate-700/30 group-hover:border-emerald-500/20 group-hover:text-emerald-600 dark:group-hover:text-emerald-400">
+                <span>Gửi phản ánh</span>
+                <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+              </div>
+            </div>
+          </motion.button>
+
+          {/* Card 5: Phong trào thi đua */}
           <motion.button
             {...fadeUpProps(4)}
-            whileHover={{ scale: 1.04, y: -3 }}
-            whileTap={{ scale: 0.93 }}
-            onClick={() => handleExternal(GOOGLE_FORM_URL)}
-            className="relative overflow-hidden rounded-2xl sm:rounded-3xl h-32 sm:h-40 flex flex-col items-start justify-end p-3.5 sm:p-4 shadow-lg cursor-pointer group border border-white/10 text-left"
-          >
-            <img
-              src="https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=400&auto=format&fit=crop&q=60"
-              alt="Kiến nghị" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-              style={{ filter: 'brightness(0.35)' }}
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-emerald-900/92 via-teal-800/50 to-transparent" />
-            <span className="absolute top-2.5 right-2.5 bg-rose-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full uppercase">Hot</span>
-            <div className="relative z-10 flex flex-col gap-1">
-              <div className="p-1.5 bg-white/15 backdrop-blur-sm rounded-lg w-fit mb-1">
-                <MessageSquare className="h-4 w-4 text-white" />
-              </div>
-              <span className="text-xs font-black text-white drop-shadow leading-tight">Kiến nghị<br /><span className="text-emerald-300">& Phản ánh</span></span>
-              <span className="text-[9px] text-white/65 flex items-center gap-1">
-                <ExternalLink className="h-2.5 w-2.5" /> Gửi qua Google Form
-              </span>
-            </div>
-          </motion.button>
-        </div>
-
-        {/* ═══════════════════════════════════════════
-            ROW 3 — Phong trào (expandable) full-width
-        ═══════════════════════════════════════════ */}
-        <div className="mb-8">
-          {/* Main Phong trào button */}
-          <motion.button
-            {...fadeUpProps(5)}
-            whileHover={{ scale: 1.015 }}
+            whileHover={{ scale: 1.03, y: -4 }}
             whileTap={{ scale: 0.97 }}
             onClick={() => setPhongTraoOpen(!phongTraoOpen)}
-            className="relative overflow-hidden rounded-3xl w-full h-28 flex items-center justify-between px-5 sm:px-6 shadow-xl cursor-pointer group border border-white/10 text-left"
+            className="flex flex-col items-center justify-between p-5 rounded-3xl border border-slate-200/50 dark:border-slate-800/50 bg-white/60 dark:bg-slate-900/40 backdrop-blur-md cursor-pointer transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/5 min-h-[220px] text-center w-full group"
           >
-            <img
-              src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=900&auto=format&fit=crop&q=60"
-              alt="Phong trào"
-              className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-              style={{ filter: 'brightness(0.4) saturate(1.1)' }}
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-slate-900/90 via-slate-800/70 to-transparent" />
-
-            <div className="relative z-10 flex items-center gap-4">
-              <div className="p-3 bg-white/15 backdrop-blur-sm rounded-2xl flex-shrink-0">
-                <Users className="h-5 w-5 text-white" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-[9px] font-black text-yellow-300 uppercase tracking-widest mb-0.5">Các cuộc vận động</span>
-                <span className="text-sm sm:text-base font-black text-white drop-shadow">Phong trào thi đua</span>
-                <span className="text-[10px] text-white/60 mt-0.5">Bấm để xem 3 phong trào</span>
-              </div>
+            {/* Icon Container */}
+            <div className="p-3.5 bg-purple-500/10 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400 rounded-2xl group-hover:scale-110 transition-transform duration-300 shadow-sm border border-purple-100/50 dark:border-purple-900/25">
+              <Users className="h-6 w-6" />
             </div>
 
-            <div className="relative z-10 flex items-center gap-2">
-              <span className="hidden sm:block text-[9px] font-bold text-white/60 uppercase tracking-wider">
-                {phongTraoOpen ? 'Thu gọn' : 'Xem thêm'}
-              </span>
-              <motion.div
-                animate={{ rotate: phongTraoOpen ? 180 : 0 }}
-                transition={{ duration: 0.3 }}
-                className="p-2 bg-white/15 rounded-xl"
-              >
-                <ChevronDown className="h-4 w-4 text-white" />
-              </motion.div>
+            {/* Title */}
+            <span className="text-[13px] font-black text-slate-800 dark:text-white uppercase leading-snug tracking-tight text-center my-auto flex-1 flex items-center justify-center min-h-[48px] px-1 select-none">
+              Phong trào<br />thi đua
+            </span>
+
+            {/* Button Box */}
+            <div className="w-full mt-3">
+              <div className="flex items-center justify-center gap-1 w-full py-2 px-3 rounded-2xl text-[11px] font-black bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700/80 dark:text-slate-200 transition-all border border-slate-200/30 dark:border-slate-700/30 group-hover:border-purple-500/20 group-hover:text-purple-600 dark:group-hover:text-purple-400">
+                <span>{phongTraoOpen ? 'Thu gọn' : 'Xem phong trào'}</span>
+                <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+              </div>
             </div>
           </motion.button>
 
-          {/* Sub-items — animated dropdown */}
+        </div>
+
+        {/* Sub-items — animated dropdown */}
+        <div className="mb-8">
           <AnimatePresence>
             {phongTraoOpen && (
               <motion.div
                 key="phong-trao-items"
                 initial={{ opacity: 0, height: 0, marginTop: 0 }}
-                animate={{ opacity: 1, height: 'auto', marginTop: 12 }}
+                animate={{ opacity: 1, height: "auto", marginTop: 12 }}
                 exit={{ opacity: 0, height: 0, marginTop: 0 }}
-                transition={{ duration: 0.4, ease: 'easeOut' }}
+                transition={{ duration: 0.4, ease: "easeOut" }}
                 className="overflow-hidden"
               >
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -335,9 +296,9 @@ export default function HomePage() {
                         <img
                           src={item.bg} alt={item.label}
                           className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                          style={{ filter: 'brightness(0.4)' }}
+                          style={{ filter: "brightness(0.4)" }}
                         />
-                        <div className={cn('absolute inset-0 bg-gradient-to-t', item.accent)} />
+                        <div className={cn("absolute inset-0 bg-gradient-to-t", item.accent)} />
                         <div className="relative z-10 flex flex-col gap-1">
                           <div className="p-1.5 bg-white/15 backdrop-blur-sm rounded-lg w-fit mb-0.5">
                             <Icon className="h-3.5 w-3.5 text-white" />
