@@ -72,13 +72,23 @@ function parseApiData(headers: string[], dataRows: string[][]): ParsedSheet {
     return row[idx]?.trim() || null;
   };
 
+  let lastDay: string | null = null;
+
   const rows: ScheduleRow[] = dataRows
     .map(row => {
       const raw: Record<string, string | null> = {};
       extraHeaders.forEach(h => { raw[h] = cell(row, headers.indexOf(h)); });
+
+      let dayVal = cell(row, fieldMap.thu);
+      if (dayVal && dayVal.trim()) {
+        lastDay = dayVal.trim();
+      } else {
+        dayVal = lastDay;
+      }
+
       return {
         stt:       cell(row, fieldMap.stt),
-        thu:       cell(row, fieldMap.thu),
+        thu:       dayVal,
         thoigian:  cell(row, fieldMap.thoigian),
         noidung:   cell(row, fieldMap.noidung),
         thanhphan: cell(row, fieldMap.thanhphan),
@@ -87,7 +97,7 @@ function parseApiData(headers: string[], dataRows: string[][]): ParsedSheet {
         raw,
       };
     })
-    .filter(r => r.noidung || r.thu || r.thoigian);
+    .filter(r => r.noidung && r.noidung.trim() && r.noidung !== 'NỘI DUNG');
 
   return { rows, lastFetched: new Date() };
 }

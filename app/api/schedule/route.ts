@@ -58,13 +58,23 @@ export async function GET() {
       );
     }
 
-    const rows = parseCSV(text);
-    if (rows.length < 2) {
+    const rawRows = parseCSV(text);
+    if (rawRows.length < 1) {
       return NextResponse.json({ headers: [], rows: [] });
     }
 
-    const headers = rows[0];
-    const dataRows = rows.slice(1).filter(r => r.some(c => c.trim() !== ''));
+    // Find the row that contains "NỘI DUNG" or "THỜI GIAN" or "NGÀY" as the header row
+    let headerIndex = 0;
+    for (let i = 0; i < rawRows.length; i++) {
+      const rowStr = rawRows[i].join(' ').toLowerCase();
+      if (rowStr.includes('nội dung') || rowStr.includes('noi dung') || (rowStr.includes('ngày') && rowStr.includes('thời gian'))) {
+        headerIndex = i;
+        break;
+      }
+    }
+
+    const headers = rawRows[headerIndex];
+    const dataRows = rawRows.slice(headerIndex + 1).filter(r => r.some(c => c.trim() !== ''));
 
     return NextResponse.json(
       { headers, rows: dataRows, fetchedAt: new Date().toISOString() },
