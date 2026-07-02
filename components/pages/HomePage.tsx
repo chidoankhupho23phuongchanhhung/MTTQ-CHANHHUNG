@@ -128,7 +128,7 @@ export default function HomePage() {
             ROW 1 — 2 full-width tiles side-by-side
             Không gian Hồ Chí Minh  |  Tài liệu sinh hoạt
         ═══════════════════════════════════════════ */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-5">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-5">
 
           {/* Card 1: Không gian Văn hóa Hồ Chí Minh */}
           <motion.button
@@ -136,7 +136,7 @@ export default function HomePage() {
             whileHover={{ scale: 1.03, y: -4 }}
             whileTap={{ scale: 0.97 }}
             onClick={() => handleNav('/khong-gian-van-hoa-hcm')}
-            className="flex flex-col items-center justify-between p-5 rounded-3xl border border-slate-200/50 dark:border-slate-800/50 bg-white/60 dark:bg-slate-900/40 backdrop-blur-md cursor-pointer transition-all duration-300 hover:shadow-lg hover:shadow-red-500/5 min-h-[220px] text-center w-full group"
+            className="flex flex-col items-center justify-between p-4 sm:p-5 rounded-3xl border border-slate-200/50 dark:border-slate-800/50 bg-white/60 dark:bg-slate-900/40 backdrop-blur-md cursor-pointer transition-all duration-300 hover:shadow-lg hover:shadow-red-500/5 min-h-[190px] sm:min-h-[220px] text-center w-full group"
           >
             {/* Icon Container */}
             <div className="p-3.5 bg-red-500/10 text-red-600 dark:bg-red-500/20 dark:text-red-400 rounded-2xl group-hover:scale-110 transition-transform duration-300 shadow-sm border border-red-100/50 dark:border-red-900/25">
@@ -144,7 +144,7 @@ export default function HomePage() {
             </div>
 
             {/* Title */}
-            <span className="text-[13px] font-black text-slate-800 dark:text-white uppercase leading-snug tracking-tight text-center my-auto flex-1 flex items-center justify-center min-h-[48px] px-1 select-none">
+            <span className="text-sm sm:text-sm font-black text-slate-800 dark:text-white uppercase leading-snug tracking-tight text-center my-auto flex-1 flex items-center justify-center min-h-[48px] px-1 select-none">
               Không gian Văn hóa<br />Hồ Chí Minh
             </span>
 
@@ -163,7 +163,7 @@ export default function HomePage() {
             whileHover={{ scale: 1.03, y: -4 }}
             whileTap={{ scale: 0.97 }}
             onClick={() => handleExternal(DRIVE_FOLDER_URL)}
-            className="flex flex-col items-center justify-between p-5 rounded-3xl border border-slate-200/50 dark:border-slate-800/50 bg-white/60 dark:bg-slate-900/40 backdrop-blur-md cursor-pointer transition-all duration-300 hover:shadow-lg hover:shadow-amber-500/5 min-h-[220px] text-center w-full group"
+            className="flex flex-col items-center justify-between p-4 sm:p-5 rounded-3xl border border-slate-200/50 dark:border-slate-800/50 bg-white/60 dark:bg-slate-900/40 backdrop-blur-md cursor-pointer transition-all duration-300 hover:shadow-lg hover:shadow-amber-500/5 min-h-[190px] sm:min-h-[220px] text-center w-full group"
           >
             {/* Icon Container */}
             <div className="p-3.5 bg-amber-500/10 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400 rounded-2xl group-hover:scale-110 transition-transform duration-300 shadow-sm border border-amber-100/50 dark:border-amber-900/25">
@@ -171,7 +171,7 @@ export default function HomePage() {
             </div>
 
             {/* Title */}
-            <span className="text-[13px] font-black text-slate-800 dark:text-white uppercase leading-snug tracking-tight text-center my-auto flex-1 flex items-center justify-center min-h-[48px] px-1 select-none">
+            <span className="text-sm sm:text-sm font-black text-slate-800 dark:text-white uppercase leading-snug tracking-tight text-center my-auto flex-1 flex items-center justify-center min-h-[48px] px-1 select-none">
               Tài liệu Sinh hoạt<br />& Tuyên truyền
             </span>
 
@@ -190,7 +190,7 @@ export default function HomePage() {
             whileHover={{ scale: 1.03, y: -4 }}
             whileTap={{ scale: 0.97 }}
             onClick={() => handleNav('/tong-dai-ai')}
-            className="flex flex-col items-center justify-between p-5 rounded-3xl border border-slate-200/50 dark:border-slate-800/50 bg-white/60 dark:bg-slate-900/40 backdrop-blur-md cursor-pointer transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/5 min-h-[220px] text-center w-full group"
+            className="flex flex-col items-center justify-between p-4 sm:p-5 rounded-3xl border border-slate-200/50 dark:border-slate-800/50 bg-white/60 dark:bg-slate-900/40 backdrop-blur-md cursor-pointer transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/5 min-h-[190px] sm:min-h-[220px] text-center w-full group"
           >
             {/* Icon Container */}
             <div className="p-3.5 bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400 rounded-2xl group-hover:scale-110 transition-transform duration-300 shadow-sm border border-blue-100/50 dark:border-blue-900/25">
@@ -198,7 +198,7 @@ export default function HomePage() {
             </div>
 
             {/* Title */}
-            <span className="text-[13px] font-black text-slate-800 dark:text-white uppercase leading-snug tracking-tight text-center my-auto flex-1 flex items-center justify-center min-h-[48px] px-1 select-none">
+            <span className="text-sm sm:text-sm font-black text-slate-800 dark:text-white uppercase leading-snug tracking-tight text-center my-auto flex-1 flex items-center justify-center min-h-[48px] px-1 select-none">
               Trợ lý AI<br />Mặt trận số
             </span>
 
@@ -217,7 +217,7 @@ export default function HomePage() {
             whileHover={{ scale: 1.03, y: -4 }}
             whileTap={{ scale: 0.97 }}
             onClick={() => handleExternal(GOOGLE_FORM_URL)}
-            className="flex flex-col items-center justify-between p-5 rounded-3xl border border-slate-200/50 dark:border-slate-800/50 bg-white/60 dark:bg-slate-900/40 backdrop-blur-md cursor-pointer transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/5 min-h-[220px] text-center w-full group"
+            className="flex flex-col items-center justify-between p-4 sm:p-5 rounded-3xl border border-slate-200/50 dark:border-slate-800/50 bg-white/60 dark:bg-slate-900/40 backdrop-blur-md cursor-pointer transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/5 min-h-[190px] sm:min-h-[220px] text-center w-full group"
           >
             {/* Icon Container */}
             <div className="p-3.5 bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 rounded-2xl group-hover:scale-110 transition-transform duration-300 shadow-sm border border-emerald-100/50 dark:border-emerald-900/25">
@@ -225,7 +225,7 @@ export default function HomePage() {
             </div>
 
             {/* Title */}
-            <span className="text-[13px] font-black text-slate-800 dark:text-white uppercase leading-snug tracking-tight text-center my-auto flex-1 flex items-center justify-center min-h-[48px] px-1 select-none">
+            <span className="text-sm sm:text-sm font-black text-slate-800 dark:text-white uppercase leading-snug tracking-tight text-center my-auto flex-1 flex items-center justify-center min-h-[48px] px-1 select-none">
               Kiến nghị<br />& Phản ánh
             </span>
 
@@ -244,7 +244,7 @@ export default function HomePage() {
             whileHover={{ scale: 1.03, y: -4 }}
             whileTap={{ scale: 0.97 }}
             onClick={() => setPhongTraoOpen(!phongTraoOpen)}
-            className="flex flex-col items-center justify-between p-5 rounded-3xl border border-slate-200/50 dark:border-slate-800/50 bg-white/60 dark:bg-slate-900/40 backdrop-blur-md cursor-pointer transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/5 min-h-[220px] text-center w-full group"
+            className="flex flex-col items-center justify-between p-4 sm:p-5 rounded-3xl border border-slate-200/50 dark:border-slate-800/50 bg-white/60 dark:bg-slate-900/40 backdrop-blur-md cursor-pointer transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/5 min-h-[190px] sm:min-h-[220px] text-center w-full group"
           >
             {/* Icon Container */}
             <div className="p-3.5 bg-purple-500/10 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400 rounded-2xl group-hover:scale-110 transition-transform duration-300 shadow-sm border border-purple-100/50 dark:border-purple-900/25">
@@ -252,7 +252,7 @@ export default function HomePage() {
             </div>
 
             {/* Title */}
-            <span className="text-[13px] font-black text-slate-800 dark:text-white uppercase leading-snug tracking-tight text-center my-auto flex-1 flex items-center justify-center min-h-[48px] px-1 select-none">
+            <span className="text-sm sm:text-sm font-black text-slate-800 dark:text-white uppercase leading-snug tracking-tight text-center my-auto flex-1 flex items-center justify-center min-h-[48px] px-1 select-none">
               Phong trào<br />thi đua
             </span>
 
