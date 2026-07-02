@@ -16,8 +16,7 @@ export default function CitizenFooter() {
     { label: 'An sinh xã hội', route: '/an-sinh-xa-hoi' },
     { label: 'Kiến nghị phản ánh', route: '/phan-anh' },
     { label: 'Không gian VH HCM', route: '/khong-gian-van-hoa-hcm' },
-    { label: 'Văn bản mẫu', route: '/van-ban-bieu-mau' },
-    { label: 'Liên hệ', route: '/lien-he' }
+    { label: 'Văn bản mẫu', route: '/van-ban-bieu-mau' }
   ];
 
   const handleNavigate = (route: string) => {
@@ -41,7 +40,7 @@ export default function CitizenFooter() {
             />
             <div className="flex flex-col text-left">
               <h4 className="font-black uppercase tracking-wider text-xs leading-none">Ủy ban MTTQ Việt Nam</h4>
-              <span className="text-[10px] text-yellow-400 font-bold uppercase mt-1">Phường Chánh Hưng, Quận 8</span>
+              <span className="text-[10px] text-yellow-400 font-bold uppercase mt-1">Phường Chánh Hưng</span>
             </div>
           </div>
           <p className="text-[11px] text-slate-400 leading-relaxed">
@@ -67,19 +66,15 @@ export default function CitizenFooter() {
 
         {/* Col 3: Contact Info */}
         <div className="flex flex-col gap-3">
-          <h4 className="text-xs font-black uppercase text-yellow-400 tracking-wider">Thông tin liên lạc</h4>
+          <h4 className="text-xs font-black uppercase text-yellow-400 tracking-wider">Thông tin địa bàn</h4>
           <div className="flex flex-col gap-2.5 text-[11px] text-slate-350">
             <span className="flex items-start gap-2 leading-relaxed">
               <MapPin className="h-4 w-4 text-yellow-400 flex-shrink-0 mt-0.5" />
-              <span>Số 142 Phạm Hùng, Phường Chánh Hưng, Quận 8, TP. Hồ Chí Minh</span>
-            </span>
-            <span className="flex items-center gap-2">
-              <Phone className="h-4 w-4 text-yellow-400 flex-shrink-0" />
-              <span>Điện thoại: (028) 3850 1234 - Hotline: (028) 7101 1234</span>
+              <span>Địa chỉ: số 5 Dương Quang Đông, phường Chánh Hưng, Thành phố Hồ Chí Minh</span>
             </span>
             <span className="flex items-center gap-2">
               <Mail className="h-4 w-4 text-yellow-400 flex-shrink-0" />
-              <span>mttq.chanhhung.q8@tphcm.gov.vn</span>
+              <span>mttq.chanhhung@tphcm.gov.vn</span>
             </span>
           </div>
         </div>

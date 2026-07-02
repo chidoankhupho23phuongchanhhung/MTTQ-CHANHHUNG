@@ -246,7 +246,7 @@ export default function HomePage() {
                 <div className="p-1.5 bg-blue-500/30 border border-blue-400/30 backdrop-blur-sm rounded-xl text-blue-200">
                   <Bot className="h-4.5 w-4.5 animate-pulse" />
                 </div>
-                <span className="text-[9px] font-black text-blue-300 uppercase tracking-wider">Trợ lý Số Hóa MTTQ</span>
+                <span className="text-[9px] font-black text-blue-300 uppercase tracking-wider">Trợ lý Số hóa Mặt trận Tổ quốc</span>
               </div>
               <span className="text-sm sm:text-base font-black text-white drop-shadow leading-tight">
                 Trợ lý AI Mặt trận số — <span className="text-yellow-300">Tổng đài AI đa năng</span>
@@ -429,43 +429,7 @@ export default function HomePage() {
           <FacebookFeed />
         </div>
 
-        {/* ─── Hotline ─── */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          viewport={{ once: true }}
-          className="mb-6"
-        >
-          <div className="relative overflow-hidden rounded-3xl border border-rose-200/20 dark:border-rose-900/20 shadow-lg">
-            <img
-              src="https://images.unsplash.com/photo-1521791055366-0d553872952f?w=800&auto=format&fit=crop&q=80"
-              alt="Hotline"
-              className="absolute inset-0 w-full h-full object-cover"
-              style={{ filter: 'brightness(0.2) saturate(1.2)' }}
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-rose-900/90 to-red-900/80" />
-            <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-4 p-5 sm:p-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3.5 bg-rose-500/30 border border-rose-400/30 text-rose-200 rounded-full animate-pulse flex-shrink-0">
-                  <PhoneCall className="h-6 w-6" />
-                </div>
-                <div className="text-left">
-                  <h4 className="text-xs font-black text-white uppercase tracking-wider">Hotline Tiếp nhận ý kiến MTTQ 24/7</h4>
-                  <p className="text-2xl font-black text-rose-300 mt-1 tracking-tight">(028) 7101 1234</p>
-                  <p className="text-[10px] text-white/60 mt-0.5">Đội phản ứng nhanh trật tự đô thị — Phường Chánh Hưng</p>
-                </div>
-              </div>
-              <motion.button
-                whileTap={{ scale: 0.93 }} whileHover={{ scale: 1.05 }}
-                onClick={() => window.open('tel:02871011234')}
-                className="flex-shrink-0 px-6 py-2.5 bg-rose-500 hover:bg-rose-400 text-white font-black text-xs rounded-2xl uppercase tracking-wider shadow-lg transition-all w-full sm:w-auto"
-              >
-                Gọi ngay
-              </motion.button>
-            </div>
-          </div>
-        </motion.div>
+
 
         <div className="h-4 md:h-0" />
       </PageContainer>
