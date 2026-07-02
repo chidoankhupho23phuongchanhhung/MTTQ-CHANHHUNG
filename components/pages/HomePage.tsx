@@ -158,14 +158,14 @@ export default function HomePage() {
             onClick={() => handleNav('/khong-gian-van-hoa-hcm')}
             className="relative overflow-hidden rounded-3xl h-36 sm:h-44 flex flex-col items-start justify-end p-4 sm:p-5 shadow-xl cursor-pointer group border border-white/10 text-left"
           >
-            {/* Bác Hồ portrait */}
+            <div className="absolute inset-0 bg-gradient-to-br from-red-800 via-red-900 to-amber-950" />
+            {/* Bác Hồ vector portrait */}
             <img
-              src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Ho_Chi_Minh_1946.jpg/800px-Ho_Chi_Minh_1946.jpg"
+              src="https://upload.wikimedia.org/wikipedia/commons/e/ec/Ho_Chi_Minh_Vector_%28positive%29.svg"
               alt="Chủ tịch Hồ Chí Minh"
-              className="absolute inset-0 w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-110"
-              style={{ filter: 'brightness(0.55) sepia(0.2)' }}
+              className="absolute right-0 bottom-0 h-[105%] w-auto object-contain object-right-bottom transition-transform duration-500 group-hover:scale-105 opacity-40 dark:opacity-30 pointer-events-none"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-red-900/92 via-red-800/50 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-red-950/90 via-red-900/30 to-transparent" />
             <div className="relative z-10 flex flex-col gap-1">
               <div className="flex items-center gap-2 mb-1">
                 <div className="p-1.5 bg-white/15 backdrop-blur-sm rounded-lg">
@@ -221,55 +221,37 @@ export default function HomePage() {
         </div>
 
         {/* ═══════════════════════════════════════════
-            ROW 2 — AI split into 2 tiles + Kiến nghị
+            ROW 2 — Grouped AI Button (col-span-2) + Kiến nghị
         ═══════════════════════════════════════════ */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
 
-          {/* AI 1: Trợ lý Soạn Kế hoạch */}
+          {/* Grouped AI Card - Prominent (col-span-2) */}
           <motion.button
             {...fadeUpProps(2)}
-            whileHover={{ scale: 1.04, y: -3 }}
-            whileTap={{ scale: 0.93 }}
+            whileHover={{ scale: 1.02, y: -3 }}
+            whileTap={{ scale: 0.95 }}
             onClick={() => handleNav('/tong-dai-ai')}
-            className="relative overflow-hidden rounded-2xl sm:rounded-3xl h-32 sm:h-40 flex flex-col items-start justify-end p-3.5 sm:p-4 shadow-lg cursor-pointer group border border-white/10 text-left"
+            className="relative overflow-hidden rounded-2xl sm:rounded-3xl h-32 sm:h-40 sm:col-span-2 flex flex-col items-start justify-end p-4 sm:p-5 shadow-lg cursor-pointer group border border-white/10 text-left"
           >
             <img
-              src="https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=400&auto=format&fit=crop&q=60"
-              alt="AI Soạn KH" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-              style={{ filter: 'brightness(0.35) saturate(1.4)' }}
+              src="https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=600&auto=format&fit=crop&q=80"
+              alt="Tổng đài AI Mặt trận số" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              style={{ filter: 'brightness(0.35) saturate(1.3)' }}
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-blue-900/92 via-blue-800/50 to-transparent" />
-            <span className="absolute top-2.5 right-2.5 bg-yellow-400 text-yellow-900 text-[8px] font-black px-1.5 py-0.5 rounded-full uppercase">AI</span>
-            <div className="relative z-10 flex flex-col gap-1">
-              <div className="p-1.5 bg-white/15 backdrop-blur-sm rounded-lg w-fit mb-1">
-                <PenLine className="h-4 w-4 text-white" />
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-950/95 via-indigo-900/80 to-transparent" />
+            <span className="absolute top-3 right-3 bg-yellow-400 text-yellow-950 text-[8.5px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider shadow-sm">AI MẶT TRẬN</span>
+            
+            <div className="relative z-10 flex flex-col gap-1 max-w-lg">
+              <div className="flex items-center gap-2 mb-0.5">
+                <div className="p-1.5 bg-blue-500/30 border border-blue-400/30 backdrop-blur-sm rounded-xl text-blue-200">
+                  <Bot className="h-4.5 w-4.5 animate-pulse" />
+                </div>
+                <span className="text-[9px] font-black text-blue-300 uppercase tracking-wider">Trợ lý Số Hóa MTTQ</span>
               </div>
-              <span className="text-xs font-black text-white drop-shadow leading-tight">Trợ lý Soạn<br /><span className="text-blue-300">Kế hoạch</span></span>
-              <span className="text-[9px] text-white/65">Soạn nhanh văn bản, KH</span>
-            </div>
-          </motion.button>
-
-          {/* AI 2: Trợ lý Kiểm tra Chính tả */}
-          <motion.button
-            {...fadeUpProps(3)}
-            whileHover={{ scale: 1.04, y: -3 }}
-            whileTap={{ scale: 0.93 }}
-            onClick={() => handleNav('/tong-dai-ai')}
-            className="relative overflow-hidden rounded-2xl sm:rounded-3xl h-32 sm:h-40 flex flex-col items-start justify-end p-3.5 sm:p-4 shadow-lg cursor-pointer group border border-white/10 text-left"
-          >
-            <img
-              src="https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=400&auto=format&fit=crop&q=60"
-              alt="AI Chính tả" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-              style={{ filter: 'brightness(0.35) saturate(1.2)' }}
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-indigo-900/92 via-indigo-800/50 to-transparent" />
-            <span className="absolute top-2.5 right-2.5 bg-yellow-400 text-yellow-900 text-[8px] font-black px-1.5 py-0.5 rounded-full uppercase">AI</span>
-            <div className="relative z-10 flex flex-col gap-1">
-              <div className="p-1.5 bg-white/15 backdrop-blur-sm rounded-lg w-fit mb-1">
-                <SpellCheck className="h-4 w-4 text-white" />
-              </div>
-              <span className="text-xs font-black text-white drop-shadow leading-tight">Trợ lý Kiểm tra<br /><span className="text-indigo-300">Lỗi Chính tả</span></span>
-              <span className="text-[9px] text-white/65">Kiểm tra thể thức văn bản</span>
+              <span className="text-sm sm:text-base font-black text-white drop-shadow leading-tight">
+                Trợ lý AI Mặt trận số — <span className="text-yellow-300">Tổng đài AI đa năng</span>
+              </span>
+              <span className="text-[10px] text-white/70 font-medium">Soạn thảo kế hoạch công tác & Kiểm tra lỗi chính tả, thể thức văn bản hành chính</span>
             </div>
           </motion.button>
 

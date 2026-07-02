@@ -33,7 +33,7 @@ function parseCSV(text: string): string[][] {
 
 export async function GET() {
   try {
-    const csvUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=0`;
+    const csvUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=1410972139`;
 
     const res = await fetch(csvUrl, {
       headers: { 'User-Agent': 'Mozilla/5.0' },

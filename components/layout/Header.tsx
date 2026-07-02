@@ -231,7 +231,7 @@ export default function Header() {
 
       {/* Bottom Row: Horizontal Navigation Bar (Only for Citizen layout, hidden on Staff) */}
       {!isStaff && (
-        <div className="hidden md:flex w-full h-12 border-t border-slate-200/40 dark:border-slate-800/40 px-4 sm:px-6 items-center justify-start overflow-x-auto no-scrollbar gap-2">
+        <div className="hidden md:flex w-full h-12 border-t border-slate-200/40 dark:border-slate-800/40 px-4 sm:px-6 items-center justify-center overflow-x-auto no-scrollbar gap-2">
           {navItems.map((item) => {
             const isActive = pathname === item.id;
             return (

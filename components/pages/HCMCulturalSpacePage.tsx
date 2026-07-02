@@ -53,29 +53,48 @@ export default function HCMCulturalSpacePage() {
   const [submittedFeedback, setSubmittedFeedback] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
     setSubmitting(true);
-    setTimeout(() => {
+    try {
+      const { getFirestore } = await import('@/lib/firebase');
+      const db = await getFirestore();
+      const { collection, addDoc } = await import('firebase/firestore');
+      await addDoc(collection(db, 'hcm_notifications'), {
+        email,
+        timestamp: new Date().toISOString()
+      });
       setSubmittedEmail(true);
+      setEmail('');
+    } catch (err) {
+      console.error("Lỗi gửi thông báo:", err);
+      alert("Đã xảy ra lỗi khi gửi đăng ký. Vui lòng thử lại!");
+    } finally {
       setSubmitting(false);
-      localStorage.setItem('hcm_notify_email', email);
-    }, 800);
+    }
   };
 
-  const handleFeedback = (e: React.FormEvent) => {
+  const handleFeedback = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!feedback) return;
     setSubmitting(true);
-    setTimeout(() => {
+    try {
+      const { getFirestore } = await import('@/lib/firebase');
+      const db = await getFirestore();
+      const { collection, addDoc } = await import('firebase/firestore');
+      await addDoc(collection(db, 'hcm_feedbacks'), {
+        feedback,
+        timestamp: new Date().toISOString()
+      });
       setSubmittedFeedback(true);
-      setSubmitting(false);
-      const prev = JSON.parse(localStorage.getItem('hcm_feedbacks') || '[]');
-      prev.push(feedback);
-      localStorage.setItem('hcm_feedbacks', JSON.stringify(prev));
       setFeedback('');
-    }, 800);
+    } catch (err) {
+      console.error("Lỗi gửi hiến kế:", err);
+      alert("Đã xảy ra lỗi khi gửi đóng góp. Vui lòng thử lại!");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
