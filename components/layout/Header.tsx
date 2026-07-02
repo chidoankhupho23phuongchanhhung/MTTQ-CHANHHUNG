@@ -121,32 +121,12 @@ export default function Header() {
             </div>
         </div>
 
-        {/* Middle Search Bar (Hidden on Mobile, Citizen Mode places it on right) */}
-        {isStaff && (
-          <div className="hidden md:flex items-center relative w-72 max-w-full">
-            <Search className="absolute left-3.5 h-4 w-4 text-slate-400 pointer-events-none" />
-            <input
-              type="text"
-              placeholder="Tìm công việc, văn bản..."
-              className="glass-input w-full pl-10 pr-4 py-2 text-xs"
-            />
-          </div>
-        )}
+        {/* Middle Search Bar (Removed as requested) */}
 
         {/* Right Controls */}
         <div className="flex items-center gap-2 sm:gap-3">
           
-          {/* Search bar inside citizen header on right */}
-          {!isStaff && (
-            <div className="hidden md:flex items-center relative w-48 max-w-full">
-              <Search className="absolute left-3 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
-              <input
-                type="text"
-                placeholder="Tìm kiếm..."
-                className="glass-input w-full pl-8 pr-3 py-1.5 text-[11px]"
-              />
-            </div>
-          )}
+          {/* Search bar inside citizen header on right (Removed as requested) */}
 
           {/* Toggle Theme */}
           <button
