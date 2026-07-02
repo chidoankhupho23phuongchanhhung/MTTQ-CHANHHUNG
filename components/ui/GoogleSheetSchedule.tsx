@@ -255,6 +255,8 @@ export default function GoogleSheetSchedule() {
   const [loading, setLoading] = useState(false);
   const [error,   setError]   = useState<string | null>(null);
   const [expanded, setExpanded] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showOnlyHighlight, setShowOnlyHighlight] = useState(false);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const fetchSheet = useCallback(async (silent = false) => {
@@ -280,27 +282,35 @@ export default function GoogleSheetSchedule() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const groups        = data ? groupByDay(data.rows) : [];
+  // Filter rows by search and highlight
+  const filteredRows = data ? data.rows.filter(row => {
+    const txt = [row.noidung, row.thanhphan, row.diaDiem, row.ghiChu, row.thu].join(' ').toLowerCase();
+    const matchesSearch = searchQuery ? txt.includes(searchQuery.toLowerCase()) : true;
+    const matchesHighlight = showOnlyHighlight ? isTrongTam(row) : true;
+    return matchesSearch && matchesHighlight;
+  }) : [];
+
+  const groups        = groupByDay(filteredRows);
   const trongTamCount = data?.rows.filter(isTrongTam).length ?? 0;
   const lastTime      = data?.lastFetched.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
 
   return (
     <>
       {/* ── Header ── */}
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
         <div className="flex items-center gap-2.5">
           <div className="p-2 bg-emerald-100 dark:bg-emerald-950/30 rounded-xl">
             <Calendar className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
           </div>
           <div>
             <h3 className="text-[11px] font-black text-slate-700 dark:text-white uppercase tracking-wider leading-none">
-              Lịch công tác — Cập nhật thực
+              Lịch công tác tuần
             </h3>
             <div className="flex items-center gap-2 mt-0.5">
               {lastTime && (
                 <span className="flex items-center gap-1 text-[9px] text-slate-400">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  Cập nhật {lastTime} · mỗi 5 phút
+                  Cập nhật {lastTime}
                 </span>
               )}
               {trongTamCount > 0 && (
@@ -326,6 +336,30 @@ export default function GoogleSheetSchedule() {
             <ExternalLink className="h-3.5 w-3.5" />
           </a>
         </div>
+      </div>
+
+      {/* ── Search & Filter Controls ── */}
+      <div className="flex flex-wrap sm:flex-nowrap gap-2 items-center mb-4 bg-slate-50/50 dark:bg-slate-950/20 p-2 rounded-xl border border-slate-150 dark:border-slate-850">
+        <div className="relative flex-1 w-full">
+          <input
+            type="text"
+            placeholder="Tìm kiếm công tác..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-2.5 pr-2 py-1.5 text-[11px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500"
+          />
+        </div>
+        <button
+          onClick={() => setShowOnlyHighlight(!showOnlyHighlight)}
+          className={cn(
+            "w-full sm:w-auto px-3 py-1.5 rounded-lg text-[10px] font-bold border transition-all cursor-pointer whitespace-nowrap",
+            showOnlyHighlight
+              ? "bg-yellow-400 border-yellow-400 text-yellow-950 shadow-sm"
+              : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-500"
+          )}
+        >
+          {showOnlyHighlight ? "★ Hiện tất cả" : "★ Chỉ trọng tâm"}
+        </button>
       </div>
 
       {/* ── Loading skeleton ── */}

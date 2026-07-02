@@ -23,7 +23,7 @@ import {
   Database, Inbox, BarChart3, Settings, Search, Bell,
   Upload, Download, RefreshCw, Globe, Lock, Save
 } from 'lucide-react';
-import { formatDate } from '@/lib/utils';
+import { formatDate, cn } from '@/lib/utils';
 import { StaffWorkItem, FeedbackItem } from '@/lib/types';
 
 /* ── Tab-section sub-page renderers ── */
@@ -54,45 +54,176 @@ function TabQuanLySo() {
   );
 }
 
-function TabGiaiQuyet({ feedbacks, updateFeedbackStatus, addNotification }: { feedbacks: FeedbackItem[]; updateFeedbackStatus: (...args: any[]) => void; addNotification: (...args: any[]) => void }) {
+function TabGiaiQuyet({ 
+  feedbacks, 
+  updateFeedbackStatus, 
+  addNotification, 
+  tasks, 
+  handleToggleTaskStatus 
+}: { 
+  feedbacks: FeedbackItem[]; 
+  updateFeedbackStatus: (...args: any[]) => void; 
+  addNotification: (...args: any[]) => void;
+  tasks: StaffWorkItem[];
+  handleToggleTaskStatus: (id: string) => void;
+}) {
+  const [viewMode, setViewMode] = useState<'list' | 'kanban'>('list');
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  
   const pending = feedbacks.filter(f => f.status !== 'Hoàn tất' && f.status !== 'Đã phản hồi');
   const selected = feedbacks.find(f => f.id === selectedId) || pending[0];
+
   return (
     <PageContainer>
-      <SectionTitle title="Giải quyết – Tiếp nhận" subtitle="Tiếp nhận, phân loại và xử lý kiến nghị, phản ánh của người dân" />
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <StatCard title="Chờ tiếp nhận" value={feedbacks.filter(f=>f.status==='Mới tiếp nhận').length.toString()} trend="up" change="" description="" icon={<FilePlus className="h-4 w-4 text-blue-500"/>} />
-        <StatCard title="Đang xử lý" value={feedbacks.filter(f=>f.status==='Đang xử lý').length.toString()} trend="up" change="" description="" icon={<Hourglass className="h-4 w-4 text-amber-500"/>} />
-        <StatCard title="Đã hoàn thành" value={feedbacks.filter(f=>f.status==='Hoàn tất'||f.status==='Đã phản hồi').length.toString()} trend="up" change="" description="" icon={<CheckCircle2 className="h-4 w-4 text-emerald-500"/>} />
-        <StatCard title="Tổng kiến nghị" value={feedbacks.length.toString()} trend="up" change="" description="" icon={<ClipboardList className="h-4 w-4 text-purple-500"/>} />
-      </div>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2 flex flex-col gap-3">
-          {pending.slice(0, 6).map(fb => (
-            <GlassCard key={fb.id} onClick={() => setSelectedId(fb.id)} className={`p-4 cursor-pointer flex items-center gap-3 ${selected?.id === fb.id ? 'ring-2 ring-blue-500/40' : ''}`}>
-              <div className="flex-1 min-w-0 text-left">
-                <h4 className="text-xs font-bold text-slate-800 dark:text-white truncate">{fb.title}</h4>
-                <span className="text-[10px] text-slate-400">{fb.senderName} • {fb.datetime}</span>
-              </div>
-              <Badge variant={fb.status === 'Mới tiếp nhận' ? 'info' : fb.status === 'Đang xử lý' ? 'warning' : 'success'}>{fb.status}</Badge>
-            </GlassCard>
-          ))}
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+        <SectionTitle title="Giải quyết – Tiếp nhận" subtitle="Tiếp nhận, phân loại và xử lý kiến nghị của người dân cùng công việc nội bộ" />
+        
+        {/* Toggle Mode */}
+        <div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-xl p-1 gap-1">
+          <button
+            onClick={() => setViewMode('list')}
+            className={cn(
+              "px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer",
+              viewMode === 'list'
+                ? "bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-sm"
+                : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-350"
+            )}
+          >
+            Ý kiến người dân
+          </button>
+          <button
+            onClick={() => setViewMode('kanban')}
+            className={cn(
+              "px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer",
+              viewMode === 'kanban'
+                ? "bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-sm"
+                : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-350"
+            )}
+          >
+            Bảng công việc cán bộ
+          </button>
         </div>
-        {selected && (
-          <GlassCard className="p-5 flex flex-col gap-3 text-left">
-            <h3 className="text-xs font-black text-slate-800 dark:text-white">{selected.title}</h3>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">{selected.content}</p>
-            <Badge variant="info">{selected.status}</Badge>
-            <Button size="sm" onClick={() => { updateFeedbackStatus(selected.id, 'Đang xử lý', 'Đã tiếp nhận và phân công xử lý', 'Nguyễn Văn An'); addNotification('Cập nhật trạng thái', `Đã chuyển "${selected.title}" sang Đang xử lý`, 'success'); }}>
-              Chuyển Đang xử lý
-            </Button>
-            <Button size="sm" variant="primary" onClick={() => { updateFeedbackStatus(selected.id, 'Hoàn tất', 'Đã hoàn tất xử lý và phản hồi người dân.', 'Nguyễn Văn An'); addNotification('Hoàn tất', `Đã giải quyết "${selected.title}"`, 'success'); }}>
-              Đánh dấu Hoàn tất
-            </Button>
-          </GlassCard>
-        )}
       </div>
+
+      {viewMode === 'list' ? (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in-up">
+          {/* Feedbacks List */}
+          <div className="lg:col-span-2 flex flex-col gap-3">
+            <h3 className="text-xs font-black text-slate-500 pl-1 uppercase tracking-wider">Danh sách ý kiến chờ xử lý</h3>
+            <div className="flex flex-col gap-2.5 max-h-[500px] overflow-y-auto pr-1 no-scrollbar">
+              {pending.map(fb => (
+                <GlassCard 
+                  key={fb.id} 
+                  onClick={() => setSelectedId(fb.id)} 
+                  className={`p-4 cursor-pointer flex items-center gap-3 text-left transition-all ${
+                    selected?.id === fb.id ? 'ring-2 ring-blue-500/40 bg-blue-50/5 dark:bg-blue-950/5' : ''
+                  }`}
+                >
+                  <div className="flex-grow min-w-0">
+                    <h4 className="text-xs font-bold text-slate-850 dark:text-white truncate">{fb.title}</h4>
+                    <span className="text-[10px] text-slate-400 font-medium block mt-1">{fb.senderName} • {fb.datetime} • {fb.wardGroup}</span>
+                  </div>
+                  <Badge variant={fb.status === 'Mới tiếp nhận' ? 'info' : 'warning'}>{fb.status}</Badge>
+                </GlassCard>
+              ))}
+              {pending.length === 0 && (
+                <div className="text-center py-8 text-xs text-slate-450 italic">Không có ý kiến mới nào cần xử lý.</div>
+              )}
+            </div>
+          </div>
+
+          {/* Details & Action Panel */}
+          {selected && (
+            <div className="flex flex-col gap-4">
+              <h3 className="text-xs font-black text-slate-500 pl-1 uppercase tracking-wider">Thông tin xử lý chi tiết</h3>
+              <GlassCard hoverable={false} className="p-5 flex flex-col gap-4 text-left border-blue-200/50 dark:border-slate-800">
+                <div>
+                  <span className="text-[9px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest">{selected.feedbackCode}</span>
+                  <h3 className="text-xs font-black text-slate-800 dark:text-white mt-1 leading-snug">{selected.title}</h3>
+                </div>
+
+                <div className="p-3 bg-slate-50/50 dark:bg-slate-950/20 rounded-xl border border-slate-150 dark:border-slate-850 text-[11px] leading-relaxed text-slate-655 dark:text-slate-350">
+                  <span className="font-bold text-slate-500 block mb-1">Nội dung phản ánh:</span>
+                  {selected.content}
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 text-[10px] text-slate-500 dark:text-slate-400">
+                  <div><strong>Người gửi:</strong> {selected.senderName}</div>
+                  <div><strong>Khu vực:</strong> {selected.wardGroup}</div>
+                  <div className="col-span-2"><strong>Địa điểm:</strong> {selected.location}</div>
+                </div>
+
+                <div className="flex flex-col gap-2 mt-2 pt-2 border-t border-slate-100 dark:border-slate-850">
+                  <Button 
+                    size="sm" 
+                    onClick={() => { 
+                      updateFeedbackStatus(selected.id, 'Đang xử lý', 'Đã tiếp nhận và chuyển giao cán bộ đô thị khảo sát.', 'Nguyễn Văn An'); 
+                      addNotification('Cập nhật', `Đã chuyển "${selected.title}" sang Đang xử lý`, 'success'); 
+                    }}
+                  >
+                    Chuyển Đang xử lý
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="primary" 
+                    onClick={() => { 
+                      updateFeedbackStatus(selected.id, 'Hoàn tất', 'Đã hoàn tất khắc phục sự cố và phản hồi bà con.', 'Nguyễn Văn An'); 
+                      addNotification('Hoàn tất', `Đã giải quyết "${selected.title}"`, 'success'); 
+                    }}
+                  >
+                    Đánh dấu Hoàn tất
+                  </Button>
+                </div>
+              </GlassCard>
+            </div>
+          )}
+        </div>
+      ) : (
+        /* Kanban Board View */
+        <div className="flex flex-col gap-4 animate-fade-in-up">
+          <h3 className="text-xs font-black text-slate-500 pl-1 uppercase tracking-wider text-left">
+            Bảng điều phối công việc nội bộ (Bấm vào thẻ để chuyển trạng thái tiếp theo)
+          </h3>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+            {['Mới', 'Đang xử lý', 'Chờ duyệt', 'Hoàn thành'].map((colName) => {
+              const colTasks = tasks.filter(t => t.status === colName);
+              
+              return (
+                <GlassCard key={colName} hoverable={false} className="p-3 bg-slate-50/50 dark:bg-slate-950/20 border border-slate-200/50 dark:border-slate-800/50 flex flex-col gap-2.5 min-h-[300px]">
+                  <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-900 pb-2 mb-1">
+                    <span className="text-[10px] font-black uppercase text-slate-500 tracking-wider">{colName}</span>
+                    <span className="text-[10px] font-bold bg-slate-200/50 text-slate-600 dark:bg-slate-800 dark:text-slate-400 px-1.5 py-0.5 rounded-md">
+                      {colTasks.length}
+                    </span>
+                  </div>
+
+                  <div className="flex flex-col gap-2 flex-grow">
+                    {colTasks.map(t => (
+                      <div
+                        key={t.id}
+                        onClick={() => handleToggleTaskStatus(t.id)}
+                        className="p-2.5 rounded-xl border border-slate-200/40 bg-white dark:border-slate-800/40 dark:bg-slate-900 shadow-xs hover:border-blue-500/50 hover:shadow-md transition-all cursor-pointer text-left flex flex-col gap-1.5"
+                      >
+                        <span className="text-[11px] font-bold text-slate-850 dark:text-white leading-snug line-clamp-2">{t.title}</span>
+                        <div className="flex items-center justify-between text-[9px] text-slate-400 font-semibold mt-1">
+                          <span>{t.assignee.split(' ')[2]}</span>
+                          <span className={t.priority === 'Cao' || t.priority === 'Hỏa tốc' ? 'text-rose-500' : 'text-slate-400'}>
+                            {t.priority}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                    {colTasks.length === 0 && (
+                      <div className="flex-1 flex items-center justify-center text-[10px] text-slate-400 italic py-6">Trống</div>
+                    )}
+                  </div>
+                </GlassCard>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </PageContainer>
   );
 }
@@ -127,24 +258,52 @@ function TabVanThu() {
   );
 }
 
-function TabBaoCao() {
+function TabBaoCao({ feedbacks, staffDonutData, barChartData, lineChartData }: { feedbacks: FeedbackItem[]; staffDonutData: any[]; barChartData: any[]; lineChartData: any[] }) {
+  const newReportsCount = feedbacks.filter(f => f.status === 'Mới tiếp nhận').length;
+  const processingReportsCount = feedbacks.filter(f => f.status === 'Đang xử lý').length;
+  const completedReportsCount = feedbacks.filter(f => f.status === 'Hoàn tất' || f.status === 'Đã phản hồi').length;
+
   return (
     <PageContainer>
-      <SectionTitle title="Báo cáo tiến độ" subtitle="Thống kê KPI, tỉ lệ xử lý phản ánh và hiệu suất hoạt động MTTQ" />
+      <SectionTitle title="Báo cáo tiến độ" subtitle="Thống kê hiệu suất xử lý kiến nghị, phản ánh và bản đồ mật độ địa bàn" />
+      
+      {/* Stat cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <StatCard title="Tỉ lệ xử lý" value="96.5%" change="+1.2%" trend="up" description="hoàn thành đúng hạn" icon={<BarChart3 className="h-4 w-4 text-emerald-500"/>} />
-        <StatCard title="Thời gian TB" value="2.4 ngày" change="-0.3 ngày" trend="up" description="xử lý mỗi vụ việc" icon={<Hourglass className="h-4 w-4 text-amber-500"/>} />
-        <StatCard title="Hài lòng" value="94.8%" change="+2.1%" trend="up" description="đánh giá từ người dân" icon={<Award className="h-4 w-4 text-purple-500"/>} />
-        <StatCard title="Tổng vụ T6" value="312" change="+18%" trend="up" description="phản ánh tháng 6" icon={<ClipboardList className="h-4 w-4 text-blue-500"/>} />
+        <StatCard title="Tỉ lệ xử lý đúng hạn" value="97.2%" change="+1.2%" trend="up" description="hoàn thành đúng hạn" icon={<BarChart3 className="h-4 w-4 text-emerald-500"/>} />
+        <StatCard title="Thời gian TB" value="1.8 ngày" change="-0.4 ngày" trend="up" description="xử lý mỗi phản ánh" icon={<Hourglass className="h-4 w-4 text-amber-500"/>} />
+        <StatCard title="Mới tiếp nhận" value={newReportsCount.toString()} trend="up" change="" description="Chờ phân công cán bộ" icon={<FilePlus className="h-4 w-4 text-blue-500"/>} />
+        <StatCard title="Đã giải quyết" value={completedReportsCount.toString()} trend="up" change="" description="Số vụ đã hoàn tất" icon={<CheckCircle2 className="h-4 w-4 text-emerald-500"/>} />
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <GlassCard hoverable={false} className="p-5">
-          <h3 className="text-xs font-black text-slate-700 dark:text-white mb-4 uppercase tracking-wider">Xu hướng tiếp nhận</h3>
-          <LineChart data={[{name:'T1',submissions:48,resolved:40},{name:'T2',submissions:62,resolved:55},{name:'T3',submissions:55,resolved:50},{name:'T4',submissions:78,resolved:70},{name:'T5',submissions:90,resolved:84},{name:'T6',submissions:105,resolved:98}]} />
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        {/* Trends line chart (2 cols) */}
+        <div className="lg:col-span-2">
+          <GlassCard hoverable={false} className="p-5 bg-white/50 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/50 rounded-3xl">
+            <h4 className="text-xs font-black text-slate-500 mb-4 uppercase tracking-widest pl-1">Xu hướng tiếp nhận & giải quyết kiến nghị</h4>
+            <LineChart data={lineChartData} />
+          </GlassCard>
+        </div>
+        
+        {/* Status Donut (1 col) */}
+        <div>
+          <GlassCard hoverable={false} className="p-5 bg-white/50 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/50 rounded-3xl">
+            <h4 className="text-xs font-black text-slate-500 mb-4 uppercase tracking-widest pl-1">Trạng thái xử lý đơn thư</h4>
+            <DonutChart data={staffDonutData} />
+          </GlassCard>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 text-left">
+        {/* Category Bar Chart */}
+        <GlassCard hoverable={false} className="p-5 bg-white/50 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/50 rounded-3xl">
+          <h4 className="text-xs font-black text-slate-500 mb-4 uppercase tracking-widest pl-1">Thống kê số lượng theo lĩnh vực</h4>
+          <BarChart data={barChartData} />
         </GlassCard>
-        <GlassCard hoverable={false} className="p-5">
-          <h3 className="text-xs font-black text-slate-700 dark:text-white mb-4 uppercase tracking-wider">Phân bổ lĩnh vực</h3>
-          <BarChart data={[{name:'Đô thị',value:85},{name:'Môi trường',value:62},{name:'An ninh',value:44},{name:'Xã hội',value:38},{name:'Khác',value:18}]} />
+
+        {/* Neighborhood Heatmap grid */}
+        <GlassCard hoverable={false} className="p-5 bg-white/50 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/50 rounded-3xl">
+          <h4 className="text-xs font-black text-slate-500 mb-4 uppercase tracking-widest pl-1">Mật độ kiến nghị tại các khu phố</h4>
+          <HeatMapMock />
         </GlassCard>
       </div>
     </PageContainer>
@@ -282,7 +441,6 @@ export default function StaffDashboardPage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     setActiveTab(params.get('tab') || 'tong-quan');
-    // Listen for popstate if user navigates with browser back/forward
     const onPop = () => {
       const p = new URLSearchParams(window.location.search);
       setActiveTab(p.get('tab') || 'tong-quan');
@@ -293,12 +451,31 @@ export default function StaffDashboardPage() {
 
   // Route to sub-tab components
   if (activeTab === 'quan-ly-so') return <TabQuanLySo />;
-  if (activeTab === 'giai-quyet') return <TabGiaiQuyet feedbacks={feedbacks} updateFeedbackStatus={updateFeedbackStatus} addNotification={addNotification} />;
+  if (activeTab === 'giai-quyet') return (
+    <TabGiaiQuyet 
+      feedbacks={feedbacks} 
+      updateFeedbackStatus={updateFeedbackStatus} 
+      addNotification={addNotification} 
+      tasks={tasks}
+      handleToggleTaskStatus={handleToggleTaskStatus}
+    />
+  );
   if (activeTab === 'van-thu') return <TabVanThu />;
-  if (activeTab === 'bao-cao') return <TabBaoCao />;
+  if (activeTab === 'bao-cao') return (
+    <TabBaoCao 
+      feedbacks={feedbacks} 
+      staffDonutData={staffDonutData} 
+      barChartData={barChartData} 
+      lineChartData={lineChartData} 
+    />
+  );
   if (activeTab === 'tuy-chinh') return <TabTuyChinh />;
 
-  // Default: Tổng quan tab
+  // Default: Tổng quan tab (2-column neat layout)
+  const urgentFeedbacks = feedbacks
+    .filter(f => f.status === 'Mới tiếp nhận' || f.priority === 'Khẩn cấp' || f.priority === 'Cao')
+    .slice(0, 3);
+
   return (
     <PageContainer>
       <SectionTitle
@@ -319,51 +496,26 @@ export default function StaffDashboardPage() {
         <StatCard title="Đúng hạn / Hài lòng" value="96.5%" change="4.8/5 ★" trend="up" description="Đánh giá của bà con" icon={<Award className="h-4.5 w-4.5 text-rose-500" />} />
       </div>
 
-      {/* ── Lịch làm việc Google Sheets (realtime) ── */}
-      <GlassCard hoverable={false} className="p-5 mb-6 bg-white/50 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/50">
-        <GoogleSheetSchedule />
-      </GlassCard>
-
-      {/* 2. Quy trình xử lý kiến nghị 6 bước */}
-      <GlassCard hoverable={false} className="p-5 bg-white/50 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/50 mb-6">
-        <h3 className="text-xs font-black text-slate-500 pl-1 mb-4 uppercase tracking-wider">
-          Sơ đồ quy trình xử lý kiến nghị thông minh (6 Bước)
-        </h3>
-        <div className="flex flex-row items-center justify-start xl:justify-between gap-3 py-2 overflow-x-auto no-scrollbar w-full min-w-0">
-          {pipelineSteps.map((step, idx) => {
-            const StepIcon = step.icon;
-            return (
-              <React.Fragment key={step.id}>
-                <div className="flex flex-col items-center text-center gap-1.5 p-3 rounded-2xl bg-white/70 dark:bg-slate-950/40 border border-slate-200/50 dark:border-slate-800/50 min-w-[100px] flex-shrink-0 xl:flex-1">
-                  <div className="p-2.5 bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 rounded-xl relative shadow-xs">
-                    <StepIcon className="h-5 w-5" />
-                    <span className="absolute -top-1.5 -right-1.5 bg-blue-600 text-white text-[9px] font-black w-4.5 h-4.5 rounded-full flex items-center justify-center">
-                      {step.count}
-                    </span>
-                  </div>
-                  <span className="text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">{`0${idx+1} ${step.label}`}</span>
-                </div>
-                {idx < pipelineSteps.length - 1 && (
-                  <div className="text-slate-350 dark:text-slate-700 font-extrabold text-sm select-none flex-shrink-0">➔</div>
-                )}
-              </React.Fragment>
-            );
-          })}
-        </div>
-      </GlassCard>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6 text-left">
-        {/* Left Side: Pending feedbacks table & Kanban (2 cols) */}
+      {/* 2-Column Scientific Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 text-left items-start">
+        
+        {/* Column Left (2/3 Width) - Weekly Schedule & Urgent Items */}
         <div className="lg:col-span-2 flex flex-col gap-6">
-          {/* Table of pending reports */}
+          {/* Lịch công tác tuần */}
+          <GlassCard hoverable={false} className="p-5 bg-white/50 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/50">
+            <GoogleSheetSchedule />
+          </GlassCard>
+
+          {/* Urgent Feedbacks Table */}
           <div>
-            <h3 className="text-xs font-black text-slate-500 pl-1 mb-4 uppercase tracking-wider">
-              Ý kiến cử dân chờ tiếp nhận & xử lý
+            <h3 className="text-xs font-black text-slate-500 pl-1 mb-3.5 uppercase tracking-wider flex items-center gap-1.5">
+              <AlertTriangle className="h-4 w-4 text-rose-500" />
+              Kiến nghị khẩn cấp & Phản ánh mới cần duyệt
             </h3>
             
             <div className="overflow-x-auto rounded-2xl border border-slate-200/50 dark:border-slate-800/50 bg-white/40 dark:bg-slate-900/40 backdrop-blur-md">
               <Table headers={["Mã số", "Tiêu đề", "Khu vực", "Độ ưu tiên", "Thao tác"]}>
-                {pendingFeedbacks.map((fb) => (
+                {urgentFeedbacks.map((fb) => (
                   <tr
                     key={fb.id}
                     onClick={() => setSelectedFbId(fb.id)}
@@ -371,21 +523,21 @@ export default function StaffDashboardPage() {
                       selectedFb?.id === fb.id ? "bg-blue-600/5 dark:bg-blue-950/15" : ""
                     }`}
                   >
-                    <td className="px-6 py-4 font-bold text-xs text-slate-850 dark:text-white tracking-wider">
+                    <td className="px-6 py-3.5 font-bold text-xs text-slate-850 dark:text-white tracking-wider">
                       {fb.feedbackCode}
                     </td>
-                    <td className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-350 max-w-[200px] truncate">
+                    <td className="px-6 py-3.5 font-semibold text-slate-700 dark:text-slate-350 max-w-[240px] truncate">
                       {fb.title}
                     </td>
-                    <td className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400">
+                    <td className="px-6 py-3.5 text-xs font-semibold text-slate-500 dark:text-slate-400">
                       {fb.wardGroup}
                     </td>
-                    <td className="px-6 py-4 text-xs text-slate-400">
-                      <Badge variant={fb.priority === 'Khẩn cấp' || fb.priority === 'Cao' ? 'danger' : 'neutral'}>
+                    <td className="px-6 py-3.5 text-xs">
+                      <Badge variant={fb.priority === 'Khẩn cấp' || fb.priority === 'Cao' ? 'danger' : 'info'}>
                         {fb.priority}
                       </Badge>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-3.5">
                       <Button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -394,79 +546,86 @@ export default function StaffDashboardPage() {
                         }}
                         size="sm"
                         variant="secondary"
-                        className="py-1.5 px-3 text-xs bg-blue-600/5 border-blue-200/50 text-blue-600 dark:text-blue-400 dark:bg-blue-950/10 font-bold"
+                        className="py-1 px-2.5 text-[10px] bg-blue-600/5 border-blue-200/50 text-blue-600 dark:text-blue-400 dark:bg-blue-950/10 font-bold"
                       >
-                        Xử lý
+                        Xử lý nhanh
                       </Button>
                     </td>
                   </tr>
                 ))}
+                {urgentFeedbacks.length === 0 && (
+                  <tr>
+                    <td colSpan={5} className="text-center py-6 text-xs text-slate-400 italic">Không có phản ánh khẩn cấp nào cần xử lý hôm nay.</td>
+                  </tr>
+                )}
               </Table>
-            </div>
-          </div>
-
-          {/* Kanban mini layout */}
-          <div>
-            <h3 className="text-xs font-black text-slate-500 pl-1 mb-4 uppercase tracking-wider">
-              Bảng quản lý công việc Ban chỉ đạo (Click để cập nhật nhanh)
-            </h3>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-              {['Mới', 'Đang xử lý', 'Chờ duyệt', 'Hoàn thành'].map((colName) => {
-                const colTasks = tasks.filter(t => t.status === colName);
-                
-                return (
-                  <GlassCard key={colName} hoverable={false} className="p-3 bg-slate-50/50 dark:bg-slate-950/20 border border-slate-200/50 dark:border-slate-800/50 flex flex-col gap-2 min-h-[160px]">
-                    <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-900 pb-2 mb-1">
-                      <span className="text-[10px] font-black uppercase text-slate-500 tracking-wider">{colName}</span>
-                      <span className="text-[10px] font-bold bg-slate-200/50 text-slate-600 dark:bg-slate-800 dark:text-slate-400 px-1.5 py-0.5 rounded-md">
-                        {colTasks.length}
-                      </span>
-                    </div>
-
-                    <div className="flex flex-col gap-2 flex-grow">
-                      {colTasks.map(t => (
-                        <div
-                          key={t.id}
-                          onClick={() => handleToggleTaskStatus(t.id)}
-                          className="p-2.5 rounded-xl border border-slate-200/40 bg-white/80 dark:border-slate-800/40 dark:bg-slate-900/60 shadow-xs hover:border-blue-500/50 transition-all cursor-pointer text-left flex flex-col gap-1.5"
-                          title="Click để chuyển trạng thái"
-                        >
-                          <span className="text-[11px] font-bold text-slate-850 dark:text-white leading-snug line-clamp-2">{t.title}</span>
-                          <div className="flex items-center justify-between text-[9px] text-slate-400 font-semibold mt-1">
-                            <span>{t.assignee.split(' ')[2]}</span>
-                            <span className={t.priority === 'Cao' || t.priority === 'Hỏa tốc' ? 'text-rose-500' : 'text-slate-400'}>
-                              {t.priority}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </GlassCard>
-                );
-              })}
             </div>
           </div>
         </div>
 
-        {/* Right Side: AI Assistant for Officers & Stats */}
-        <div className="flex flex-col gap-6 text-left">
+        {/* Column Right (1/3 Width) - Pipeline Stepper & Mini-Stats & AI */}
+        <div className="flex flex-col gap-6">
+          {/* Vertical Stepper: Quy trình xử lý */}
+          <GlassCard hoverable={false} className="p-5 bg-white/50 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/50">
+            <h3 className="text-xs font-black text-slate-500 mb-4 uppercase tracking-wider pl-1">
+              Tiến độ Quy trình Tiếp nhận
+            </h3>
+            
+            <div className="flex flex-col gap-4">
+              {pipelineSteps.map((step, idx) => {
+                const StepIcon = step.icon;
+                return (
+                  <div key={step.id} className="flex items-start gap-3 relative">
+                    {/* Stepper Line connector */}
+                    {idx < pipelineSteps.length - 1 && (
+                      <div className="absolute left-4.5 top-9 bottom-[-16px] w-0.5 bg-slate-200 dark:bg-slate-800" />
+                    )}
+
+                    <div className="p-2 bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 rounded-xl relative shadow-xs flex-shrink-0 z-10">
+                      <StepIcon className="h-4.5 w-4.5" />
+                      <span className="absolute -top-1.5 -right-1.5 bg-blue-600 text-white text-[8px] font-black w-3.5 h-3.5 rounded-full flex items-center justify-center">
+                        {idx + 1}
+                      </span>
+                    </div>
+
+                    <div className="flex-1 min-w-0 text-left pt-0.5">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-[11px] font-black text-slate-700 dark:text-white uppercase tracking-wider">{step.label}</span>
+                        <Badge variant="neutral" className="text-[9px] font-bold py-0.5 px-1.5">
+                          {step.count} hồ sơ
+                        </Badge>
+                      </div>
+                      <p className="text-[9.5px] text-slate-400 mt-0.5">
+                        {idx === 0 && "Kiểm tra thông tin biểu mẫu người dân gửi"}
+                        {idx === 1 && "Phân loại theo ban ngành phụ trách đô thị / môi trường"}
+                        {idx === 2 && "Chuyển giao cán bộ kỹ thuật kiểm tra hiện địa bàn"}
+                        {idx === 3 && "Tiến hành sửa chữa, khắc phục trực tiếp"}
+                        {idx === 4 && "Đăng tải biên bản phản hồi trực tiếp lên Cổng số"}
+                        {idx === 5 && "Đánh giá sao đo lường độ hài lòng của nhân dân"}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </GlassCard>
+
           {/* AI Helper tool box */}
           <GlassCard className="p-5 bg-gradient-to-br from-blue-600/5 via-blue-600/[0.02] to-amber-600/[0.02] border-blue-200/50 dark:border-blue-900/30 flex flex-col gap-4">
             <div className="flex items-center gap-2 border-b border-slate-200/40 pb-3">
-              <div className="p-2 bg-blue-600 text-white rounded-xl shadow-md">
-                <Bot className="h-5 w-5 animate-pulse-glow" />
+              <div className="p-2 bg-blue-600 text-white rounded-xl shadow-md flex-shrink-0">
+                <Bot className="h-4.5 w-4.5 animate-pulse-glow" />
               </div>
               <div>
-                <h4 className="text-xs font-bold text-slate-800 dark:text-white uppercase tracking-wider">Trợ lý AI cho Cán bộ</h4>
-                <span className="text-[9px] text-slate-400 font-medium">Trực quan phân tích & xử lý phản ánh</span>
+                <h4 className="text-xs font-bold text-slate-800 dark:text-white uppercase tracking-wider">Trợ lý AI nhanh</h4>
+                <span className="text-[9px] text-slate-400 font-medium">Xử lý ngay văn bản phản hồi</span>
               </div>
             </div>
 
             {selectedFb ? (
               <div className="flex flex-col gap-3">
-                <div className="p-3 bg-white/80 dark:bg-slate-900/80 rounded-xl border border-slate-200/50 dark:border-slate-800/50 flex flex-col gap-1.5 text-xs">
-                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Đang lựa chọn phản ánh:</span>
+                <div className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200/50 dark:border-slate-800/50 flex flex-col gap-1 text-xs">
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Đang lựa chọn:</span>
                   <span className="font-bold text-slate-800 dark:text-white truncate">{selectedFb.feedbackCode} - {selectedFb.title}</span>
                 </div>
 
@@ -475,70 +634,38 @@ export default function StaffDashboardPage() {
                     onClick={() => setAiSummaryModal(true)}
                     variant="secondary"
                     size="sm"
-                    className="w-full text-xs font-bold justify-start gap-2 bg-white/40"
+                    className="w-full text-[10px] font-bold justify-start gap-1.5 bg-white/40"
                   >
-                    <Sparkles className="h-4 w-4 text-amber-500" />
+                    <Sparkles className="h-3.5 w-3.5 text-amber-500" />
                     Tóm tắt phản ánh hỏa tốc
                   </Button>
                   <Button
                     onClick={() => setAiSuggestionModal(true)}
                     variant="secondary"
                     size="sm"
-                    className="w-full text-xs font-bold justify-start gap-2 bg-white/40"
+                    className="w-full text-[10px] font-bold justify-start gap-1.5 bg-white/40"
                   >
-                    <Bot className="h-4 w-4 text-blue-500" />
+                    <Bot className="h-3.5 w-3.5 text-blue-500" />
                     Gợi ý biên bản phản hồi
                   </Button>
                 </div>
               </div>
             ) : (
-              <div className="text-center py-4 text-xs text-slate-450">
-                Hãy lựa chọn một phản ánh bên danh sách để sử dụng các tính năng Trợ lý AI xử lý văn bản.
+              <div className="text-center py-2 text-[10px] text-slate-400 italic">
+                Lựa chọn phản ánh khẩn bên trái để sử dụng Trợ lý AI.
               </div>
             )}
           </GlassCard>
 
-          {/* Right sidebar no longer has the small donut chart to avoid clutter */}
-        </div>
-      </div>
-
-      {/* 4. Analytics & Charts Section (Google Material 3 design spec with scroll animation reveals) */}
-      <div className="mt-8 border-t border-slate-200/50 dark:border-slate-800/50 pt-6 animate-fade-in-up">
-        <h3 className="text-sm font-black text-slate-700 dark:text-slate-200 mb-6 uppercase tracking-wider pl-1">
-          Báo cáo số liệu & Phân tích chuyên sâu
-        </h3>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 text-left">
-          {/* Trends line chart (2 cols) */}
-          <div className="lg:col-span-2">
-            <GlassCard hoverable={false} className="p-5 bg-white/50 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/50 rounded-3xl">
-              <h4 className="text-xs font-black text-slate-500 mb-4 uppercase tracking-widest pl-1">Xu hướng tiếp nhận & giải quyết kiến nghị</h4>
-              <LineChart data={lineChartData} />
-            </GlassCard>
-          </div>
-          
-          {/* Status Donut (1 col) */}
-          <div>
-            <GlassCard hoverable={false} className="p-5 bg-white/50 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/50 rounded-3xl">
-              <h4 className="text-xs font-black text-slate-500 mb-4 uppercase tracking-widest pl-1">Phân bố trạng thái đơn thư</h4>
+          {/* Quick Donut Chart (Overview status) */}
+          <GlassCard hoverable={false} className="p-4 bg-white/50 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/50">
+            <h4 className="text-[10px] font-black text-slate-500 mb-3.5 uppercase tracking-widest pl-1">Phân bố trạng thái xử lý</h4>
+            <div className="h-36">
               <DonutChart data={staffDonutData} />
-            </GlassCard>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6 text-left">
-          {/* Category Bar Chart */}
-          <GlassCard hoverable={false} className="p-5 bg-white/50 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/50 rounded-3xl">
-            <h4 className="text-xs font-black text-slate-500 mb-4 uppercase tracking-widest pl-1">Thống kê số lượng theo lĩnh vực</h4>
-            <BarChart data={barChartData} />
-          </GlassCard>
-
-          {/* Neighborhood Heatmap grid */}
-          <GlassCard hoverable={false} className="p-5 bg-white/50 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/50 rounded-3xl">
-            <h4 className="text-xs font-black text-slate-500 mb-4 uppercase tracking-widest pl-1">Mật độ kiến nghị tại các khu phố</h4>
-            <HeatMapMock />
+            </div>
           </GlassCard>
         </div>
+
       </div>
 
       {/* AI Summary Modal */}
@@ -551,7 +678,7 @@ export default function StaffDashboardPage() {
         {selectedFb && (
           <div className="flex flex-col gap-4 text-left text-xs sm:text-sm">
             <p className="font-bold text-slate-800 dark:text-white">Ý chính phản ánh:</p>
-            <div className="p-4 rounded-xl border border-slate-200/50 bg-slate-50/50 dark:border-slate-800/50 dark:bg-slate-950/20 leading-relaxed leading-normal">
+            <div className="p-4 rounded-xl border border-slate-200/50 bg-slate-50/50 dark:border-slate-800/50 dark:bg-slate-950/20 leading-relaxed">
               - **Đối tượng**: Người dân {selectedFb.senderName} ({selectedFb.senderPhone}).<br />
               - **Địa bàn**: {selectedFb.wardGroup} (Vị trí: {selectedFb.location}).<br />
               - **Sự việc**: {selectedFb.title}.<br />

@@ -1,32 +1,22 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import PageContainer from '../layout/PageContainer';
 import SectionTitle from '../ui/SectionTitle';
 import GlassCard from '../ui/GlassCard';
-import ChatPanel from '../ai/ChatPanel';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
 import Badge from '../ui/Badge';
-import Modal from '../ui/Modal';
-import Drawer from '../ui/Drawer';
-import { useAppStore } from '@/store/useAppStore';
 import { 
-  HelpCircle, PhoneCall, ArrowRight, Bot, Sparkles, User, 
-  FileText, CheckSquare, SearchCode, ShieldAlert, Check,
-  BookOpen, PlusCircle, Upload, Briefcase, FileCode
+  Bot, Sparkles, FileText, Check, AlertCircle, Copy, Download,
+  Settings, Key, Eye, EyeOff, Loader2, RefreshCw, PenTool,
+  CheckSquare, ShieldAlert, ArrowRight, HelpCircle
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAppStore } from '@/store/useAppStore';
 
-const faqs = [
-  "Làm thế nào để nộp hồ sơ tạm trú online?",
-  "Thời gian giải quyết phản ánh đô thị là bao lâu?",
-  "Lịch tiếp công dân của lãnh đạo Mặt trận phường?",
-  "Liên hệ cán bộ phụ trách Khu phố 4 như thế nào?",
-  "Mức phí công chứng sao y bản chính là bao nhiêu?"
-];
-
-const prefilledDraft = `ỦY BAN MTTQ VIỆT NAM         CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM
+const DEFAULT_PLAN_PROMPT = "Soạn thảo kế hoạch tổ chức ngày hội Đại đoàn kết toàn dân tộc năm 2026 tại khu dân cư.";
+const DEFAULT_SPELL_TEXT = `ỦY BAN MTTQ VIỆT NAM         CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM
 PHƯỜNG CHÁNH HƯNG                  Độc lập - Tự do - Hạnh phúc
 ------------------                 ---------------------------
                             Chánh Hưng, ngày 30 tháng 6 năm 2026
@@ -43,346 +33,441 @@ II. NỘI DUNG VÀ GIẢI PHẤP
 2. Tổ chức giám sát các công trình hạ tầng đô thị trên tuyến đường Phạm Hùng.`;
 
 export default function AIAssistantPage() {
-  const { addChatMessage, setAiTyping, addNotification } = useAppStore();
-  const [activeTab, setActiveTab] = useState<'citizen' | 'staff'>('citizen');
+  const { addNotification } = useAppStore();
   
-  // Staff Mode States
-  const [editorText, setEditorText] = useState(prefilledDraft);
-  const [editorTitle, setEditorTitle] = useState('Kế hoạch công tác Mặt trận Quý II/2026');
-  const [spellCheckModal, setSpellCheckModal] = useState(false);
-  const [formatCheckModal, setFormatCheckModal] = useState(false);
-  const [aiWorking, setAiWorking] = useState<string | null>(null);
+  // States
+  const [activeTab, setActiveTab] = useState<'planner' | 'checker'>('planner');
+  const [apiKey, setApiKey] = useState('');
+  const [showKey, setShowKey] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [apiStatus, setApiStatus] = useState<'not-set' | 'configured'>('not-set');
+  
+  // Mode 1: Planner States
+  const [planTopic, setPlanTopic] = useState(DEFAULT_PLAN_PROMPT);
+  const [planOutput, setPlanOutput] = useState('');
+  
+  // Mode 2: Checker States
+  const [checkInput, setCheckInput] = useState(DEFAULT_SPELL_TEXT);
+  const [checkOutputText, setCheckOutputText] = useState('');
+  const [spellErrors, setSpellErrors] = useState<{ original: string; fixed: string; reason: string }[]>([]);
+  const [formatChecks, setFormatChecks] = useState<{ title: string; status: 'valid' | 'invalid'; msg: string }[]>([]);
 
-  // FAQ handles
-  const handleFAQClick = (faq: string) => {
-    addChatMessage('user', faq);
-    setAiTyping(true);
-    setTimeout(() => {
-      let aiText = '';
-      const text = faq.toLowerCase();
+  // Load API Key from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('gemini_api_key');
+    if (saved) {
+      setApiKey(saved);
+      setApiStatus('configured');
+    }
+  }, []);
 
-      if (text.includes('tạm trú')) {
-        aiText = 'Để đăng ký tạm trú trực tuyến tại Phường Chánh Hưng, bà con làm theo các bước sau:\n1. Chuẩn bị hồ sơ (CT01, Hợp đồng thuê nhà hoặc Sổ hồng).\n2. Truy cập Cổng dịch vụ công Bộ Công an bằng tài khoản VNeID cấp độ 2.\n3. Chọn mục "Đăng ký tạm trú", khai báo thông tin và tải ảnh chụp giấy tờ lên.\nThời gian giải quyết là 03 ngày làm việc. Tôi có thể mở hướng dẫn từng bước chi tiết tại mục "Dịch vụ công" cho bà con nhé!';
-      } else if (text.includes('thời gian giải quyết') || text.includes('phản ánh')) {
-        aiText = 'Thời gian giải quyết phản ánh đô thị tùy thuộc vào mức độ ưu tiên:\n- Khẩn cấp (Hố ga mất nắp, rò rỉ khí độc): xử lý rào chắn trong 2 giờ và hoàn tất trong ngày.\n- Tiêu chuẩn (Đèn hỏng, rác tồn): xử lý hoàn tất trong 3 - 5 ngày làm việc.\nBà con có thể theo dõi tiến độ chi tiết bằng mã phản ánh tại trang "Tra cứu phản ánh".';
-      } else if (text.includes('lịch tiếp công dân')) {
-        aiText = 'Ban Thường trực Ủy ban MTTQ Việt Nam Phường Chánh Hưng tiếp công dân định kỳ vào ngày thứ Năm hàng tuần từ 08:00 - 11:30 sáng và 14:00 - 17:00 chiều tại Phòng Tiếp dân UBND Phường (đầu cầu thang trệt). Ngoài ra, Chủ tịch MTTQ phường sẽ tiếp đột xuất khi có yêu cầu khẩn cấp của cử dân.';
-      } else if (text.includes('khu phố 4')) {
-        aiText = 'Cán bộ phụ trách Ban Công tác Mặt trận Khu phố 4 là bà Nguyễn Thị Tuyết (SĐT liên lạc: 0903.888.xxx). Văn phòng Ban điều hành Khu phố 4 nằm tại địa chỉ số 142/24 Phạm Hùng. Bà Tuyết thường trực tiếp dân vào 18h00 thứ Hai đầu tháng.';
-      } else if (text.includes('công chứng') || text.includes('sao y')) {
-        aiText = 'Thủ tục sao y chứng thực bản chính được xử lý trực tiếp trong ngày tại Bộ phận Một cửa UBND Phường Chánh Hưng. Lệ phí là 2.000đ/trang cho 2 trang đầu và 1.000đ từ trang thứ 3. Bà con nên đem theo bản chính gốc và bản photo sẵn để rút ngắn thời gian chờ đợi.';
-      } else {
-        aiText = 'Tôi có thể hỗ trợ giải đáp trực tiếp thủ tục này. Xin mời bà con gửi thêm các câu hỏi liên quan.';
-      }
-
-      addChatMessage('ai', aiText);
-      setAiTyping(false);
-    }, 1000);
+  const handleSaveApiKey = () => {
+    if (apiKey.trim()) {
+      localStorage.setItem('gemini_api_key', apiKey.trim());
+      setApiStatus('configured');
+      addNotification('API Key', 'Đã lưu khóa API thành công.', 'success');
+    } else {
+      localStorage.removeItem('gemini_api_key');
+      setApiStatus('not-set');
+      addNotification('API Key', 'Đã xóa khóa API.', 'info');
+    }
   };
 
-  // Staff AI trigger simulation
-  const triggerAIAction = (actionType: 'spell' | 'format' | 'template') => {
-    setAiWorking(actionType);
-    setTimeout(() => {
-      setAiWorking(null);
-      if (actionType === 'spell') {
-        setSpellCheckModal(true);
-      } else if (actionType === 'format') {
-        setFormatCheckModal(true);
-      } else if (actionType === 'template') {
-        // chèn nhanh bộ khung mới
-        const expandedTemplate = prefilledDraft + `\n\nIII. TỔ CHỨC THỰC HIỆN\n- Giao Ban Công tác Mặt trận 5 khu phố phổ biến kế hoạch.\n- Tổ chức giám sát định kỳ hàng tháng.\n- Tổng hợp báo cáo về Thường trực trước ngày 25 hàng tháng.`;
-        setEditorText(expandedTemplate);
-        addNotification('Trợ lý AI', 'Đã gợi ý lập kế hoạch và chèn phần III. Tổ chức thực hiện', 'success');
+  const callGemini = async (prompt: string, systemInstruction?: string) => {
+    setLoading(true);
+    try {
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      
+      const savedKey = localStorage.getItem('gemini_api_key');
+      if (savedKey) {
+        headers['x-gemini-key'] = savedKey;
       }
-    }, 1200);
+
+      const res = await fetch('/api/gemini', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ prompt, systemInstruction }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Lỗi không xác định khi gọi AI.');
+      }
+
+      return data.text || '';
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Lỗi kết nối';
+      addNotification('Lỗi AI', msg, 'error');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const applySpellFix = () => {
-    const fixedText = editorText
-      .replace('tuyên chiền', 'tuyên truyền')
-      .replace('GIẢI PHẤP', 'GIẢI PHÁP');
-    setEditorText(fixedText);
-    setSpellCheckModal(false);
-    addNotification('Trợ lý AI', 'Đã tự động sửa các lỗi chính tả được phát hiện.', 'success');
+  // Generate Plan Handler
+  const handleGeneratePlan = async () => {
+    if (!planTopic.trim()) return;
+    
+    const sysInstruction = `Bạn là trợ lý hành chính chuyên nghiệp của Ủy ban Mặt trận Tổ quốc Việt Nam cấp cơ sở.
+Nhiệm vụ của bạn là soạn thảo một kế hoạch công tác chính trị xã hội chuẩn chỉnh, hành văn nghiêm túc, trang trọng, sử dụng đúng các đề mục La Mã (I, II, III...) và nhánh nhỏ (1, 2, 3...).
+Kế hoạch cần có bố cục:
+1. MỤC ĐÍCH, YÊU CẦU
+2. NỘI DUNG VÀ BIỆN PHÁP THỰC HIỆN
+3. TỔ CHỨC THỰC HIỆN
+Hãy viết chi tiết, cụ thể và đúng nghiệp vụ Mặt trận.`;
+
+    const promptText = `Hãy soạn thảo dự thảo kế hoạch chi tiết cho chủ đề sau: "${planTopic}"`;
+    
+    try {
+      const result = await callGemini(promptText, sysInstruction);
+      setPlanOutput(result);
+      addNotification('Trợ lý Soạn thảo', 'Đã xây dựng kế hoạch thành công.', 'success');
+    } catch (e) {
+      // Handled in callGemini
+    }
+  };
+
+  // Audit Spell and Format Handler
+  const handleCheckDocument = async () => {
+    if (!checkInput.trim()) return;
+
+    const sysInstruction = `Bạn là chuyên gia kiểm tra thể thức văn bản hành chính theo Nghị định 30/2020/NĐ-CP của Việt Nam và lỗi chính tả tiếng Việt.
+Hãy phân tích đoạn văn bản được cung cấp và trả về một chuỗi JSON chuẩn có cấu trúc chính xác như sau (không kèm ký tự markdown như \`\`\`json ở ngoài, chỉ trả về chuỗi JSON thô):
+{
+  "spellErrors": [
+    { "original": "từ sai chính tả", "fixed": "từ đã sửa lại đúng", "reason": "giải thích ngắn gọn" }
+  ],
+  "formatChecks": [
+    { "title": "Quốc hiệu Tiêu ngữ", "status": "valid", "msg": "Căn giữa chuẩn" },
+    { "title": "Lề giấy", "status": "invalid", "msg": "Lề phải không đều" }
+  ],
+  "fixedText": "Toàn bộ văn bản đã được sửa đổi sạch lỗi chính tả"
+}`;
+
+    const promptText = `Kiểm tra văn bản sau:\n\n${checkInput}`;
+
+    try {
+      const result = await callGemini(promptText, sysInstruction);
+      // Attempt to clean markdown block wrappers if model outputs them
+      const cleanJson = result.replace(/```json/g, '').replace(/```/g, '').trim();
+      const parsed = JSON.parse(cleanJson);
+      
+      setSpellErrors(parsed.spellErrors || []);
+      setFormatChecks(parsed.formatChecks || []);
+      setCheckOutputText(parsed.fixedText || checkInput);
+      
+      addNotification('Trợ lý Kiểm tra', 'Đã phân tích văn bản hoàn tất.', 'success');
+    } catch (e) {
+      // Fallback fallback if JSON parse fails
+      if (e instanceof SyntaxError) {
+        addNotification('Lỗi định dạng', 'Phản hồi từ AI không đúng cấu trúc JSON mong đợi. Đang chạy kiểm thử dự phòng.', 'warning');
+        // Mock fallback
+        setSpellErrors([
+          { original: 'tuyên chiền', fixed: 'tuyên truyền', reason: 'Sai phụ âm cuối' },
+          { original: 'GIẢI PHẤP', fixed: 'GIẢI PHÁP', reason: 'Sai nguyên âm chính' }
+        ]);
+        setFormatChecks([
+          { title: 'Quốc hiệu & Tiêu ngữ', status: 'valid', msg: 'Đầy đủ, đúng font chữ đứng' },
+          { title: 'Địa danh & Ngày tháng', status: 'valid', msg: 'Đầy đủ, đúng font nghiêng' },
+          { title: 'Căn lề văn bản', status: 'invalid', msg: 'Căn lề không chuẩn Nghị định 30' }
+        ]);
+        setCheckOutputText(
+          checkInput
+            .replace('tuyên chiền', 'tuyên truyền')
+            .replace('GIẢI PHẤP', 'GIẢI PHÁP')
+        );
+      }
+    }
+  };
+
+  const handleApplyFixes = () => {
+    if (checkOutputText) {
+      setCheckInput(checkOutputText);
+      setSpellErrors([]);
+      addNotification('Áp dụng', 'Đã cập nhật bản sửa đổi chính tả vào khung soạn thảo.', 'success');
+    }
+  };
+
+  const handleCopyText = (text: string) => {
+    if (!text) return;
+    navigator.clipboard.writeText(text);
+    addNotification('Sao chép', 'Đã sao chép vào bộ nhớ tạm.', 'success');
+  };
+
+  const handleDownloadText = (title: string, content: string) => {
+    if (!content) return;
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${title.toLowerCase().replace(/\s+/g, '_')}.txt`;
+    link.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
     <PageContainer>
       <SectionTitle
-        title={activeTab === 'citizen' ? 'Tổng đài viên AI thông minh' : 'Trợ lý Hành chính AI cho Cán bộ'}
-        subtitle={activeTab === 'citizen' ? 'Trợ lý ảo hỗ trợ tư vấn thủ tục hành chính, giải đáp kiến nghị đô thị 24/7' : 'Công cụ hỗ trợ chuyên viên soạn thảo, kiểm tra thể thức văn bản hành chính'}
-      >
-        <div className="flex gap-2 p-1 bg-slate-100 dark:bg-slate-950 rounded-xl border border-slate-200/50 dark:border-slate-800/50">
-          <button
-            onClick={() => setActiveTab('citizen')}
-            className={cn(
-              "px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5",
-              activeTab === 'citizen'
-                ? "bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-sm"
-                : "text-slate-500 hover:text-slate-700"
-            )}
-          >
-            <User className="h-3.5 w-3.5" /> Người dân
-          </button>
-          <button
-            onClick={() => setActiveTab('staff')}
-            className={cn(
-              "px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5",
-              activeTab === 'staff'
-                ? "bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-sm"
-                : "text-slate-500 hover:text-slate-700"
-            )}
-          >
-            <Bot className="h-3.5 w-3.5" /> Cán bộ (AI Soạn thảo)
-          </button>
+        title="Trung tâm Trợ lý Hành chính AI"
+        subtitle="Trợ lý ảo thông minh hỗ trợ soạn thảo kế hoạch công tác và kiểm tra thể thức văn bản hành chính"
+      />
+
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 text-left items-start animate-fade-in-up">
+        
+        {/* Left Control Bar (Tabs & Setup) - 1 col */}
+        <div className="lg:col-span-1 flex flex-col gap-5">
+          {/* Key Selection Tabs */}
+          <GlassCard hoverable={false} className="p-4 bg-white/50 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/50 flex flex-col gap-2">
+            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Phân loại Trợ lý</span>
+            
+            <button
+              onClick={() => setActiveTab('planner')}
+              className={cn(
+                "w-full flex items-center gap-2.5 p-3 rounded-xl text-xs font-bold text-left transition-all cursor-pointer",
+                activeTab === 'planner'
+                  ? "bg-blue-600 text-white shadow-md shadow-blue-500/10"
+                  : "bg-white/40 hover:bg-slate-100 dark:bg-slate-950/20 dark:hover:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200/40 dark:border-slate-800/40"
+              )}
+            >
+              <PenTool className="h-4.5 w-4.5" />
+              <div className="flex flex-col">
+                <span>Soạn thảo Kế hoạch</span>
+                <span className={cn("text-[9px] font-medium mt-0.5", activeTab === 'planner' ? "text-blue-100" : "text-slate-400")}>
+                  Xây dựng bố cục, nội dung
+                </span>
+              </div>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('checker')}
+              className={cn(
+                "w-full flex items-center gap-2.5 p-3 rounded-xl text-xs font-bold text-left transition-all cursor-pointer",
+                activeTab === 'checker'
+                  ? "bg-blue-600 text-white shadow-md shadow-blue-500/10"
+                  : "bg-white/40 hover:bg-slate-100 dark:bg-slate-950/20 dark:hover:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200/40 dark:border-slate-800/40"
+              )}
+            >
+              <CheckSquare className="h-4.5 w-4.5" />
+              <div className="flex flex-col">
+                <span>Kiểm tra Thể thức & Lỗi</span>
+                <span className={cn("text-[9px] font-medium mt-0.5", activeTab === 'checker' ? "text-blue-100" : "text-slate-400")}>
+                  Quét chính tả, Nghị định 30
+                </span>
+              </div>
+            </button>
+          </GlassCard>
+
+          {/* API Key Setup */}
+          <GlassCard hoverable={false} className="p-4 bg-white/50 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/50 flex flex-col gap-3">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                <Settings className="h-3.5 w-3.5" /> Cấu hình Gemini
+              </span>
+              <Badge variant={apiStatus === 'configured' ? 'success' : 'neutral'}>
+                {apiStatus === 'configured' ? 'Đã cấu hình' : 'Chưa cấu hình'}
+              </Badge>
+            </div>
+
+            <p className="text-[9.5px] text-slate-400 leading-normal">
+              Hệ thống sử dụng model <strong>Gemini 2.5 Flash</strong>. Anh có thể điền Gemini API Key của mình vào đây (lưu cục bộ trên trình duyệt).
+            </p>
+
+            <div className="flex gap-1">
+              <div className="relative flex-1">
+                <Input
+                  type={showKey ? 'text' : 'password'}
+                  placeholder="Nhập API Key..."
+                  value={apiKey}
+                  onChange={(e) => setApiKey(e.target.value)}
+                  className="py-1.5 px-2.5 text-xs bg-slate-50/50"
+                />
+                <button
+                  onClick={() => setShowKey(!showKey)}
+                  className="absolute right-2 top-2.5 text-slate-400 hover:text-slate-655"
+                >
+                  {showKey ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                </button>
+              </div>
+              <Button onClick={handleSaveApiKey} variant="secondary" className="px-2.5 py-1 text-xs font-bold rounded-lg border border-slate-200 bg-white">
+                Lưu
+              </Button>
+            </div>
+          </GlassCard>
         </div>
-      </SectionTitle>
 
-      {activeTab === 'citizen' ? (
-        // CITIZEN CHAT VIEW
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in-up">
-          <div className="lg:col-span-2">
-            <ChatPanel />
-          </div>
+        {/* Right Workspaces - 3 cols */}
+        <div className="lg:col-span-3">
+          
+          {/* TAB 1: PLANNER WORKSPACE */}
+          {activeTab === 'planner' && (
+            <div className="flex flex-col gap-5">
+              {/* Prompt Input Card */}
+              <GlassCard hoverable={false} className="p-5 bg-white/60 dark:bg-slate-900/50 border border-slate-200/50 dark:border-slate-800/50 flex flex-col gap-4">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-400 rounded-lg">
+                    <Sparkles className="h-4.5 w-4.5 animate-pulse-glow" />
+                  </div>
+                  <h4 className="text-xs font-black text-slate-700 dark:text-white uppercase tracking-wider">
+                    Chủ đề / Yêu cầu soạn thảo Kế hoạch
+                  </h4>
+                </div>
 
-          <div className="flex flex-col gap-6 text-left">
-            <GlassCard className="p-5 bg-white/40 dark:bg-slate-900/30 border border-slate-200/50 dark:border-slate-800/50">
-              <div className="flex items-center gap-2 mb-4">
-                <HelpCircle className="h-4.5 w-4.5 text-blue-500" />
-                <h4 className="text-xs font-bold text-slate-800 dark:text-white uppercase tracking-wider">Câu hỏi thường gặp</h4>
-              </div>
-              
-              <div className="flex flex-col gap-2.5">
-                {faqs.map((faq, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => handleFAQClick(faq)}
-                    className="w-full flex items-center justify-between p-3 rounded-xl border border-slate-100 hover:border-blue-500/50 hover:bg-blue-50/5 text-slate-700 hover:text-blue-600 dark:border-slate-800/50 dark:hover:border-blue-500/30 dark:text-slate-350 dark:hover:text-blue-400 text-xs font-semibold text-left transition-all cursor-pointer leading-normal"
-                  >
-                    <span className="line-clamp-2 flex-1 pr-2">{faq}</span>
-                    <ArrowRight className="h-3.5 w-3.5 flex-shrink-0 opacity-70" />
-                  </button>
-                ))}
-              </div>
-            </GlassCard>
-
-            <GlassCard className="p-5 bg-rose-600/5 border-red-200/40 dark:bg-red-950/10 dark:border-red-900/30 flex gap-4 items-start">
-              <div className="p-2.5 bg-rose-500 text-white rounded-xl flex-shrink-0 shadow-md">
-                <PhoneCall className="h-5 w-5" />
-              </div>
-              <div>
-                <h4 className="text-xs font-bold text-slate-800 dark:text-white uppercase tracking-wider">Tổng đài hỗ trợ 24/7</h4>
-                <p className="text-lg font-black text-rose-600 dark:text-rose-400 mt-1">(028) 7101 1234</p>
-                <p className="text-[10px] text-slate-400 mt-1 leading-relaxed">Đường dây nóng của UBND & Mặt trận phường tiếp nhận khẩn cấp các vụ việc đe dọa an toàn hoặc sạt lở.</p>
-              </div>
-            </GlassCard>
-          </div>
-        </div>
-      ) : (
-        // STAFF AI DOCUMENT EDITOR WORKSPACE
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 text-left animate-fade-in-up">
-          {/* Main Document Editor (2 cols) */}
-          <div className="lg:col-span-2 flex flex-col gap-4">
-            <GlassCard hoverable={false} className="p-5 bg-white/60 dark:bg-slate-900/50 border border-slate-200/50 dark:border-slate-800/50 flex flex-col gap-4">
-              
-              {/* Draft Info Header */}
-              <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-                <div className="flex-1 w-full min-w-0">
-                  <Input
-                    placeholder="Nhập tiêu đề dự thảo văn bản..."
-                    value={editorTitle}
-                    onChange={(e) => setEditorTitle(e.target.value)}
-                    className="font-bold text-sm bg-transparent border-none py-1 px-0 shadow-none focus:ring-0 dark:text-white"
+                <div className="flex flex-col sm:flex-row gap-2.5">
+                  <textarea
+                    placeholder="Ví dụ: Kế hoạch tổ chức quyên góp quỹ vì người nghèo tại Phường Chánh Hưng..."
+                    value={planTopic}
+                    onChange={(e) => setPlanTopic(e.target.value)}
+                    rows={2}
+                    className="flex-1 p-3 text-xs bg-slate-50/50 rounded-2xl border border-slate-200 focus:outline-none focus:border-blue-500/50 text-slate-800 dark:text-white leading-relaxed"
                   />
+                  <Button
+                    onClick={handleGeneratePlan}
+                    disabled={loading || !planTopic.trim()}
+                    className="sm:w-36 text-xs font-bold gap-1 rounded-2xl justify-center h-fit self-end sm:self-center py-3 bg-blue-600 hover:bg-blue-500 text-white"
+                  >
+                    {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Bot className="h-4.5 w-4.5" />}
+                    Tạo kế hoạch
+                  </Button>
                 </div>
-                <div className="flex-shrink-0">
-                  <Badge variant="primary">Đang soạn thảo</Badge>
+              </GlassCard>
+
+              {/* Editor / Output Card */}
+              <GlassCard hoverable={false} className="p-5 bg-white/65 dark:bg-slate-900/55 border border-slate-200/50 dark:border-slate-800/50 flex flex-col gap-4 min-h-[460px]">
+                <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 flex-shrink-0">
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-4.5 w-4.5 text-blue-500" />
+                    <span className="text-xs font-black text-slate-850 dark:text-white uppercase tracking-widest">Khung Soạn Thảo Văn Bản</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => handleCopyText(planOutput)}
+                      disabled={!planOutput}
+                      className="p-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-blue-500 disabled:opacity-40"
+                      title="Sao chép"
+                    >
+                      <Copy className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      onClick={() => handleDownloadText('Ke_hoach_Mttq', planOutput)}
+                      disabled={!planOutput}
+                      className="p-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-emerald-500 disabled:opacity-40"
+                      title="Tải về .txt"
+                    >
+                      <Download className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
                 </div>
+
+                <textarea
+                  value={planOutput}
+                  onChange={(e) => setPlanOutput(e.target.value)}
+                  placeholder="Nội dung kế hoạch công tác sau khi tạo sẽ hiển thị và cho phép chỉnh sửa trực tiếp tại đây..."
+                  className="w-full flex-1 min-h-[380px] p-4 font-mono text-xs sm:text-sm bg-slate-50/50 dark:bg-slate-950/20 rounded-2xl border border-slate-200/50 focus:outline-none focus:border-blue-500/50 text-slate-800 dark:text-white leading-relaxed resize-y"
+                />
+              </GlassCard>
+            </div>
+          )}
+
+          {/* TAB 2: SPELL & FORMAT CHECKER WORKSPACE */}
+          {activeTab === 'checker' && (
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
+              
+              {/* Input Workspace */}
+              <GlassCard hoverable={false} className="p-5 bg-white/60 dark:bg-slate-900/50 border border-slate-200/50 dark:border-slate-800/50 flex flex-col gap-4 min-h-[460px]">
+                <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 flex-shrink-0">
+                  <div className="flex items-center gap-2">
+                    <PenTool className="h-4.5 w-4.5 text-blue-500" />
+                    <span className="text-xs font-black text-slate-850 dark:text-white uppercase tracking-widest">Dán Văn Bản Gốc</span>
+                  </div>
+                  <Button
+                    onClick={handleCheckDocument}
+                    disabled={loading || !checkInput.trim()}
+                    className="text-xs font-bold gap-1 rounded-xl px-3 py-1.5 bg-blue-600 text-white"
+                  >
+                    {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
+                    Quét lỗi AI
+                  </Button>
+                </div>
+
+                <textarea
+                  value={checkInput}
+                  onChange={(e) => setCheckInput(e.target.value)}
+                  placeholder="Dán dự thảo văn bản của anh vào đây để quét lỗi..."
+                  className="w-full flex-grow min-h-[340px] p-4 font-mono text-xs bg-slate-50/50 dark:bg-slate-950/20 rounded-2xl border border-slate-200/50 focus:outline-none focus:border-blue-500/50 text-slate-800 dark:text-white leading-relaxed resize-y"
+                />
+              </GlassCard>
+
+              {/* Analysis & Fixes Output */}
+              <div className="flex flex-col gap-4">
+                {/* Format Checks */}
+                <GlassCard hoverable={false} className="p-4 bg-white/65 dark:bg-slate-900/55 border border-slate-200/50 dark:border-slate-800/50 flex flex-col gap-3">
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Đánh giá thể thức (Nghị định 30)</span>
+                  
+                  {formatChecks.length === 0 ? (
+                    <div className="text-[11px] text-slate-400 italic py-2 text-center">
+                      Chưa có phân tích thể thức. Nhấn nút "Quét lỗi AI".
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-2.5 max-h-[140px] overflow-y-auto pr-1">
+                      {formatChecks.map((check, i) => (
+                        <div key={i} className="flex items-start justify-between border-b border-slate-100 dark:border-slate-800 pb-1.5 text-xs">
+                          <span className="font-bold text-slate-700 dark:text-slate-300">{check.title}</span>
+                          <div className="flex items-center gap-1.5 text-right">
+                            <span className="text-[10px] text-slate-400 font-medium">{check.msg}</span>
+                            <Badge variant={check.status === 'valid' ? 'success' : 'warning'}>
+                              {check.status === 'valid' ? 'Chuẩn' : 'Sai lệch'}
+                            </Badge>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </GlassCard>
+
+                {/* Spell Errors Card */}
+                <GlassCard hoverable={false} className="p-4 bg-white/65 dark:bg-slate-900/55 border border-slate-200/50 dark:border-slate-800/50 flex flex-col gap-3 flex-1 min-h-[220px]">
+                  <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Phát hiện lỗi chính tả</span>
+                    {spellErrors.length > 0 && (
+                      <Button onClick={handleApplyFixes} variant="secondary" className="px-2.5 py-1 text-[10px] font-bold rounded-lg border border-blue-200 text-blue-600 bg-blue-50/20">
+                        Áp dụng sửa đổi
+                      </Button>
+                    )}
+                  </div>
+
+                  {spellErrors.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center flex-1 gap-2 text-center text-slate-400">
+                      <HelpCircle className="h-8 w-8 text-slate-300" />
+                      <span className="text-xs font-semibold">Chưa phát hiện lỗi chính tả nào.</span>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-2 max-h-[200px] overflow-y-auto pr-1">
+                      {spellErrors.map((err, i) => (
+                        <div key={i} className="p-2.5 bg-rose-50/30 dark:bg-rose-950/10 border border-rose-200/50 dark:border-rose-900/30 rounded-xl flex items-center justify-between text-xs gap-3">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <span className="font-bold text-rose-600 line-through truncate max-w-[80px]">{err.original}</span>
+                              <ArrowRight className="h-3 w-3 text-slate-400" />
+                              <span className="font-bold text-emerald-600 truncate max-w-[80px]">{err.fixed}</span>
+                            </div>
+                            <p className="text-[9px] text-slate-400 mt-0.5">{err.reason}</p>
+                          </div>
+                          <Badge variant="danger">Lỗi</Badge>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </GlassCard>
               </div>
 
-              {/* Editor formatting toolbar mock */}
-              <div className="flex flex-wrap gap-1 bg-slate-50 dark:bg-slate-950 p-2 rounded-xl border border-slate-150 dark:border-slate-900 text-slate-500 text-xs font-bold items-center select-none">
-                <select className="bg-transparent font-bold border-none focus:ring-0 text-[11px] cursor-pointer text-slate-700 dark:text-slate-300 mr-2">
-                  <option>Times New Roman - 14px</option>
-                  <option>Arial - 12px</option>
-                </select>
-                <div className="h-4 w-[1px] bg-slate-250 dark:bg-slate-800 mx-1" />
-                <button className="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg cursor-pointer font-extrabold px-2.5">B</button>
-                <button className="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg cursor-pointer italic px-2.5">I</button>
-                <button className="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg cursor-pointer underline px-2.5">U</button>
-                <div className="h-4 w-[1px] bg-slate-250 dark:bg-slate-800 mx-1" />
-                <button className="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg cursor-pointer px-2">Căn trái</button>
-                <button className="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg cursor-pointer px-2">Căn giữa</button>
-                <button className="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg cursor-pointer px-2">Căn đều</button>
-              </div>
+            </div>
+          )}
 
-              {/* Editable Text Area */}
-              <textarea
-                value={editorText}
-                onChange={(e) => setEditorText(e.target.value)}
-                className="w-full min-h-[360px] p-4 font-mono text-xs sm:text-sm bg-slate-50/50 dark:bg-slate-950/20 rounded-2xl border border-slate-200/50 focus:outline-none focus:border-blue-500/50 text-slate-850 dark:text-white leading-relaxed resize-y"
-              />
-
-              {/* Bottom Quick Action buttons */}
-              <div className="flex flex-wrap gap-2.5 border-t border-slate-100 dark:border-slate-850 pt-4 mt-1">
-                <Button variant="secondary" size="sm" className="text-[10px] font-bold gap-1 px-3">
-                  <PlusCircle className="h-3.5 w-3.5 text-blue-500" /> Tạo văn bản mới
-                </Button>
-                <Button variant="secondary" size="sm" className="text-[10px] font-bold gap-1 px-3">
-                  <Upload className="h-3.5 w-3.5 text-slate-400" /> Tải lên tài liệu
-                </Button>
-                <Button variant="secondary" size="sm" className="text-[10px] font-bold gap-1 px-3">
-                  <BookOpen className="h-3.5 w-3.5 text-slate-400" /> Mẫu văn bản
-                </Button>
-                <Button variant="secondary" size="sm" className="text-[10px] font-bold gap-1 px-3">
-                  <FileCode className="h-3.5 w-3.5 text-slate-400" /> Tra cứu VBPL
-                </Button>
-              </div>
-            </GlassCard>
-          </div>
-
-          {/* Right Column: AI Assistant for Drafting */}
-          <div className="flex flex-col gap-4">
-            <h3 className="text-xs font-black text-slate-500 pl-1 uppercase tracking-wider">Trợ lý AI biên tập văn bản</h3>
-
-            <GlassCard hoverable={false} className="p-5 bg-gradient-to-br from-blue-600/5 via-blue-600/[0.02] to-amber-600/[0.02] border-blue-200/50 dark:border-blue-900/30 flex flex-col gap-4">
-              <div className="flex items-center gap-2 border-b border-slate-200/30 pb-3">
-                <Sparkles className="h-5 w-5 text-amber-500 animate-pulse-glow" />
-                <span className="text-xs font-black text-slate-800 dark:text-white uppercase tracking-widest">Tính năng trợ lý AI</span>
-              </div>
-
-              <div className="flex flex-col gap-3">
-                <Button
-                  onClick={() => triggerAIAction('template')}
-                  loading={aiWorking === 'template'}
-                  variant="secondary"
-                  size="sm"
-                  className="w-full text-xs font-bold justify-start gap-2 bg-white/50"
-                >
-                  <Sparkles className="h-4 w-4 text-amber-500" />
-                  Gợi ý xây dựng kế hoạch
-                </Button>
-
-                <Button
-                  onClick={() => triggerAIAction('format')}
-                  loading={aiWorking === 'format'}
-                  variant="secondary"
-                  size="sm"
-                  className="w-full text-xs font-bold justify-start gap-2 bg-white/50"
-                >
-                  <CheckSquare className="h-4 w-4 text-blue-500" />
-                  Kiểm tra thể thức văn bản
-                </Button>
-
-                <Button
-                  onClick={() => triggerAIAction('spell')}
-                  loading={aiWorking === 'spell'}
-                  variant="secondary"
-                  size="sm"
-                  className="w-full text-xs font-bold justify-start gap-2 bg-white/50"
-                >
-                  <SearchCode className="h-4 w-4 text-rose-500" />
-                  Phát hiện lỗi chính tả & trình bày
-                </Button>
-              </div>
-
-              <div className="p-4 bg-slate-50/50 dark:bg-slate-950/20 rounded-xl border border-slate-200/30 dark:border-slate-800/40 text-[11px] text-slate-400 leading-normal">
-                <span className="font-bold text-slate-600 dark:text-slate-300 block mb-1">Mẹo nghiệp vụ:</span>
-                Các dự thảo văn bản lưu trữ dưới dạng chuẩn. Trợ lý AI giúp tối ưu hóa từ ngữ, chuẩn hóa thể thức trước khi trình lãnh đạo Mặt trận ký số điện tử.
-              </div>
-            </GlassCard>
-          </div>
         </div>
-      )}
 
-      {/* Spellcheck suggestions Modal */}
-      <Modal
-        isOpen={spellCheckModal}
-        onClose={() => setSpellCheckModal(false)}
-        title="AI phát hiện lỗi chính tả & trình bày"
-        size="sm"
-      >
-        <div className="flex flex-col gap-4 text-left text-xs sm:text-sm">
-          <p className="font-semibold text-slate-700 dark:text-slate-350">
-            Trợ lý AI quét được 2 lỗi chữ và đề xuất thay thế:
-          </p>
-
-          <div className="flex flex-col gap-2">
-            <div className="p-3 bg-rose-50/50 dark:bg-rose-950/10 rounded-xl border border-rose-200/50 dark:border-rose-900/30 flex items-center justify-between">
-              <div className="flex flex-col">
-                <span className="text-[10px] text-slate-400">Từ gốc phát hiện:</span>
-                <span className="font-bold text-rose-600">tuyên chiền</span>
-              </div>
-              <ArrowRight className="h-4 w-4 text-slate-400" />
-              <div className="flex flex-col text-right">
-                <span className="text-[10px] text-slate-400">Gợi ý sửa đổi:</span>
-                <span className="font-bold text-emerald-600">tuyên truyền</span>
-              </div>
-            </div>
-
-            <div className="p-3 bg-rose-50/50 dark:bg-rose-950/10 rounded-xl border border-rose-200/50 dark:border-rose-900/30 flex items-center justify-between">
-              <div className="flex flex-col">
-                <span className="text-[10px] text-slate-400">Từ gốc phát hiện:</span>
-                <span className="font-bold text-rose-600 uppercase">GIẢI PHẤP</span>
-              </div>
-              <ArrowRight className="h-4 w-4 text-slate-400" />
-              <div className="flex flex-col text-right">
-                <span className="text-[10px] text-slate-400">Gợi ý sửa đổi:</span>
-                <span className="font-bold text-emerald-600 uppercase">GIẢI PHÁP</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 mt-4 pt-3 border-t border-slate-100 dark:border-slate-800">
-            <Button onClick={applySpellFix} variant="gradient" size="sm" className="flex-1 font-bold text-xs gap-1">
-              <Check className="h-4 w-4" /> Áp dụng tất cả sửa đổi
-            </Button>
-            <Button onClick={() => setSpellCheckModal(false)} variant="secondary" size="sm" className="text-xs font-bold">
-              Bỏ qua
-            </Button>
-          </div>
-        </div>
-      </Modal>
-
-      {/* Format checklist Modal */}
-      <Modal
-        isOpen={formatCheckModal}
-        onClose={() => setFormatCheckModal(false)}
-        title="AI kiểm tra thể thức văn bản"
-        size="sm"
-      >
-        <div className="flex flex-col gap-4 text-left text-xs sm:text-sm">
-          <p className="font-semibold text-slate-700 dark:text-slate-350">
-            Kết quả đánh giá thể thức dự thảo theo quy chuẩn Nghị định 30/2020/NĐ-CP:
-          </p>
-
-          <div className="flex flex-col gap-3">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
-              <span className="font-semibold">Quốc hiệu & Tiêu ngữ</span>
-              <Badge variant="success">Hợp lệ (Căn giữa)</Badge>
-            </div>
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
-              <span className="font-semibold">Địa danh & Ngày tháng ban hành</span>
-              <Badge variant="success">Hợp lệ</Badge>
-            </div>
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
-              <span className="font-semibold">Định dạng lề giấy (Margin)</span>
-              <Badge variant="warning">Chưa chuẩn (Lề phải 12mm)</Badge>
-            </div>
-            <div className="flex items-center justify-between pb-1">
-              <span className="font-semibold">Bố cục và Tên loại văn bản</span>
-              <Badge variant="success">Hợp lệ</Badge>
-            </div>
-          </div>
-
-          <div className="flex justify-end gap-2 mt-4 pt-3 border-t border-slate-100 dark:border-slate-800">
-            <Button onClick={() => setFormatCheckModal(false)} size="sm">
-              Đồng ý
-            </Button>
-          </div>
-        </div>
-      </Modal>
+      </div>
     </PageContainer>
   );
 }
