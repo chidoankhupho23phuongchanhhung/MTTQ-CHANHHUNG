@@ -5,13 +5,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '@/store/useAppStore';
 import PageContainer from '../layout/PageContainer';
 import FacebookFeed from '../ui/FacebookFeed';
-import FanpageSection from '../ui/FanpageSection';
 import { cn } from '@/lib/utils';
 import {
   MessageSquare, Bot, PhoneCall, Compass, BookOpen,
   Shield, Flower2, ChevronRight, FileText, ExternalLink,
   PenLine, SpellCheck, ChevronDown, ChevronUp, Users, ArrowRight,
-  LayoutDashboard, Globe, Building2
+  LayoutDashboard, Globe, Building2, Briefcase, Sparkles
 } from 'lucide-react';
 
 /* ─── per-index fade-up ─── */
@@ -46,6 +45,13 @@ export default function HomePage() {
   };
 
   const handleExternal = (url: string) => window.open(url, '_blank', 'noopener,noreferrer');
+
+  const getFanpageUrl = (id: string, defaultUrl: string) => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem(`fanpage_url_${id}`) || defaultUrl;
+    }
+    return defaultUrl;
+  };
 
   /* ─── Phong trào sub-items ─── */
   const phongTraoItems = [
@@ -373,8 +379,71 @@ export default function HomePage() {
 
         </div>
 
-        {/* ─── Hệ thống 4 Fanpage Đoàn thể Phường Chánh Hưng ─── */}
-        <FanpageSection className="mb-8" />
+        {/* ═══════════════════════════════════════════
+            ROW 3 — 4 Thẻ Truy Cập Nhanh Fanpage Đoàn Thể
+            MTTQ | Công Đoàn | Đoàn Thanh Niên | Hội Phụ Nữ
+        ═══════════════════════════════════════════ */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-5 mb-8">
+
+          {/* Card 9: Fanpage MTTQ Phường Chánh Hưng */}
+          <FeatureCard
+            index={8}
+            onClick={() => handleExternal(getFanpageUrl('mttq', 'https://www.facebook.com/profile.php?id=61580661372890'))}
+            iconBg="bg-red-500/10 dark:bg-red-500/20 border-red-100/50 dark:border-red-900/25"
+            iconColor="text-red-600"
+            hoverShadow="hover:shadow-lg hover:shadow-red-500/5"
+            title={<>Fanpage MTTQ<br />P. Chánh Hưng</>}
+            buttonLabel="Vào Fanpage"
+            buttonHoverColor="group-hover:border-red-500/20 group-hover:text-red-600 dark:group-hover:text-red-400"
+            customIcon={
+              <img
+                src="/mttq-logo.png"
+                alt="Logo MTTQ"
+                className="h-8 w-8 sm:h-9 sm:w-9 object-contain"
+              />
+            }
+          />
+
+          {/* Card 10: Fanpage Công Đoàn Phường Chánh Hưng */}
+          <FeatureCard
+            index={9}
+            onClick={() => handleExternal(getFanpageUrl('congdoan', 'https://www.facebook.com/search/top?q=C%C3%B4ng%20%C4%90o%C3%A0n%20Ph%C6%B0%E1%BB%9Dng%20Ch%C3%A1nh%20H%C6%B0ng'))}
+            icon={Briefcase}
+            iconBg="bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400 border-blue-100/50 dark:border-blue-900/25"
+            iconColor="text-blue-600"
+            hoverShadow="hover:shadow-lg hover:shadow-blue-500/5"
+            title={<>Fanpage Công Đoàn<br />P. Chánh Hưng</>}
+            buttonLabel="Vào Fanpage"
+            buttonHoverColor="group-hover:border-blue-500/20 group-hover:text-blue-600 dark:group-hover:text-blue-400"
+          />
+
+          {/* Card 11: Fanpage Đoàn Thanh Niên TNCS Hồ Chí Minh */}
+          <FeatureCard
+            index={10}
+            onClick={() => handleExternal(getFanpageUrl('doanthanhnien', 'https://www.facebook.com/search/top?q=%C4%90o%C3%A0n%20Thanh%20Ni%C3%AAn%20Ph%C6%B0%E1%BB%9Dng%20Ch%C3%A1nh%20H%C6%B0ng'))}
+            icon={Sparkles}
+            iconBg="bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 border-emerald-100/50 dark:border-emerald-900/25"
+            iconColor="text-emerald-600"
+            hoverShadow="hover:shadow-lg hover:shadow-emerald-500/5"
+            title={<>Đoàn Thanh Niên<br />P. Chánh Hưng</>}
+            buttonLabel="Vào Fanpage"
+            buttonHoverColor="group-hover:border-emerald-500/20 group-hover:text-emerald-600 dark:group-hover:text-emerald-400"
+          />
+
+          {/* Card 12: Fanpage Hội Liên Hiệp Phụ Nữ */}
+          <FeatureCard
+            index={11}
+            onClick={() => handleExternal(getFanpageUrl('phunu', 'https://www.facebook.com/search/top?q=H%E1%BB%99i%20Li%C3%AAn%20hi%E1%BB%87p%20Ph%E1%BB%A5%20n%E1%BB%AF%20Ph%C6%B0%E1%BB%9Dng%20Ch%C3%A1nh%20H%C6%B0ng'))}
+            icon={Flower2}
+            iconBg="bg-pink-500/10 text-pink-600 dark:bg-pink-500/20 dark:text-pink-400 border-pink-100/50 dark:border-pink-900/25"
+            iconColor="text-pink-600"
+            hoverShadow="hover:shadow-lg hover:shadow-pink-500/5"
+            title={<>Hội Phụ Nữ<br />P. Chánh Hưng</>}
+            buttonLabel="Vào Fanpage"
+            buttonHoverColor="group-hover:border-pink-500/20 group-hover:text-pink-600 dark:group-hover:text-pink-400"
+          />
+
+        </div>
 
         {/* ─── Facebook Live Feed ─── */}
         <div className="mb-8">
