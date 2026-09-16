@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '@/store/useAppStore';
 import PageContainer from '../layout/PageContainer';
@@ -10,6 +10,11 @@ import {
   Shield, Flower2, FileText,
   Users, ArrowRight, Globe
 } from 'lucide-react';
+import {
+  DEFAULT_PHONG_TRAO,
+  getPhongTraoIcon,
+  getPhongTraoBg
+} from '@/lib/phongTrao';
 
 /* ─── per-index fade-up (Fast & snappy animation) ─── */
 const fadeUpProps = (i = 0) => ({
@@ -124,30 +129,26 @@ export default function HomePage() {
     return defaultBg;
   };
 
-  /* ─── Phong trào sub-items ─── */
-  const phongTraoItems = [
-    {
-      label: 'Toàn dân Bảo vệ ANTQ',
-      icon: Shield,
-      accent: 'from-slate-600/90 to-slate-800/95',
-      bg: 'https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?w=400&auto=format&fit=crop&q=60',
-      route: '/hoat-dong-mttq'
-    },
-    {
-      label: 'Thành phố Muôn Sắc Hoa',
-      icon: Flower2,
-      accent: 'from-pink-600/90 to-rose-800/95',
-      bg: 'https://images.unsplash.com/photo-1490750967868-88df5691cc52?w=400&auto=format&fit=crop&q=60',
-      route: '/hoat-dong-mttq'
-    },
-    {
-      label: 'Cảm hóa – Giáo dục người lầm lỗi',
-      icon: FileText,
-      accent: 'from-violet-600/90 to-purple-800/95',
-      bg: 'https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=400&auto=format&fit=crop&q=60',
-      route: '/an-sinh-xa-hoi'
-    }
-  ];
+  /* ─── Phong trào real-time backgrounds ─── */
+  const [phongTraoBgs, setPhongTraoBgs] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    const updateBgs = () => {
+      const bgs: Record<string, string> = {};
+      DEFAULT_PHONG_TRAO.forEach(p => {
+        bgs[p.id] = getPhongTraoBg(p.id, p.defaultBg);
+      });
+      setPhongTraoBgs(bgs);
+    };
+
+    updateBgs();
+    window.addEventListener('phongtrao-bg-updated', updateBgs);
+    window.addEventListener('storage', updateBgs);
+    return () => {
+      window.removeEventListener('phongtrao-bg-updated', updateBgs);
+      window.removeEventListener('storage', updateBgs);
+    };
+  }, []);
 
   /* ─── Reusable Card Component with strict height uniformity ─── */
   const FeatureCard = ({
@@ -396,34 +397,46 @@ export default function HomePage() {
                 initial={{ opacity: 0, height: 0, marginTop: 0 }}
                 animate={{ opacity: 1, height: "auto", marginTop: 10 }}
                 exit={{ opacity: 0, height: 0, marginTop: 0 }}
-                transition={{ duration: 0.35, ease: "easeOut" }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
                 className="overflow-hidden"
               >
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  {phongTraoItems.map((item, i) => {
-                    const Icon = item.icon;
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-stretch">
+                  {DEFAULT_PHONG_TRAO.map((item, i) => {
+                    const Icon = getPhongTraoIcon(item.iconName);
+                    const bg = phongTraoBgs[item.id] || item.defaultBg;
                     return (
                       <motion.button
-                        key={item.label}
+                        key={item.id}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: i * 0.05, duration: 0.3 }}
-                        whileHover={{ scale: 1.03, y: -2 }}
-                        whileTap={{ scale: 0.96 }}
+                        transition={{ delay: i * 0.03, duration: 0.2 }}
+                        whileHover={{ scale: 1.02, y: -2 }}
+                        whileTap={{ scale: 0.98 }}
                         onClick={() => handleNav(item.route)}
-                        className="relative overflow-hidden rounded-2xl h-28 flex flex-col items-start justify-end p-4 shadow-md cursor-pointer group border border-white/10 text-left"
+                        className="relative overflow-hidden rounded-2xl min-h-[118px] sm:min-h-[128px] md:min-h-[135px] flex flex-col justify-between p-4 shadow-md cursor-pointer group border border-white/10 text-left transition-all"
                       >
                         <img
-                          src={item.bg} alt={item.label}
-                          className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                          style={{ filter: "brightness(0.38)" }}
+                          src={bg} alt={item.label}
+                          className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                          style={{ filter: "brightness(0.35)" }}
                         />
-                        <div className={cn("absolute inset-0 bg-gradient-to-t", item.accent)} />
-                        <div className="relative z-10 flex flex-col gap-1">
-                          <div className="p-1.5 bg-white/20 backdrop-blur-sm rounded-lg w-fit">
+                        <div className={cn("absolute inset-0 bg-gradient-to-t pointer-events-none", item.accent)} />
+                        
+                        {/* Top: Icon + Badge tag */}
+                        <div className="relative z-10 flex items-center justify-between w-full">
+                          <div className="p-1.5 bg-white/20 backdrop-blur-sm rounded-lg w-fit shadow-xs">
                             <Icon className="h-4 w-4 text-white" />
                           </div>
-                          <span className="text-xs sm:text-sm font-black text-white drop-shadow leading-tight">{item.label}</span>
+                          <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-white/15 backdrop-blur-sm text-white/90 border border-white/20">
+                            {item.tag}
+                          </span>
+                        </div>
+
+                        {/* Bottom: Official full title */}
+                        <div className="relative z-10 mt-3">
+                          <span className="text-xs sm:text-[13px] font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] leading-snug line-clamp-3">
+                            {item.label}
+                          </span>
                         </div>
                       </motion.button>
                     );

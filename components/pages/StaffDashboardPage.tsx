@@ -26,6 +26,7 @@ import {
 import { formatDate, cn } from '@/lib/utils';
 import { StaffWorkItem, FeedbackItem } from '@/lib/types';
 import FanpageSection from '../ui/FanpageSection';
+import PhongTraoSection from '../ui/PhongTraoSection';
 
 /* ── Tab-section sub-page renderers ── */
 function TabQuanLySo() {
@@ -40,6 +41,9 @@ function TabQuanLySo() {
 
       {/* Hệ thống 4 Fanpage Đoàn thể */}
       <FanpageSection className="mb-6" />
+
+      {/* Quản lý Ảnh nền Phong trào thi đua */}
+      <PhongTraoSection className="mb-6" />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <GlassCard className="p-5 flex flex-col gap-4">
           <h3 className="text-xs font-black text-slate-700 dark:text-white uppercase tracking-wider">Kết nối Fanpage Facebook</h3>
