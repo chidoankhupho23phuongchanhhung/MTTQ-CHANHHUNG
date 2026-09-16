@@ -11,11 +11,11 @@ import {
   Users, ArrowRight, Globe
 } from 'lucide-react';
 
-/* ─── per-index fade-up ─── */
+/* ─── per-index fade-up (Fast & snappy animation) ─── */
 const fadeUpProps = (i = 0) => ({
-  initial: { opacity: 0, y: 24 },
+  initial: { opacity: 0, y: 12 },
   animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.45, delay: i * 0.06, ease: 'easeOut' as const }
+  transition: { duration: 0.2, delay: i * 0.02, ease: 'easeOut' as const }
 });
 
 /* ─── External Links ─── */
@@ -40,8 +40,8 @@ interface FanpageConfig {
 const FANPAGES: FanpageConfig[] = [
   {
     id: 'mttq',
-    name: 'Mặt trận Tổ quốc',
-    shortName: 'MTTQ',
+    name: 'Mặt trận Tổ Quốc Việt Nam Phường Chánh Hưng',
+    shortName: 'MTTQ Chánh Hưng',
     logo: '/mttq-logo.png',
     defaultBg: 'https://images.unsplash.com/photo-1541872703-74c5e44368f9?w=800&auto=format&fit=crop&q=80',
     defaultUrl: 'https://www.facebook.com/profile.php?id=61580661372890',
@@ -51,8 +51,8 @@ const FANPAGES: FanpageConfig[] = [
   },
   {
     id: 'congdoan',
-    name: 'Công đoàn',
-    shortName: 'Công đoàn',
+    name: 'Công Đoàn Phường Chánh Hưng',
+    shortName: 'Công Đoàn Chánh Hưng',
     logo: '/congdoan-logo.svg',
     defaultBg: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&auto=format&fit=crop&q=80',
     defaultUrl: 'https://www.facebook.com/search/top?q=C%C3%B4ng%20%C4%90o%C3%A0n%20Ph%C6%B0%E1%BB%9Dng%20Ch%C3%A1nh%20H%C6%B0ng',
@@ -62,8 +62,8 @@ const FANPAGES: FanpageConfig[] = [
   },
   {
     id: 'doanthanhnien',
-    name: 'Đoàn Thanh niên',
-    shortName: 'Đoàn TN',
+    name: 'Đoàn TNCS Hồ Chí Minh Phường Chánh Hưng',
+    shortName: 'Đoàn TNCS Chánh Hưng',
     logo: '/doan-logo.png',
     defaultBg: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&auto=format&fit=crop&q=80',
     defaultUrl: 'https://www.facebook.com/search/top?q=%C4%90o%C3%A0n%20Thanh%20Ni%C3%AAn%20Ph%C6%B0%E1%BB%9Dng%20Ch%C3%A1nh%20H%C6%B0ng',
@@ -73,8 +73,8 @@ const FANPAGES: FanpageConfig[] = [
   },
   {
     id: 'phunu',
-    name: 'Hội Phụ nữ',
-    shortName: 'Hội PN',
+    name: 'Hội Liên Hiệp Phụ Nữ Phường Chánh Hưng',
+    shortName: 'Hội LHPN Chánh Hưng',
     logo: '/phunu-logo.png',
     defaultBg: 'https://images.unsplash.com/photo-1509099836639-18ba1795216d?w=800&auto=format&fit=crop&q=80',
     defaultUrl: 'https://www.facebook.com/search/top?q=H%E1%BB%99i%20Li%C3%AAn%20hi%E1%BB%87p%20Ph%E1%BB%A5%20n%E1%BB%AF%20Ph%C6%B0%E1%BB%9Dng%20Ch%C3%A1nh%20H%C6%B0ng',
@@ -163,28 +163,29 @@ export default function HomePage() {
   }) => (
     <motion.button
       {...fadeUpProps(index)}
-      whileHover={{ scale: 1.02, y: -4 }}
-      whileTap={{ scale: 0.97 }}
+      whileHover={{ scale: 1.02, y: -2 }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ duration: 0.15 }}
       onClick={onClick}
       className={cn(
         "flex flex-col items-center justify-between p-4 sm:p-5 md:p-6 rounded-3xl",
         "border border-slate-200/60 dark:border-slate-800/60",
         "bg-white/70 dark:bg-slate-900/50 backdrop-blur-md",
-        "cursor-pointer transition-all duration-300",
+        "cursor-pointer transition-all duration-150",
         hoverShadow,
         "h-full min-h-[210px] sm:min-h-[235px] text-center w-full group select-none"
       )}
     >
       {/* Icon Container */}
       <div className={cn(
-        "p-3.5 sm:p-4 rounded-2xl group-hover:scale-110 transition-transform duration-300 shadow-sm border flex-shrink-0 flex items-center justify-center",
+        "p-3 sm:p-3.5 rounded-2xl group-hover:scale-105 transition-transform duration-150 shadow-sm border flex-shrink-0 flex items-center justify-center",
         iconBg
       )}>
-        {customIcon ? customIcon : Icon && <Icon className="h-7 w-7 sm:h-8 sm:w-8" />}
+        {customIcon ? customIcon : Icon && <Icon className="h-6 w-6 sm:h-7 sm:w-7" />}
       </div>
 
       {/* Title - Fixed height so 1, 2, or 3 lines of text never cause vertical jumping */}
-      <div className="flex-1 flex items-center justify-center my-2 sm:my-3 min-h-[50px] sm:min-h-[58px] px-1 w-full text-center">
+      <div className="flex-1 flex items-center justify-center my-2 sm:my-2.5 min-h-[50px] sm:min-h-[58px] px-1 w-full text-center">
         <div className="text-xs sm:text-sm md:text-base font-black text-slate-800 dark:text-white uppercase leading-snug tracking-tight">
           {title}
         </div>
@@ -207,7 +208,7 @@ export default function HomePage() {
     </motion.button>
   );
 
-  /* ─── Vibrant Colored Tab Fanpage Card (Chỉ Logo + Tên, người dân chỉ click truy cập) ─── */
+  /* ─── Vibrant Colored Tab Fanpage Card (Chỉ Logo + Tên đầy đủ, nhanh và mượt) ─── */
   const ColorTabCard = ({
     index,
     item,
@@ -221,30 +222,31 @@ export default function HomePage() {
     return (
       <motion.button
         {...fadeUpProps(index)}
-        whileHover={{ scale: 1.03, y: -4 }}
-        whileTap={{ scale: 0.97 }}
+        whileHover={{ scale: 1.02, y: -3 }}
+        whileTap={{ scale: 0.98 }}
+        transition={{ duration: 0.15 }}
         onClick={() => handleExternal(url)}
         className={cn(
-          "relative flex flex-col items-center justify-center p-4 sm:p-5 rounded-3xl",
-          "border overflow-hidden cursor-pointer transition-all duration-300 text-center w-full select-none group",
-          "h-full min-h-[175px] sm:min-h-[195px] md:min-h-[210px] shadow-lg",
+          "relative flex flex-col items-center justify-between p-3.5 sm:p-4 md:p-5 rounded-3xl",
+          "border overflow-hidden cursor-pointer transition-all duration-150 text-center w-full select-none group",
+          "h-full min-h-[185px] sm:min-h-[205px] md:min-h-[220px] shadow-lg",
           item.borderColor,
           item.shadowColor
         )}
       >
-        {/* Background image with gentle zoom on hover */}
+        {/* Background image with quick zoom on hover */}
         <img
           src={bg}
           alt={item.name}
-          className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+          className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 ease-out"
         />
 
         {/* Tint gradient overlay matching organization identity */}
         <div className={cn("absolute inset-0 bg-gradient-to-t pointer-events-none", item.gradient)} />
-        <div className="absolute inset-0 bg-black/20 pointer-events-none group-hover:bg-black/10 transition-colors duration-300" />
+        <div className="absolute inset-0 bg-black/20 pointer-events-none group-hover:bg-black/10 transition-colors duration-150" />
 
         {/* Official Emblem / Logo Badge */}
-        <div className="relative z-10 w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 rounded-2xl bg-white/95 dark:bg-white/90 p-2 sm:p-2.5 shadow-xl group-hover:scale-110 transition-transform duration-300 flex items-center justify-center border border-white/40 mb-2 sm:mb-2.5 flex-shrink-0">
+        <div className="relative z-10 w-13 h-13 sm:w-15 sm:h-15 md:w-16 md:h-16 rounded-2xl bg-white/95 dark:bg-white/90 p-2 sm:p-2.5 shadow-xl group-hover:scale-105 transition-transform duration-150 flex items-center justify-center border border-white/40 mb-1.5 flex-shrink-0 my-auto">
           <img
             src={item.logo}
             alt={item.name}
@@ -252,9 +254,9 @@ export default function HomePage() {
           />
         </div>
 
-        {/* Name: Only Logo + Name as requested */}
-        <div className="relative z-10 h-[44px] flex items-center justify-center px-1">
-          <span className="text-xs sm:text-sm md:text-[15px] font-black text-white uppercase leading-snug tracking-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] text-center select-none line-clamp-2">
+        {/* Name: Full official name written clearly */}
+        <div className="relative z-10 min-h-[50px] sm:min-h-[58px] flex items-center justify-center px-1 w-full mt-auto">
+          <span className="text-[11px] sm:text-xs md:text-[13px] font-black text-white uppercase leading-snug tracking-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.95)] text-center select-none line-clamp-3">
             {item.name}
           </span>
         </div>

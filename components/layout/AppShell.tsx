@@ -14,17 +14,17 @@ import { cn } from '@/lib/utils';
 
 interface AppShellProps { children: React.ReactNode; }
 
-/* Portal switch transition variants */
+/* Portal switch transition variants (Fast & snappy) */
 const portalTransition = {
   citizen: {
-    initial: { opacity: 0, scale: 1.03, filter: 'blur(8px)' },
-    animate: { opacity: 1, scale: 1, filter: 'blur(0px)', transition: { duration: 0.55, ease: 'easeOut' as const } },
-    exit:    { opacity: 0, scale: 0.97, filter: 'blur(6px)', transition: { duration: 0.35, ease: 'easeIn' as const } }
+    initial: { opacity: 0, scale: 1.01 },
+    animate: { opacity: 1, scale: 1, transition: { duration: 0.2, ease: 'easeOut' as const } },
+    exit:    { opacity: 0, scale: 0.99, transition: { duration: 0.15, ease: 'easeIn' as const } }
   },
   staff: {
-    initial: { opacity: 0, x: 40, filter: 'blur(8px)' },
-    animate: { opacity: 1, x: 0, filter: 'blur(0px)', transition: { duration: 0.55, ease: 'easeOut' as const } },
-    exit:    { opacity: 0, x: -40, filter: 'blur(6px)', transition: { duration: 0.35, ease: 'easeIn' as const } }
+    initial: { opacity: 0, x: 20 },
+    animate: { opacity: 1, x: 0, transition: { duration: 0.2, ease: 'easeOut' as const } },
+    exit:    { opacity: 0, x: -20, transition: { duration: 0.15, ease: 'easeIn' as const } }
   }
 };
 

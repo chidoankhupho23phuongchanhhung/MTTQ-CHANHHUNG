@@ -37,8 +37,8 @@ interface FanpageItem {
 const DEFAULT_FANPAGES: FanpageItem[] = [
   {
     id: 'mttq',
-    name: 'Mặt trận Tổ Quốc Phường Chánh Hưng',
-    shortName: 'Mặt trận Tổ quốc',
+    name: 'Mặt trận Tổ Quốc Việt Nam Phường Chánh Hưng',
+    shortName: 'Mặt trận Tổ Quốc Việt Nam Phường Chánh Hưng',
     tag: 'Cổng Mặt Trận',
     desc: 'Đại đoàn kết toàn dân tộc - Lắng nghe ý kiến và tâm tư nguyện vọng của nhân dân',
     defaultUrl: 'https://www.facebook.com/profile.php?id=61580661372890',
@@ -63,7 +63,7 @@ const DEFAULT_FANPAGES: FanpageItem[] = [
   {
     id: 'congdoan',
     name: 'Công Đoàn Phường Chánh Hưng',
-    shortName: 'Công đoàn',
+    shortName: 'Công Đoàn Phường Chánh Hưng',
     tag: 'Công đoàn VN',
     desc: 'Chăm lo, đại diện, bảo vệ quyền và lợi ích hợp pháp, chính đáng của người lao động',
     defaultUrl: 'https://www.facebook.com/search/top?q=C%C3%B4ng%20%C4%90o%C3%A0n%20Ph%C6%B0%E1%BB%9Dng%20Ch%C3%A1nh%20H%C6%B0ng',
@@ -87,8 +87,8 @@ const DEFAULT_FANPAGES: FanpageItem[] = [
   },
   {
     id: 'doanthanhnien',
-    name: 'Đoàn Thanh Niên TNCS Hồ Chí Minh Phường Chánh Hưng',
-    shortName: 'Đoàn Thanh niên',
+    name: 'Đoàn TNCS Hồ Chí Minh Phường Chánh Hưng',
+    shortName: 'Đoàn TNCS Hồ Chí Minh Phường Chánh Hưng',
     tag: 'Tuổi trẻ Chánh Hưng',
     desc: 'Khát vọng - Tiên phong - Bản lĩnh - Đoàn kết - Sáng tạo vì cộng đồng văn minh',
     defaultUrl: 'https://www.facebook.com/search/top?q=%C4%90o%C3%A0n%20Thanh%20Ni%C3%AAn%20Ph%C6%B0%E1%BB%9Dng%20Ch%C3%A1nh%20H%C6%B0ng',
@@ -107,13 +107,13 @@ const DEFAULT_FANPAGES: FanpageItem[] = [
       badge: 'bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800',
       badgeText: 'Đang liên kết',
       btnHover: 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/20',
-      iconBg: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-200/60 dark:border-emerald-800/40',
+      iconBg: 'bg-emerald-500/15 text-emerald-600 dark:text-blue-400 border-emerald-200/60 dark:border-emerald-800/40',
     }
   },
   {
     id: 'phunu',
     name: 'Hội Liên Hiệp Phụ Nữ Phường Chánh Hưng',
-    shortName: 'Hội Phụ nữ',
+    shortName: 'Hội Liên Hiệp Phụ Nữ Phường Chánh Hưng',
     tag: 'Phụ nữ VN',
     desc: 'Tự tin - Tự trọng - Trung hậu - Đảm đang, xây dựng gia đình hạnh phúc, bình đẳng',
     defaultUrl: 'https://www.facebook.com/search/top?q=H%E1%BB%99i%20Li%C3%AAn%20hi%E1%BB%87p%20Ph%E1%BB%A5%20n%E1%BB%AF%20Ph%C6%B0%E1%BB%9Dng%20Ch%C3%A1nh%20H%C6%B0ng',
@@ -342,9 +342,9 @@ export default function FanpageSection({ className }: { className?: string }) {
               key={item.id}
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.35, delay: index * 0.08 }}
+              transition={{ duration: 0.2, delay: index * 0.03 }}
               className={cn(
-                "relative rounded-3xl p-5 border flex flex-col justify-between transition-all duration-300",
+                "relative rounded-3xl p-5 border flex flex-col justify-between transition-all duration-150",
                 "bg-white/85 dark:bg-slate-900/85 backdrop-blur-md shadow-xs hover:shadow-lg group",
                 item.colorScheme.border
               )}
