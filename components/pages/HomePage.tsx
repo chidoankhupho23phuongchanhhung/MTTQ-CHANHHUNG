@@ -146,6 +146,85 @@ export default function HomePage() {
     </motion.button>
   );
 
+  /* ─── Vibrant Colored Tab Card Component ─── */
+  const ColorTabCard = ({
+    index,
+    onClick,
+    tag,
+    title,
+    subtitle,
+    gradient,
+    shadowColor,
+    borderColor,
+    icon: Icon,
+    customIcon,
+  }: {
+    index: number;
+    onClick: () => void;
+    tag: string;
+    title: string;
+    subtitle: string;
+    gradient: string;
+    shadowColor: string;
+    borderColor: string;
+    icon?: React.ComponentType<{ className?: string }>;
+    customIcon?: React.ReactNode;
+  }) => (
+    <motion.button
+      {...fadeUpProps(index)}
+      whileHover={{ scale: 1.03, y: -4 }}
+      whileTap={{ scale: 0.97 }}
+      onClick={onClick}
+      className={cn(
+        "relative flex flex-col items-center justify-between p-4 sm:p-5 lg:p-6 rounded-3xl",
+        "border overflow-hidden cursor-pointer transition-all duration-300 text-center w-full group",
+        "min-h-[210px] sm:min-h-[230px] lg:min-h-[250px] shadow-lg",
+        gradient,
+        borderColor,
+        shadowColor
+      )}
+    >
+      {/* Decorative background glow overlay */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-white/10 pointer-events-none" />
+
+      {/* Top Tag / Tab Pill */}
+      <div className="relative z-10 flex items-center justify-center mb-2">
+        <span className="inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white shadow-xs">
+          {tag}
+        </span>
+      </div>
+
+      {/* Icon Container */}
+      <div className="relative z-10 p-3 sm:p-3.5 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 text-white shadow-sm group-hover:scale-110 transition-transform duration-300 my-1">
+        {customIcon ? customIcon : Icon && <Icon className="h-6 w-6 sm:h-7 sm:w-7 text-white" />}
+      </div>
+
+      {/* Title & Subtitle */}
+      <div className="relative z-10 my-auto py-1 flex flex-col items-center justify-center">
+        <span className="text-xs sm:text-sm lg:text-base font-black text-white uppercase leading-snug tracking-tight drop-shadow-md">
+          {title}
+        </span>
+        <span className="text-[10px] sm:text-[11px] text-white/90 font-bold mt-0.5 drop-shadow-sm">
+          {subtitle}
+        </span>
+      </div>
+
+      {/* Action Button Box */}
+      <div className="relative z-10 w-full mt-3">
+        <div className={cn(
+          "flex items-center justify-center gap-1.5 w-full py-2 sm:py-2.5 px-3 sm:px-4 rounded-2xl",
+          "text-[11px] sm:text-xs font-black uppercase tracking-wider",
+          "bg-white/25 group-hover:bg-white text-white group-hover:text-slate-900",
+          "backdrop-blur-md border border-white/35 group-hover:border-white",
+          "transition-all duration-300 shadow-sm"
+        )}>
+          <span>Vào Fanpage</span>
+          <ArrowRight className="h-3 w-3 sm:h-3.5 sm:w-3.5 transition-transform group-hover:translate-x-1" />
+        </div>
+      </div>
+    </motion.button>
+  );
+
   return (
     <div className="flex flex-col gap-0">
 
@@ -380,69 +459,78 @@ export default function HomePage() {
         </div>
 
         {/* ═══════════════════════════════════════════
-            ROW 3 — 4 Thẻ Truy Cập Nhanh Fanpage Đoàn Thể
-            MTTQ | Công Đoàn | Đoàn Thanh Niên | Hội Phụ Nữ
+            ROW 3 — 4 Tab Màu Truy Cập Nhanh Fanpage Đoàn Thể (Responsive)
+            MTTQ (Đỏ) | Công Đoàn (Xanh) | Đoàn Thanh Niên (Lục) | Hội Phụ Nữ (Hồng)
         ═══════════════════════════════════════════ */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-5 mb-8">
+        <div className="mb-8 sm:mb-10">
+          <div className="flex items-center gap-2 mb-3.5 pl-1">
+            <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
+            <h3 className="text-xs sm:text-sm font-black text-slate-700 dark:text-slate-200 uppercase tracking-widest">
+              Cổng Fanpage Đoàn thể • Truy cập nhanh
+            </h3>
+          </div>
 
-          {/* Card 9: Fanpage MTTQ Phường Chánh Hưng */}
-          <FeatureCard
-            index={8}
-            onClick={() => handleExternal(getFanpageUrl('mttq', 'https://www.facebook.com/profile.php?id=61580661372890'))}
-            iconBg="bg-red-500/10 dark:bg-red-500/20 border-red-100/50 dark:border-red-900/25"
-            iconColor="text-red-600"
-            hoverShadow="hover:shadow-lg hover:shadow-red-500/5"
-            title={<>Fanpage MTTQ<br />P. Chánh Hưng</>}
-            buttonLabel="Vào Fanpage"
-            buttonHoverColor="group-hover:border-red-500/20 group-hover:text-red-600 dark:group-hover:text-red-400"
-            customIcon={
-              <img
-                src="/mttq-logo.png"
-                alt="Logo MTTQ"
-                className="h-8 w-8 sm:h-9 sm:w-9 object-contain"
-              />
-            }
-          />
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 lg:gap-5">
 
-          {/* Card 10: Fanpage Công Đoàn Phường Chánh Hưng */}
-          <FeatureCard
-            index={9}
-            onClick={() => handleExternal(getFanpageUrl('congdoan', 'https://www.facebook.com/search/top?q=C%C3%B4ng%20%C4%90o%C3%A0n%20Ph%C6%B0%E1%BB%9Dng%20Ch%C3%A1nh%20H%C6%B0ng'))}
-            icon={Briefcase}
-            iconBg="bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400 border-blue-100/50 dark:border-blue-900/25"
-            iconColor="text-blue-600"
-            hoverShadow="hover:shadow-lg hover:shadow-blue-500/5"
-            title={<>Fanpage Công Đoàn<br />P. Chánh Hưng</>}
-            buttonLabel="Vào Fanpage"
-            buttonHoverColor="group-hover:border-blue-500/20 group-hover:text-blue-600 dark:group-hover:text-blue-400"
-          />
+            {/* Tab 1 (Đỏ): Fanpage MTTQ Phường Chánh Hưng */}
+            <ColorTabCard
+              index={8}
+              onClick={() => handleExternal(getFanpageUrl('mttq', 'https://www.facebook.com/profile.php?id=61580661372890'))}
+              tag="🔴 MTTQ VIỆT NAM"
+              title="Mặt trận Tổ quốc"
+              subtitle="Phường Chánh Hưng"
+              gradient="bg-gradient-to-br from-red-600 via-red-700 to-amber-700"
+              borderColor="border-red-400/40"
+              shadowColor="shadow-red-900/30 hover:shadow-red-600/40"
+              customIcon={
+                <img
+                  src="/mttq-logo.png"
+                  alt="Logo MTTQ"
+                  className="h-7 w-7 sm:h-8 sm:w-8 object-contain filter drop-shadow-md"
+                />
+              }
+            />
 
-          {/* Card 11: Fanpage Đoàn Thanh Niên TNCS Hồ Chí Minh */}
-          <FeatureCard
-            index={10}
-            onClick={() => handleExternal(getFanpageUrl('doanthanhnien', 'https://www.facebook.com/search/top?q=%C4%90o%C3%A0n%20Thanh%20Ni%C3%AAn%20Ph%C6%B0%E1%BB%9Dng%20Ch%C3%A1nh%20H%C6%B0ng'))}
-            icon={Sparkles}
-            iconBg="bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 border-emerald-100/50 dark:border-emerald-900/25"
-            iconColor="text-emerald-600"
-            hoverShadow="hover:shadow-lg hover:shadow-emerald-500/5"
-            title={<>Đoàn Thanh Niên<br />P. Chánh Hưng</>}
-            buttonLabel="Vào Fanpage"
-            buttonHoverColor="group-hover:border-emerald-500/20 group-hover:text-emerald-600 dark:group-hover:text-emerald-400"
-          />
+            {/* Tab 2 (Xanh): Fanpage Công Đoàn Phường Chánh Hưng */}
+            <ColorTabCard
+              index={9}
+              onClick={() => handleExternal(getFanpageUrl('congdoan', 'https://www.facebook.com/search/top?q=C%C3%B4ng%20%C4%90o%C3%A0n%20Ph%C6%B0%E1%BB%9Dng%20Ch%C3%A1nh%20H%C6%B0ng'))}
+              tag="🔵 CÔNG ĐOÀN VN"
+              title="Công Đoàn"
+              subtitle="Phường Chánh Hưng"
+              gradient="bg-gradient-to-br from-blue-600 via-indigo-700 to-sky-800"
+              borderColor="border-blue-400/40"
+              shadowColor="shadow-blue-900/30 hover:shadow-blue-600/40"
+              icon={Briefcase}
+            />
 
-          {/* Card 12: Fanpage Hội Liên Hiệp Phụ Nữ */}
-          <FeatureCard
-            index={11}
-            onClick={() => handleExternal(getFanpageUrl('phunu', 'https://www.facebook.com/search/top?q=H%E1%BB%99i%20Li%C3%AAn%20hi%E1%BB%87p%20Ph%E1%BB%A5%20n%E1%BB%AF%20Ph%C6%B0%E1%BB%9Dng%20Ch%C3%A1nh%20H%C6%B0ng'))}
-            icon={Flower2}
-            iconBg="bg-pink-500/10 text-pink-600 dark:bg-pink-500/20 dark:text-pink-400 border-pink-100/50 dark:border-pink-900/25"
-            iconColor="text-pink-600"
-            hoverShadow="hover:shadow-lg hover:shadow-pink-500/5"
-            title={<>Hội Phụ Nữ<br />P. Chánh Hưng</>}
-            buttonLabel="Vào Fanpage"
-            buttonHoverColor="group-hover:border-pink-500/20 group-hover:text-pink-600 dark:group-hover:text-pink-400"
-          />
+            {/* Tab 3 (Lục): Fanpage Đoàn Thanh Niên TNCS Hồ Chí Minh */}
+            <ColorTabCard
+              index={10}
+              onClick={() => handleExternal(getFanpageUrl('doanthanhnien', 'https://www.facebook.com/search/top?q=%C4%90o%C3%A0n%20Thanh%20Ni%C3%AAn%20Ph%C6%B0%E1%BB%9Dng%20Ch%C3%A1nh%20H%C6%B0ng'))}
+              tag="🟢 TUỔI TRẺ CHÁNH HƯNG"
+              title="Đoàn Thanh Niên"
+              subtitle="TNCS Hồ Chí Minh"
+              gradient="bg-gradient-to-br from-emerald-600 via-teal-700 to-green-800"
+              borderColor="border-emerald-400/40"
+              shadowColor="shadow-emerald-900/30 hover:shadow-emerald-600/40"
+              icon={Sparkles}
+            />
 
+            {/* Tab 4 (Hồng): Fanpage Hội Liên Hiệp Phụ Nữ */}
+            <ColorTabCard
+              index={11}
+              onClick={() => handleExternal(getFanpageUrl('phunu', 'https://www.facebook.com/search/top?q=H%E1%BB%99i%20Li%C3%AAn%20hi%E1%BB%87p%20Ph%E1%BB%A5%20n%E1%BB%AF%20Ph%C6%B0%E1%BB%9Dng%20Ch%C3%A1nh%20H%C6%B0ng'))}
+              tag="🌸 PHỤ NỮ VIỆT NAM"
+              title="Hội Phụ Nữ"
+              subtitle="Phường Chánh Hưng"
+              gradient="bg-gradient-to-br from-rose-600 via-pink-700 to-purple-800"
+              borderColor="border-pink-400/40"
+              shadowColor="shadow-pink-900/30 hover:shadow-pink-600/40"
+              icon={Flower2}
+            />
+
+          </div>
         </div>
 
         {/* ─── Facebook Live Feed ─── */}
