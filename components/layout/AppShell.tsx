@@ -98,7 +98,7 @@ export default function AppShell({ children }: AppShellProps) {
 
         {/* Content */}
         <div className={cn(
-          "flex-1 flex flex-col min-w-0 pb-16 md:pb-0 transition-all duration-500",
+          "flex-1 flex flex-col min-w-0 pb-24 md:pb-0 transition-all duration-500",
           isStaff ? "xl:pl-72" : "xl:pl-0"
         )}>
           {/* Header — hides nav tabs in staff mode internally */}
