@@ -146,11 +146,11 @@ export default function FanpageSection({ className }: { className?: string }) {
   const [tempBg, setTempBg] = useState('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Handle direct file upload from local device
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  // Process and compress image file
+  const processFile = async (file: File) => {
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
@@ -159,58 +159,80 @@ export default function FanpageSection({ className }: { className?: string }) {
     }
 
     setUploading(true);
+    setUploadedFileName(file.name);
+
     try {
       const reader = new FileReader();
       reader.onload = (event) => {
         const rawDataUrl = event.target?.result as string;
         const img = new Image();
         img.onload = async () => {
-          const canvas = document.createElement('canvas');
-          let { width, height } = img;
-          const maxDim = 1200;
-          if (width > maxDim || height > maxDim) {
-            if (width > height) {
-              height = Math.round((height * maxDim) / width);
-              width = maxDim;
-            } else {
-              width = Math.round((width * maxDim) / height);
-              height = maxDim;
-            }
-          }
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          if (ctx) {
-            ctx.drawImage(img, 0, 0, width, height);
-            const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
-            setTempBg(compressedDataUrl);
-
-            // Attempt upload to Firebase Storage if online
-            try {
-              const { getFirebaseStorage } = await import('@/lib/firebase');
-              const storage = await getFirebaseStorage();
-              if (storage && editingItem) {
-                const { ref, uploadString, getDownloadURL } = await import('firebase/storage');
-                const storageRef = ref(storage, `fanpages/${editingItem.id}_${Date.now()}.jpg`);
-                await uploadString(storageRef, compressedDataUrl, 'data_url');
-                const downloadUrl = await getDownloadURL(storageRef);
-                if (downloadUrl) {
-                  setTempBg(downloadUrl);
-                }
+          try {
+            const canvas = document.createElement('canvas');
+            let { width, height } = img;
+            const maxDim = 1200;
+            if (width > maxDim || height > maxDim) {
+              if (width > height) {
+                height = Math.round((height * maxDim) / width);
+                width = maxDim;
+              } else {
+                width = Math.round((width * maxDim) / height);
+                height = maxDim;
               }
-            } catch (fbErr) {
-              console.log('Firebase storage upload skipped/cached locally', fbErr);
             }
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+              ctx.drawImage(img, 0, 0, width, height);
+              const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+              setTempBg(compressedDataUrl);
+
+              // Attempt upload to Firebase Storage
+              try {
+                const { getFirebaseStorage } = await import('@/lib/firebase');
+                const storage = await getFirebaseStorage();
+                if (storage && editingItem) {
+                  const { ref, uploadString, getDownloadURL } = await import('firebase/storage');
+                  const storageRef = ref(storage, `fanpages/${editingItem.id}_${Date.now()}.jpg`);
+                  await uploadString(storageRef, compressedDataUrl, 'data_url');
+                  const downloadUrl = await getDownloadURL(storageRef);
+                  if (downloadUrl) {
+                    setTempBg(downloadUrl);
+                  }
+                }
+              } catch (fbErr) {
+                console.log('Firebase storage upload skipped/cached locally', fbErr);
+              }
+            }
+          } finally {
+            setUploading(false);
           }
+        };
+        img.onerror = () => {
+          console.error('Failed to load image element');
           setUploading(false);
         };
         img.src = rawDataUrl;
+      };
+      reader.onerror = () => {
+        console.error('Failed to read file');
+        setUploading(false);
       };
       reader.readAsDataURL(file);
     } catch (err) {
       console.error('File read error', err);
       setUploading(false);
     }
+  };
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      processFile(file);
+    }
+    // Clear input value so selecting the same file triggers onChange again
+    e.target.value = '';
   };
 
   // Load custom URLs & Backgrounds from localStorage
@@ -236,6 +258,8 @@ export default function FanpageSection({ className }: { className?: string }) {
     setEditingItem(item);
     setTempUrl(getUrl(item));
     setTempBg(getBg(item));
+    setUploadedFileName(null);
+    setUploading(false);
   };
 
   const handleSave = () => {
@@ -486,25 +510,66 @@ export default function FanpageSection({ className }: { className?: string }) {
                 <Upload className="w-3.5 h-3.5 text-blue-500" />
                 Tải ảnh lên từ máy tính / điện thoại:
               </label>
-              <input
-                type="file"
-                ref={fileInputRef}
-                accept="image/*"
-                onChange={handleFileUpload}
-                className="hidden"
-              />
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={uploading}
-                className="flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl border border-dashed border-blue-400 dark:border-blue-500 bg-blue-50/60 dark:bg-blue-950/30 hover:bg-blue-100/70 dark:hover:bg-blue-900/40 text-blue-600 dark:text-blue-400 text-xs font-bold transition-all cursor-pointer shadow-xs active:scale-[0.98]"
+
+              {/* Native label click trigger — 100% works across all browsers including Safari */}
+              <label
+                htmlFor="fanpage-upload-input"
+                className={cn(
+                  "relative flex flex-col items-center justify-center gap-2 w-full p-4 rounded-2xl border-2 border-dashed transition-all cursor-pointer select-none",
+                  uploading
+                    ? "border-amber-400 bg-amber-50/50 dark:bg-amber-950/20"
+                    : uploadedFileName
+                    ? "border-emerald-400 dark:border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/20 hover:bg-emerald-100/50"
+                    : "border-blue-400 dark:border-blue-500 bg-blue-50/60 dark:bg-blue-950/30 hover:bg-blue-100/70 dark:hover:bg-blue-900/40"
+                )}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  const file = e.dataTransfer.files?.[0];
+                  if (file) processFile(file);
+                }}
               >
-                <Upload className="w-4 h-4" />
-                <span>{uploading ? 'Đang xử lý & lưu ảnh...' : 'Chọn tệp ảnh từ thiết bị của bạn'}</span>
-              </button>
-              <p className="text-[10px] text-slate-400 mt-1">
-                Lưu trữ qua Firebase Cloud Storage & bộ nhớ hệ thống. Hỗ trợ mọi định dạng ảnh phổ biến (JPG, PNG, WebP...).
-              </p>
+                <input
+                  id="fanpage-upload-input"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileInputChange}
+                  style={{
+                    position: 'absolute',
+                    width: '1px',
+                    height: '1px',
+                    padding: 0,
+                    margin: '-1px',
+                    overflow: 'hidden',
+                    clip: 'rect(0, 0, 0, 0)',
+                    whiteSpace: 'nowrap',
+                    border: 0,
+                  }}
+                />
+
+                <div className="p-2.5 rounded-full bg-white dark:bg-slate-800 shadow-sm text-blue-600 dark:text-blue-400">
+                  {uploading ? (
+                    <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                  ) : uploadedFileName ? (
+                    <Check className="w-5 h-5 text-emerald-600 stroke-[3px]" />
+                  ) : (
+                    <Upload className="w-5 h-5" />
+                  )}
+                </div>
+
+                <div className="text-center">
+                  <p className="text-xs font-bold text-slate-800 dark:text-slate-100">
+                    {uploading
+                      ? 'Đang nén & lưu ảnh...'
+                      : uploadedFileName
+                      ? `✓ Đã tải ảnh: ${uploadedFileName}`
+                      : 'Bấm vào đây để chọn ảnh từ máy (hoặc kéo thả ảnh vào)'}
+                  </p>
+                  <p className="text-[10px] text-slate-400 dark:text-slate-400 mt-0.5">
+                    Hỗ trợ JPG, PNG, WebP (Tối đa 15MB) • Tự động nén & đồng bộ Firebase
+                  </p>
+                </div>
+              </label>
             </div>
 
             {/* Custom Background Image URL Input */}
