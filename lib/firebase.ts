@@ -39,3 +39,10 @@ export async function getAuth() {
   const { getAuth: _getAuth } = await import('firebase/auth');
   return _getAuth(app);
 }
+
+/* ─── Storage (lazy-loaded) ─── */
+export async function getFirebaseStorage() {
+  const { getStorage } = await import('firebase/storage');
+  return getStorage(app);
+}
+

@@ -312,9 +312,9 @@ export default function HomePage() {
       </div>
 
       {/* ════════════════════════════════════════════
-          MAIN CONTENT CONTAINER
+          MAIN CONTENT CONTAINER (Hạ thấp thẻ xuống, không đè lên câu khẩu hiệu)
       ════════════════════════════════════════════ */}
-      <PageContainer className="relative z-10 -mt-6 sm:-mt-8">
+      <PageContainer className="relative z-10 pt-4 sm:pt-6">
 
         {/* ═══════════════════════════════════════════
             ROW 1 — 4 cards per row (Equal heights)

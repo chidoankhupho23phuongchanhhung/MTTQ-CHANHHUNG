@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import {
   ExternalLink, Copy, Check, Edit3, Globe,
   Image as ImageIcon, Link as LinkIcon, RotateCcw,
-  Sparkles, Camera
+  Sparkles, Camera, Upload
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Modal from './Modal';
@@ -145,6 +145,73 @@ export default function FanpageSection({ className }: { className?: string }) {
   const [tempUrl, setTempUrl] = useState('');
   const [tempBg, setTempBg] = useState('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Handle direct file upload from local device
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      alert('Vui lòng chọn tệp hình ảnh (JPG, PNG, WebP...)');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const rawDataUrl = event.target?.result as string;
+        const img = new Image();
+        img.onload = async () => {
+          const canvas = document.createElement('canvas');
+          let { width, height } = img;
+          const maxDim = 1200;
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+            setTempBg(compressedDataUrl);
+
+            // Attempt upload to Firebase Storage if online
+            try {
+              const { getFirebaseStorage } = await import('@/lib/firebase');
+              const storage = await getFirebaseStorage();
+              if (storage && editingItem) {
+                const { ref, uploadString, getDownloadURL } = await import('firebase/storage');
+                const storageRef = ref(storage, `fanpages/${editingItem.id}_${Date.now()}.jpg`);
+                await uploadString(storageRef, compressedDataUrl, 'data_url');
+                const downloadUrl = await getDownloadURL(storageRef);
+                if (downloadUrl) {
+                  setTempBg(downloadUrl);
+                }
+              }
+            } catch (fbErr) {
+              console.log('Firebase storage upload skipped/cached locally', fbErr);
+            }
+          }
+          setUploading(false);
+        };
+        img.src = rawDataUrl;
+      };
+      reader.readAsDataURL(file);
+    } catch (err) {
+      console.error('File read error', err);
+      setUploading(false);
+    }
+  };
 
   // Load custom URLs & Backgrounds from localStorage
   useEffect(() => {
@@ -411,6 +478,33 @@ export default function FanpageSection({ className }: { className?: string }) {
                   </button>
                 ))}
               </div>
+            </div>
+
+            {/* Direct Image Upload from Device (Firebase / Local Storage) */}
+            <div>
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
+                <Upload className="w-3.5 h-3.5 text-blue-500" />
+                Tải ảnh lên từ máy tính / điện thoại:
+              </label>
+              <input
+                type="file"
+                ref={fileInputRef}
+                accept="image/*"
+                onChange={handleFileUpload}
+                className="hidden"
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                className="flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl border border-dashed border-blue-400 dark:border-blue-500 bg-blue-50/60 dark:bg-blue-950/30 hover:bg-blue-100/70 dark:hover:bg-blue-900/40 text-blue-600 dark:text-blue-400 text-xs font-bold transition-all cursor-pointer shadow-xs active:scale-[0.98]"
+              >
+                <Upload className="w-4 h-4" />
+                <span>{uploading ? 'Đang xử lý & lưu ảnh...' : 'Chọn tệp ảnh từ thiết bị của bạn'}</span>
+              </button>
+              <p className="text-[10px] text-slate-400 mt-1">
+                Lưu trữ qua Firebase Cloud Storage & bộ nhớ hệ thống. Hỗ trợ mọi định dạng ảnh phổ biến (JPG, PNG, WebP...).
+              </p>
             </div>
 
             {/* Custom Background Image URL Input */}
