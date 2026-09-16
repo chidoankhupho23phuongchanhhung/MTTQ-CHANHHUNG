@@ -4,11 +4,10 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '@/store/useAppStore';
 import PageContainer from '../layout/PageContainer';
-import FacebookFeed from '../ui/FacebookFeed';
 import { cn } from '@/lib/utils';
 import {
   MessageSquare, Bot, Compass, BookOpen,
-  Shield, Flower2, ChevronRight, FileText,
+  Shield, Flower2, FileText,
   Users, ArrowRight, Globe
 } from 'lucide-react';
 
@@ -22,7 +21,6 @@ const fadeUpProps = (i = 0) => ({
 /* ─── External Links ─── */
 const GOOGLE_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSflI6uajykE5zW3Ula8BSUFQelEbyXF04AnJfjTZ87sluz7ag/viewform';
 const DRIVE_FOLDER_URL = 'https://drive.google.com/drive/folders/1ZsJfimQEU7WdHY5cK1KoO_ULELcSLlPf';
-const FB_PAGE_URL = 'https://www.facebook.com/profile.php?id=61580661372890';
 const MAT_TRAN_SO_TPHCM_URL = 'https://mttqtphcm.vn/';
 const DICH_VU_CONG_URL = 'https://dichvucong.gov.vn';
 
@@ -518,26 +516,6 @@ export default function HomePage() {
               />
             ))}
           </div>
-        </div>
-
-        {/* ─── Facebook Live Feed ─── */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4 pl-1">
-            <div className="flex items-center gap-2">
-              <h2 className="text-xs sm:text-sm font-black text-slate-500 uppercase tracking-widest">Tin tức từ Fanpage MTTQ</h2>
-              <span className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-600/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 text-[10px] sm:text-xs font-black uppercase">
-                <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" /> Live
-              </span>
-            </div>
-            <motion.button
-              whileTap={{ scale: 0.93 }}
-              onClick={() => handleExternal(FB_PAGE_URL)}
-              className="flex items-center gap-1 text-sm font-bold text-blue-600 dark:text-blue-400 cursor-pointer"
-            >
-              Xem Fanpage <ChevronRight className="h-4 w-4" />
-            </motion.button>
-          </div>
-          <FacebookFeed />
         </div>
 
       </PageContainer>
