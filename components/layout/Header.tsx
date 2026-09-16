@@ -1,0 +1,255 @@
+"use client";
+
+import React, { useState, useRef, useEffect } from 'react';
+import { useAppStore } from '@/store/useAppStore';
+import { useRouter, usePathname } from 'next/navigation';
+import { Menu, Bell, Sun, Moon, Search, LogOut, ArrowRight, Shield, Clock, CloudSun } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import Badge from '../ui/Badge';
+
+export default function Header() {
+  const { 
+    viewMode, setViewMode, setCurrentRoute, 
+    notifications, markNotificationsAsRead, 
+    theme, toggleTheme, toggleSidebar 
+  } = useAppStore();
+  
+  const router = useRouter();
+  const pathname = usePathname();
+  const [notifOpen, setNotifOpen] = useState(false);
+  const notifRef = useRef<HTMLDivElement>(null);
+  
+  const [timeStr, setTimeStr] = useState('');
+  const [dateStr, setDateStr] = useState('');
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+      setTimeStr(now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
+      setDateStr(now.toLocaleDateString('vi-VN', { weekday: 'short', day: '2-digit', month: '2-digit' }));
+    };
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const unreadCount = notifications.filter(n => !n.read).length;
+
+  // Close notifications panel when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+        setNotifOpen(false);
+      }
+    };
+    if (notifOpen) {
+      window.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => window.removeEventListener('mousedown', handleClickOutside);
+  }, [notifOpen]);
+
+  const handleNotifClick = () => {
+    setNotifOpen(!notifOpen);
+    if (!notifOpen && unreadCount > 0) {
+      markNotificationsAsRead();
+    }
+  };
+
+  const handlePortalSwitch = () => {
+    const targetMode = viewMode === 'citizen' ? 'staff' : 'citizen';
+    setViewMode(targetMode);
+    setCurrentRoute(targetMode === 'staff' ? '/cong-lam-viec-can-bo' : '/');
+    router.push(targetMode === 'staff' ? '/cong-lam-viec-can-bo' : '/');
+  };
+
+  const isStaff = viewMode === 'staff';
+
+  const navItems = [
+    { id: '/', label: 'Trang chủ' },
+    { id: '/hoat-dong-mttq', label: 'Giới thiệu' },
+    { id: '/tin-tuc', label: 'Tin tức - Sự kiện' },
+    { id: '/phan-anh', label: 'Kiến nghị' },
+    { id: '/van-ban-bieu-mau', label: 'Văn bản' },
+    { id: '/khong-gian-van-hoa-hcm', label: 'Thư viện số' }
+  ];
+
+  const handleNavigate = (id: string) => {
+    setCurrentRoute(id);
+    router.push(id);
+  };
+
+  return (
+    <header className="sticky top-0 z-30 w-full flex flex-col justify-center bg-white/70 dark:bg-slate-900/70 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-800/50 shadow-sm transition-all h-16">
+      {/* Brand Logo, horizontal navigation menu, and profile controls */}
+      <div className="w-full flex items-center justify-between px-4 sm:px-6 h-16">
+        
+        {/* Left brand logo & Hamburger */}
+        <div className="flex items-center gap-3">
+          {/* Hamburger for staff (tablet/mobile) */}
+          {isStaff && (
+            <button
+              onClick={() => toggleSidebar()}
+              className="p-2 -ml-2 rounded-xl text-slate-500 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 xl:hidden cursor-pointer"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+          )}
+          {/* Hamburger for citizens (mobile drawer) */}
+          {!isStaff && (
+            <button
+              onClick={() => toggleSidebar()}
+              className="p-2 -ml-2 rounded-xl text-slate-500 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 md:hidden cursor-pointer active:scale-90 transition-transform"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+          )}
+
+            <img 
+              src="/mttq-logo.png" 
+              alt="Logo MTTQ" 
+              className="w-9 h-9 object-contain flex-shrink-0 animate-float" 
+            />
+            <div className="flex flex-col text-left">
+              <h1 className="text-xs sm:text-sm font-black text-slate-800 dark:text-white uppercase leading-none tracking-tight">
+                {isStaff ? 'Dashboard Điều hành' : 'MẶT TRẬN SỐ'}
+              </h1>
+              <span className="text-[9px] text-slate-400 font-bold uppercase mt-1">
+                {isStaff ? 'Dành cho cán bộ, chuyên viên' : 'Phường Chánh Hưng'}
+              </span>
+            </div>
+        </div>
+
+        {/* Center Horizontal Navigation Bar (Only for Citizen layout, hidden on Staff) */}
+        {!isStaff && (
+          <div className="hidden md:flex items-center justify-center flex-1 mx-4 gap-1 sm:gap-1.5 overflow-x-auto no-scrollbar">
+            {navItems.map((item) => {
+              const isActive = pathname === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => handleNavigate(item.id)}
+                  className={cn(
+                    "px-3 py-1.5 text-xs font-black transition-all rounded-full cursor-pointer select-none border whitespace-nowrap",
+                    isActive 
+                      ? "bg-blue-600/10 text-blue-600 border-blue-500/20 dark:bg-blue-500/15 dark:text-blue-400 dark:border-blue-400/20 shadow-xs" 
+                      : "text-slate-500 hover:text-slate-850 dark:text-slate-400 dark:hover:text-slate-200 bg-transparent border-transparent hover:bg-slate-100/60 dark:hover:bg-slate-800/50"
+                  )}
+                >
+                  {item.label}
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Right Controls */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          
+          {/* Search bar inside citizen header on right (Removed as requested) */}
+
+          {/* Toggle Theme */}
+          <button
+            onClick={toggleTheme}
+            className="p-2 rounded-xl border border-slate-200/40 dark:border-slate-800/40 bg-white/20 dark:bg-slate-900/20 text-slate-500 hover:text-slate-800 dark:hover:text-white transition-all cursor-pointer hover:bg-white/40 active:scale-95"
+            title="Chế độ màu"
+          >
+            {theme === 'light' ? <Moon className="h-4.5 w-4.5" /> : <Sun className="h-4.5 w-4.5" />}
+          </button>
+
+          {/* Notifications Panel */}
+          <div ref={notifRef} className="relative">
+            <button
+              onClick={handleNotifClick}
+              className="relative p-2 rounded-xl border border-slate-200/40 dark:border-slate-800/40 bg-white/20 dark:bg-slate-900/20 text-slate-500 hover:text-slate-800 dark:hover:text-white transition-all cursor-pointer hover:bg-white/40 active:scale-95"
+              title="Thông báo"
+            >
+              <Bell className="h-4.5 w-4.5" />
+              {unreadCount > 0 && (
+                <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white dark:ring-slate-900" />
+              )}
+            </button>
+
+            {/* Notifications Dropdown */}
+            {notifOpen && (
+              <div className="absolute right-0 mt-3 w-80 shadow-2xl rounded-2xl border border-slate-200/50 dark:border-slate-800/50 bg-white dark:bg-slate-950 p-2 overflow-hidden z-50">
+                <div className="px-3 py-2 border-b border-slate-100 dark:border-slate-900 flex justify-between items-center mb-1">
+                  <span className="text-xs font-black text-slate-800 dark:text-white">Thông báo mới</span>
+                  <span className="text-[10px] bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400 px-1.5 py-0.5 rounded-md font-bold">
+                    {unreadCount} chưa đọc
+                  </span>
+                </div>
+                <div className="flex flex-col gap-1 max-h-60 overflow-y-auto no-scrollbar">
+                  {notifications.map((notif) => (
+                    <div
+                      key={notif.id}
+                      className={cn(
+                        "p-2.5 rounded-xl transition-all flex flex-col gap-0.5 text-left",
+                        notif.read ? "opacity-70 hover:opacity-100" : "bg-blue-50/40 dark:bg-blue-950/15"
+                      )}
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">{notif.title}</span>
+                        <span className="text-[9px] text-slate-400">{notif.time}</span>
+                      </div>
+                      <span className="text-[11px] text-slate-500 dark:text-slate-400 leading-normal">{notif.description}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Time & Weather Widget (fills the space and looks premium) */}
+          <div className="hidden md:flex items-center gap-2.5 px-3 py-1.5 rounded-xl border border-slate-200/40 dark:border-slate-800/40 bg-slate-50/50 dark:bg-slate-900/20 select-none text-[11px] font-bold text-slate-600 dark:text-slate-355">
+            <div className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400">
+              <Clock className="h-3.5 w-3.5" />
+              <span className="tabular-nums">{dateStr} · {timeStr}</span>
+            </div>
+            <div className="h-3 w-px bg-slate-200 dark:bg-slate-800" />
+            <div className="flex items-center gap-1.5 text-amber-500">
+              <CloudSun className="h-3.5 w-3.5" />
+              <span>Chánh Hưng · 30°C</span>
+            </div>
+          </div>
+
+          {/* Đăng nhập — Dashboard Quản lý */}
+          {!isStaff ? (
+            <button
+              onClick={handlePortalSwitch}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer active:scale-95 shadow-sm border bg-blue-600 hover:bg-blue-700 text-white border-blue-500 shadow-blue-500/15 uppercase tracking-wide"
+            >
+              <Shield className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Đăng nhập</span>
+              <ArrowRight className="h-3 w-3 ml-0.5" />
+            </button>
+          ) : (
+            <button
+              onClick={handlePortalSwitch}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer active:scale-95 shadow-sm border bg-slate-800 hover:bg-slate-700 text-white border-slate-600 dark:bg-white dark:hover:bg-slate-100 dark:text-slate-900 dark:border-slate-200"
+            >
+              <LogOut className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Thoát</span>
+            </button>
+          )}
+
+          {/* Avatar Profile (Temporarily hidden, set to true to reactivate) */}
+          {false && (
+            <div className="flex items-center gap-2 pl-1 border-l border-slate-200/50 dark:border-slate-800/50 h-8">
+              <div className="w-8 h-8 rounded-full border border-slate-200/50 dark:border-slate-800/50 overflow-hidden bg-slate-100 flex items-center justify-center font-bold text-xs text-blue-600">
+                {!isStaff ? 'US' : 'AD'}
+              </div>
+              <div className="hidden lg:flex flex-col text-left">
+                <span className="text-xs font-bold text-slate-800 dark:text-slate-200 leading-none">
+                  {!isStaff ? 'Cư dân Chánh Hưng' : 'Nguyễn Văn An'}
+                </span>
+                <span className="text-[9px] text-slate-400 mt-1">
+                  {!isStaff ? 'Người dùng' : 'Chuyên viên'}
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+    </header>
+  );
+}

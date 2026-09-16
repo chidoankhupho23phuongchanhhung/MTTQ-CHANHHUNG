@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- Shield shape -->
+  <path d="M100 10 L180 50 L180 120 C180 160 140 190 100 195 C60 190 20 160 20 120 L20 50 Z" fill="#1a3a6e" stroke="#c5a847" stroke-width="3"/>
+  <!-- Inner shield -->
+  <path d="M100 25 L165 58 L165 115 C165 148 132 175 100 180 C68 175 35 148 35 115 L35 58 Z" fill="#1e4d8e"/>
+  <!-- Star -->
+  <polygon points="100,40 112,75 150,75 120,95 130,130 100,110 70,130 80,95 50,75 88,75" fill="#ffd700"/>
+  <!-- Text UBND -->
+  <text x="100" y="160" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="22" font-weight="900" fill="#ffd700">UBND</text>
+</svg>

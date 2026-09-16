@@ -1,0 +1,77 @@
+@import "tailwindcss";
+@import "../styles/glassmorphism.css";
+@import "../styles/animations.css";
+
+:root {
+  --background: #f4f6fa;
+  --foreground: #0f172a;
+  
+  /* Brand colors */
+  --brand-blue-dark: #07152c;
+  --brand-blue: #1e40af;
+  --brand-blue-light: #3b82f6;
+  --brand-red: #be123c;
+  --brand-gold: #ca8a04;
+}
+
+.dark {
+  --background: #0b0f19;
+  --foreground: #f8fafc;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: 'Be Vietnam Pro', system-ui, -apple-system, sans-serif;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(59, 130, 246, 0.2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(59, 130, 246, 0.4);
+}
+
+/* Global Text Contrast Enhancements for Glassmorphism UI */
+.text-slate-400 {
+  color: #57657a !important; /* Darker slate in light mode for accessibility */
+}
+.dark .text-slate-400 {
+  color: #a1b0cb !important; /* Soft slate in dark mode */
+}
+
+.text-slate-450 {
+  color: #3e4c5e !important;
+}
+.dark .text-slate-450 {
+  color: #cbd5e1 !important;
+}
+
+.text-slate-500 {
+  color: #27364b !important;
+}
+.dark .text-slate-500 {
+  color: #94a3b8 !important;
+}
+
+.glass-card p, .glass-card span {
+  text-shadow: 0px 0.5px 1px rgba(255, 255, 255, 0.4);
+}
+.dark .glass-card p, .dark .glass-card span {
+  text-shadow: none;
+}
+
