@@ -4,12 +4,14 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   ExternalLink, Copy, Check, Edit3, Globe,
-  Briefcase, Sparkles, Flower2, ShieldAlert
+  Image as ImageIcon, Link as LinkIcon, RotateCcw,
+  Sparkles, Camera
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Modal from './Modal';
 import Button from './Button';
 import Input from './Input';
+import { useAppStore } from '@/store/useAppStore';
 
 interface FanpageItem {
   id: string;
@@ -18,6 +20,10 @@ interface FanpageItem {
   tag: string;
   desc: string;
   defaultUrl: string;
+  logo: string;
+  defaultBg: string;
+  gradient: string;
+  presets: string[];
   colorScheme: {
     bgLight: string;
     border: string;
@@ -26,19 +32,25 @@ interface FanpageItem {
     btnHover: string;
     iconBg: string;
   };
-  logo?: string;
-  icon?: React.ComponentType<{ className?: string }>;
 }
 
 const DEFAULT_FANPAGES: FanpageItem[] = [
   {
     id: 'mttq',
     name: 'Mặt trận Tổ Quốc Phường Chánh Hưng',
-    shortName: 'MTTQ Chánh Hưng',
+    shortName: 'Mặt trận Tổ quốc',
     tag: 'Cổng Mặt Trận',
     desc: 'Đại đoàn kết toàn dân tộc - Lắng nghe ý kiến và tâm tư nguyện vọng của nhân dân',
     defaultUrl: 'https://www.facebook.com/profile.php?id=61580661372890',
     logo: '/mttq-logo.png',
+    defaultBg: 'https://images.unsplash.com/photo-1541872703-74c5e44368f9?w=800&auto=format&fit=crop&q=80',
+    gradient: 'from-red-950/90 via-red-900/65 to-red-800/40',
+    presets: [
+      'https://images.unsplash.com/photo-1541872703-74c5e44368f9?w=800&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?w=800&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=800&auto=format&fit=crop&q=80'
+    ],
     colorScheme: {
       bgLight: 'from-red-500/10 via-amber-500/5 to-transparent',
       border: 'border-red-200/50 dark:border-red-900/30',
@@ -51,11 +63,19 @@ const DEFAULT_FANPAGES: FanpageItem[] = [
   {
     id: 'congdoan',
     name: 'Công Đoàn Phường Chánh Hưng',
-    shortName: 'Công Đoàn Chánh Hưng',
+    shortName: 'Công đoàn',
     tag: 'Công đoàn VN',
     desc: 'Chăm lo, đại diện, bảo vệ quyền và lợi ích hợp pháp, chính đáng của người lao động',
     defaultUrl: 'https://www.facebook.com/search/top?q=C%C3%B4ng%20%C4%90o%C3%A0n%20Ph%C6%B0%E1%BB%9Dng%20Ch%C3%A1nh%20H%C6%B0ng',
-    icon: Briefcase,
+    logo: '/congdoan-logo.svg',
+    defaultBg: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&auto=format&fit=crop&q=80',
+    gradient: 'from-blue-950/90 via-blue-900/65 to-indigo-800/40',
+    presets: [
+      'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=800&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1497215728101-856f4ea42174?w=800&auto=format&fit=crop&q=80'
+    ],
     colorScheme: {
       bgLight: 'from-blue-500/10 via-indigo-500/5 to-transparent',
       border: 'border-blue-200/50 dark:border-blue-900/30',
@@ -68,11 +88,19 @@ const DEFAULT_FANPAGES: FanpageItem[] = [
   {
     id: 'doanthanhnien',
     name: 'Đoàn Thanh Niên TNCS Hồ Chí Minh Phường Chánh Hưng',
-    shortName: 'Đoàn Thanh Niên',
+    shortName: 'Đoàn Thanh niên',
     tag: 'Tuổi trẻ Chánh Hưng',
     desc: 'Khát vọng - Tiên phong - Bản lĩnh - Đoàn kết - Sáng tạo vì cộng đồng văn minh',
     defaultUrl: 'https://www.facebook.com/search/top?q=%C4%90o%C3%A0n%20Thanh%20Ni%C3%AAn%20Ph%C6%B0%E1%BB%9Dng%20Ch%C3%A1nh%20H%C6%B0ng',
-    icon: Sparkles,
+    logo: '/doan-logo.png',
+    defaultBg: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&auto=format&fit=crop&q=80',
+    gradient: 'from-emerald-950/90 via-emerald-900/65 to-teal-800/40',
+    presets: [
+      'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=800&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?w=800&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800&auto=format&fit=crop&q=80'
+    ],
     colorScheme: {
       bgLight: 'from-emerald-500/10 via-teal-500/5 to-transparent',
       border: 'border-emerald-200/50 dark:border-emerald-900/30',
@@ -85,11 +113,19 @@ const DEFAULT_FANPAGES: FanpageItem[] = [
   {
     id: 'phunu',
     name: 'Hội Liên Hiệp Phụ Nữ Phường Chánh Hưng',
-    shortName: 'Hội Phụ Nữ',
+    shortName: 'Hội Phụ nữ',
     tag: 'Phụ nữ VN',
     desc: 'Tự tin - Tự trọng - Trung hậu - Đảm đang, xây dựng gia đình hạnh phúc, bình đẳng',
     defaultUrl: 'https://www.facebook.com/search/top?q=H%E1%BB%99i%20Li%C3%AAn%20hi%E1%BB%87p%20Ph%E1%BB%A5%20n%E1%BB%AF%20Ph%C6%B0%E1%BB%9Dng%20Ch%C3%A1nh%20H%C6%B0ng',
-    icon: Flower2,
+    logo: '/phunu-logo.png',
+    defaultBg: 'https://images.unsplash.com/photo-1509099836639-18ba1795216d?w=800&auto=format&fit=crop&q=80',
+    gradient: 'from-rose-950/90 via-pink-900/65 to-rose-800/40',
+    presets: [
+      'https://images.unsplash.com/photo-1509099836639-18ba1795216d?w=800&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=800&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1490750967868-88df5691cc52?w=800&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&auto=format&fit=crop&q=80'
+    ],
     colorScheme: {
       bgLight: 'from-pink-500/10 via-rose-500/5 to-transparent',
       border: 'border-pink-200/50 dark:border-pink-900/30',
@@ -102,47 +138,78 @@ const DEFAULT_FANPAGES: FanpageItem[] = [
 ];
 
 export default function FanpageSection({ className }: { className?: string }) {
+  const { addNotification } = useAppStore();
   const [urls, setUrls] = useState<Record<string, string>>({});
+  const [bgs, setBgs] = useState<Record<string, string>>({});
   const [editingItem, setEditingItem] = useState<FanpageItem | null>(null);
   const [tempUrl, setTempUrl] = useState('');
+  const [tempBg, setTempBg] = useState('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  // Load custom URLs from localStorage
+  // Load custom URLs & Backgrounds from localStorage
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const saved: Record<string, string> = {};
+      const savedUrls: Record<string, string> = {};
+      const savedBgs: Record<string, string> = {};
       DEFAULT_FANPAGES.forEach(item => {
-        const val = localStorage.getItem(`fanpage_url_${item.id}`);
-        if (val) saved[item.id] = val;
+        const u = localStorage.getItem(`fanpage_url_${item.id}`);
+        if (u) savedUrls[item.id] = u;
+        const b = localStorage.getItem(`fanpage_bg_${item.id}`);
+        if (b) savedBgs[item.id] = b;
       });
-      setUrls(saved);
+      setUrls(savedUrls);
+      setBgs(savedBgs);
     }
   }, []);
 
   const getUrl = (item: FanpageItem) => urls[item.id] || item.defaultUrl;
+  const getBg = (item: FanpageItem) => bgs[item.id] || item.defaultBg;
 
   const handleOpenEdit = (item: FanpageItem) => {
     setEditingItem(item);
     setTempUrl(getUrl(item));
+    setTempBg(getBg(item));
   };
 
-  const handleSaveUrl = () => {
+  const handleSave = () => {
     if (!editingItem) return;
-    const newUrls = { ...urls, [editingItem.id]: tempUrl.trim() || editingItem.defaultUrl };
+
+    const trimmedUrl = tempUrl.trim();
+    const trimmedBg = tempBg.trim();
+
+    const newUrls = { ...urls, [editingItem.id]: trimmedUrl || editingItem.defaultUrl };
+    const newBgs = { ...bgs, [editingItem.id]: trimmedBg || editingItem.defaultBg };
+
     setUrls(newUrls);
+    setBgs(newBgs);
+
     if (typeof window !== 'undefined') {
-      if (tempUrl.trim() && tempUrl.trim() !== editingItem.defaultUrl) {
-        localStorage.setItem(`fanpage_url_${editingItem.id}`, tempUrl.trim());
+      if (trimmedUrl && trimmedUrl !== editingItem.defaultUrl) {
+        localStorage.setItem(`fanpage_url_${editingItem.id}`, trimmedUrl);
       } else {
         localStorage.removeItem(`fanpage_url_${editingItem.id}`);
       }
+
+      if (trimmedBg && trimmedBg !== editingItem.defaultBg) {
+        localStorage.setItem(`fanpage_bg_${editingItem.id}`, trimmedBg);
+      } else {
+        localStorage.removeItem(`fanpage_bg_${editingItem.id}`);
+      }
     }
+
+    addNotification(
+      'Cập nhật thành công',
+      `Đã lưu ảnh nền & liên kết Fanpage ${editingItem.shortName}`,
+      'success'
+    );
+
     setEditingItem(null);
   };
 
-  const handleResetUrl = () => {
+  const handleReset = () => {
     if (!editingItem) return;
     setTempUrl(editingItem.defaultUrl);
+    setTempBg(editingItem.defaultBg);
   };
 
   const handleCopy = (id: string, url: string) => {
@@ -152,19 +219,19 @@ export default function FanpageSection({ className }: { className?: string }) {
   };
 
   return (
-    <div className={cn("flex flex-col gap-3", className)}>
+    <div className={cn("flex flex-col gap-4", className)}>
       {/* Section Header */}
       <div className="flex items-center justify-between pl-1">
         <div className="flex items-center gap-2">
-          <div className="p-1.5 rounded-lg bg-blue-600/10 text-blue-600 dark:text-blue-400">
-            <Globe className="h-4 w-4" />
+          <div className="p-2 rounded-xl bg-blue-600/10 text-blue-600 dark:text-blue-400">
+            <Globe className="h-5 w-5" />
           </div>
           <div>
-            <h3 className="text-xs sm:text-sm font-black text-slate-800 dark:text-white uppercase tracking-wider">
-              Hệ thống Fanpage Đoàn thể Phường Chánh Hưng
+            <h3 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-wider">
+              Quản lý Hệ thống 4 Fanpage Đoàn thể
             </h3>
-            <p className="text-[10px] text-slate-400">
-              Liên kết các trang thông tin trực tuyến chính thức của các ban ngành, đoàn thể địa phương
+            <p className="text-[11px] text-slate-400">
+              Quản lý liên kết chính thức và tùy chỉnh ảnh nền hiển thị trên trang chủ cho từng đoàn thể
             </p>
           </div>
         </div>
@@ -174,9 +241,10 @@ export default function FanpageSection({ className }: { className?: string }) {
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         {DEFAULT_FANPAGES.map((item, index) => {
           const currentUrl = getUrl(item);
-          const Icon = item.icon;
+          const currentBg = getBg(item);
           const isCopied = copiedId === item.id;
           const hasCustomUrl = !!urls[item.id];
+          const hasCustomBg = !!bgs[item.id];
 
           return (
             <motion.div
@@ -186,28 +254,24 @@ export default function FanpageSection({ className }: { className?: string }) {
               transition={{ duration: 0.35, delay: index * 0.08 }}
               className={cn(
                 "relative rounded-3xl p-5 border flex flex-col justify-between transition-all duration-300",
-                "bg-white/80 dark:bg-slate-900/85 backdrop-blur-md shadow-xs hover:shadow-md group",
+                "bg-white/85 dark:bg-slate-900/85 backdrop-blur-md shadow-xs hover:shadow-lg group",
                 item.colorScheme.border
               )}
             >
               {/* Top Accent Gradient Bar */}
               <div className={cn("absolute inset-x-0 top-0 h-1.5 rounded-t-3xl bg-gradient-to-r", item.colorScheme.bgLight)} />
 
-              {/* Card Header: Icon/Logo + Tag Badge */}
+              {/* Card Header: Logo + Tag Badge */}
               <div className="flex items-start justify-between gap-3 mb-3">
-                <div className={cn("p-2.5 rounded-2xl border shadow-xs flex-shrink-0", item.colorScheme.iconBg)}>
-                  {item.logo ? (
-                    <img src={item.logo} alt={item.name} className="h-7 w-7 object-contain" />
-                  ) : Icon ? (
-                    <Icon className="h-6 w-6" />
-                  ) : null}
+                <div className={cn("p-2 rounded-2xl border shadow-xs flex-shrink-0 bg-white/90 dark:bg-white/10 flex items-center justify-center", item.colorScheme.iconBg)}>
+                  <img src={item.logo} alt={item.name} className="h-8 w-8 object-contain" />
                 </div>
 
                 <div className="flex items-center gap-1.5 flex-wrap justify-end">
                   <span className={cn("text-[9px] font-black px-2 py-0.5 rounded-full border uppercase tracking-wide", item.colorScheme.badge)}>
                     {item.tag}
                   </span>
-                  {hasCustomUrl && (
+                  {(hasCustomUrl || hasCustomBg) && (
                     <span className="text-[8px] font-bold px-1.5 py-0.5 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
                       Tùy chỉnh
                     </span>
@@ -216,17 +280,31 @@ export default function FanpageSection({ className }: { className?: string }) {
               </div>
 
               {/* Title & Description */}
-              <div className="flex-1 flex flex-col justify-start mb-4">
+              <div className="flex-1 flex flex-col justify-start mb-3">
                 <h4 className="text-xs sm:text-[13px] font-black text-slate-900 dark:text-white uppercase leading-snug group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                   {item.name}
                 </h4>
-                <p className="text-[10px] sm:text-[11px] text-slate-600 dark:text-slate-200 mt-1.5 leading-relaxed line-clamp-2 font-medium">
+                <p className="text-[10px] sm:text-[11px] text-slate-600 dark:text-slate-300 mt-1 leading-relaxed line-clamp-2 font-medium">
                   {item.desc}
                 </p>
               </div>
 
+              {/* Background Thumbnail Preview */}
+              <div className="mb-3 relative rounded-xl overflow-hidden h-16 border border-slate-200 dark:border-slate-700/80 group/thumb">
+                <img src={currentBg} alt="Ảnh nền hiện tại" className="w-full h-full object-cover group-hover/thumb:scale-105 transition-transform" />
+                <div className={cn("absolute inset-0 bg-gradient-to-t pointer-events-none", item.gradient)} />
+                <span className="absolute bottom-1.5 left-2 text-[9px] font-bold text-white/90 drop-shadow flex items-center gap-1">
+                  <Camera className="w-3 h-3" /> Ảnh nền trang chủ
+                </span>
+                {hasCustomBg && (
+                  <span className="absolute top-1.5 right-1.5 text-[8px] font-black bg-blue-600 text-white px-1.5 py-0.5 rounded shadow">
+                    Đã đổi
+                  </span>
+                )}
+              </div>
+
               {/* URL Display Bar */}
-              <div className="mb-4 p-2 rounded-xl bg-slate-100/80 dark:bg-slate-950/70 border border-slate-200/70 dark:border-slate-700/70 flex items-center justify-between gap-2">
+              <div className="mb-3 p-2 rounded-xl bg-slate-100/80 dark:bg-slate-950/70 border border-slate-200/70 dark:border-slate-700/70 flex items-center justify-between gap-2">
                 <span className="text-[10px] font-semibold text-slate-700 dark:text-slate-200 truncate max-w-[170px]" title={currentUrl}>
                   {currentUrl}
                 </span>
@@ -238,47 +316,122 @@ export default function FanpageSection({ className }: { className?: string }) {
                   >
                     {isCopied ? <Check className="h-3 w-3 text-emerald-500" /> : <Copy className="h-3 w-3" />}
                   </button>
-                  <button
-                    onClick={() => handleOpenEdit(item)}
-                    className="p-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
-                    title="Chỉnh sửa liên kết Fanpage"
-                  >
-                    <Edit3 className="h-3 w-3" />
-                  </button>
                 </div>
               </div>
 
-              {/* Action Button: Open Fanpage */}
-              <a
-                href={currentUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={cn(
-                  "flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-2xl",
-                  "text-xs font-black uppercase tracking-wider transition-all duration-200 shadow-sm",
-                  item.colorScheme.btnHover
-                )}
-              >
-                <span>Truy cập Fanpage</span>
-                <ExternalLink className="h-3.5 w-3.5" />
-              </a>
+              {/* Buttons: Edit & Open Fanpage */}
+              <div className="grid grid-cols-2 gap-2 mt-auto">
+                <button
+                  onClick={() => handleOpenEdit(item)}
+                  className="flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-all border border-slate-200 dark:border-slate-700"
+                >
+                  <Edit3 className="h-3.5 w-3.5 text-blue-500" />
+                  <span>Đổi ảnh / Link</span>
+                </button>
+
+                <a
+                  href={currentUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={cn(
+                    "flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl text-xs font-bold uppercase tracking-wide transition-all shadow-sm",
+                    item.colorScheme.btnHover
+                  )}
+                >
+                  <span>Mở Fanpage</span>
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              </div>
             </motion.div>
           );
         })}
       </div>
 
-      {/* Edit URL Modal */}
+      {/* Edit Fanpage & Background Modal */}
       <Modal
         isOpen={!!editingItem}
         onClose={() => setEditingItem(null)}
-        title={`Cập nhật liên kết Fanpage: ${editingItem?.shortName}`}
-        size="sm"
+        title={editingItem ? `Chỉnh sửa Fanpage: ${editingItem.shortName}` : 'Chỉnh sửa'}
+        size="md"
       >
         {editingItem && (
           <div className="flex flex-col gap-4 text-left">
+            {/* Live Preview Box */}
             <div>
-              <label className="text-xs font-bold text-slate-800 dark:text-slate-100 mb-1.5 block">
-                Đường dẫn URL Fanpage Facebook chính thức:
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 block">
+                Xem trước thẻ hiển thị ở trang chủ:
+              </span>
+              <div className="relative w-full h-36 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-inner flex flex-col items-center justify-center">
+                <img
+                  src={tempBg || editingItem.defaultBg}
+                  alt="Preview"
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+                <div className={cn("absolute inset-0 bg-gradient-to-t pointer-events-none", editingItem.gradient)} />
+                <div className="absolute inset-0 bg-black/20 pointer-events-none" />
+
+                {/* Logo & Title preview */}
+                <div className="relative z-10 w-12 h-12 rounded-xl bg-white/95 p-2 shadow-lg flex items-center justify-center mb-1.5 border border-white/40">
+                  <img src={editingItem.logo} alt={editingItem.name} className="w-full h-full object-contain" />
+                </div>
+                <span className="relative z-10 text-xs sm:text-sm font-black text-white uppercase drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
+                  {editingItem.shortName}
+                </span>
+                <span className="absolute bottom-2 right-2.5 z-10 text-[10px] font-bold bg-black/50 text-white/90 px-2 py-0.5 rounded-md backdrop-blur-sm">
+                  Trực tiếp
+                </span>
+              </div>
+            </div>
+
+            {/* Presets Gallery */}
+            <div>
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-1.5">
+                <ImageIcon className="w-3.5 h-3.5 text-blue-500" />
+                Chọn ảnh mẫu tiêu chuẩn có sẵn:
+              </label>
+              <div className="grid grid-cols-4 gap-2">
+                {editingItem.presets.map((presetUrl, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setTempBg(presetUrl)}
+                    className={cn(
+                      "relative h-14 rounded-xl overflow-hidden border-2 transition-all cursor-pointer group",
+                      tempBg === presetUrl
+                        ? "border-blue-500 ring-2 ring-blue-500/30 scale-95"
+                        : "border-slate-200 dark:border-slate-700 hover:border-slate-400"
+                    )}
+                  >
+                    <img src={presetUrl} alt={`Preset ${idx + 1}`} className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
+                    {tempBg === presetUrl && (
+                      <div className="absolute inset-0 bg-blue-600/30 flex items-center justify-center">
+                        <Check className="w-4 h-4 text-white stroke-[3px]" />
+                      </div>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Custom Background Image URL Input */}
+            <div>
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-1.5">
+                <Camera className="w-3.5 h-3.5 text-slate-500" />
+                Hoặc dán URL ảnh nền tùy chỉnh:
+              </label>
+              <Input
+                value={tempBg}
+                onChange={(e) => setTempBg(e.target.value)}
+                placeholder="https://..."
+                className="w-full text-xs font-mono"
+              />
+            </div>
+
+            {/* Fanpage Link URL Input */}
+            <div>
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-1.5">
+                <LinkIcon className="w-3.5 h-3.5 text-slate-500" />
+                Đường dẫn liên kết Fanpage Facebook:
               </label>
               <Input
                 value={tempUrl}
@@ -286,18 +439,17 @@ export default function FanpageSection({ className }: { className?: string }) {
                 placeholder="https://www.facebook.com/..."
                 className="w-full text-xs font-mono"
               />
-              <p className="text-[11px] text-slate-600 dark:text-slate-300 mt-1.5 font-medium leading-relaxed">
-                Dán đường dẫn trực tiếp đến Fanpage của <strong className="text-slate-900 dark:text-white">{editingItem.name}</strong>. Liên kết sẽ được lưu tự động trên trình duyệt của bạn.
-              </p>
             </div>
 
-            <div className="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-slate-800 gap-3">
+            {/* Actions */}
+            <div className="flex items-center justify-between pt-3 border-t border-slate-200 dark:border-slate-800 gap-3">
               <Button
                 variant="secondary"
                 size="sm"
-                onClick={handleResetUrl}
+                onClick={handleReset}
                 className="text-[11px] font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
               >
+                <RotateCcw className="w-3.5 h-3.5 mr-1" />
                 Khôi phục mặc định
               </Button>
               <div className="flex items-center gap-2">
@@ -312,10 +464,11 @@ export default function FanpageSection({ className }: { className?: string }) {
                 <Button
                   variant="primary"
                   size="sm"
-                  onClick={handleSaveUrl}
+                  onClick={handleSave}
                   className="font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/20"
                 >
-                  Lưu liên kết
+                  <Check className="w-3.5 h-3.5 mr-1 stroke-[3px]" />
+                  Lưu thay đổi
                 </Button>
               </div>
             </div>

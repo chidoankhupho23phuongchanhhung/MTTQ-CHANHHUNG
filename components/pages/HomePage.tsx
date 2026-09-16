@@ -5,13 +5,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '@/store/useAppStore';
 import PageContainer from '../layout/PageContainer';
 import FacebookFeed from '../ui/FacebookFeed';
-import Modal from '../ui/Modal';
 import { cn } from '@/lib/utils';
 import {
   MessageSquare, Bot, Compass, BookOpen,
   Shield, Flower2, ChevronRight, FileText,
-  Users, ArrowRight, Globe, Camera, RotateCcw,
-  Check, Link as LinkIcon, Image as ImageIcon
+  Users, ArrowRight, Globe
 } from 'lucide-react';
 
 /* ─── per-index fade-up ─── */
@@ -39,7 +37,6 @@ interface FanpageConfig {
   gradient: string;
   borderColor: string;
   shadowColor: string;
-  presets: string[];
 }
 
 const FANPAGES: FanpageConfig[] = [
@@ -53,29 +50,17 @@ const FANPAGES: FanpageConfig[] = [
     gradient: 'from-red-950/90 via-red-900/65 to-red-800/40',
     borderColor: 'border-red-500/40 hover:border-red-400',
     shadowColor: 'shadow-red-950/40 hover:shadow-red-700/40',
-    presets: [
-      'https://images.unsplash.com/photo-1541872703-74c5e44368f9?w=800&auto=format&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&auto=format&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?w=800&auto=format&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&auto=format&fit=crop&q=80'
-    ]
   },
   {
     id: 'congdoan',
     name: 'Công đoàn',
     shortName: 'Công đoàn',
     logo: '/congdoan-logo.svg',
-    defaultBg: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&auto=format&fit=crop&q=80',
+    defaultBg: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&auto=format&fit=crop&q=80',
     defaultUrl: 'https://www.facebook.com/search/top?q=C%C3%B4ng%20%C4%90o%C3%A0n%20Ph%C6%B0%E1%BB%9Dng%20Ch%C3%A1nh%20H%C6%B0ng',
     gradient: 'from-blue-950/90 via-blue-900/65 to-indigo-800/40',
     borderColor: 'border-blue-500/40 hover:border-blue-400',
     shadowColor: 'shadow-blue-950/40 hover:shadow-blue-700/40',
-    presets: [
-      'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&auto=format&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800&auto=format&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=800&auto=format&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&auto=format&fit=crop&q=80'
-    ]
   },
   {
     id: 'doanthanhnien',
@@ -87,12 +72,6 @@ const FANPAGES: FanpageConfig[] = [
     gradient: 'from-emerald-950/90 via-emerald-900/65 to-teal-800/40',
     borderColor: 'border-emerald-500/40 hover:border-emerald-400',
     shadowColor: 'shadow-emerald-950/40 hover:shadow-emerald-700/40',
-    presets: [
-      'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&auto=format&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=800&auto=format&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?w=800&auto=format&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800&auto=format&fit=crop&q=80'
-    ]
   },
   {
     id: 'phunu',
@@ -104,25 +83,12 @@ const FANPAGES: FanpageConfig[] = [
     gradient: 'from-rose-950/90 via-pink-900/65 to-rose-800/40',
     borderColor: 'border-rose-500/40 hover:border-rose-400',
     shadowColor: 'shadow-rose-950/40 hover:shadow-rose-700/40',
-    presets: [
-      'https://images.unsplash.com/photo-1509099836639-18ba1795216d?w=800&auto=format&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1490750967868-88df5691cc52?w=800&auto=format&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&auto=format&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?w=800&auto=format&fit=crop&q=80'
-    ]
   }
 ];
 
 export default function HomePage() {
-  const { setCurrentRoute, setViewMode, addNotification } = useAppStore();
+  const { setCurrentRoute, setViewMode } = useAppStore();
   const [phongTraoOpen, setPhongTraoOpen] = useState(false);
-
-  // Background customization state
-  const [bgModalOpen, setBgModalOpen] = useState(false);
-  const [selectedFp, setSelectedFp] = useState<FanpageConfig | null>(null);
-  const [customBgInput, setCustomBgInput] = useState('');
-  const [customUrlInput, setCustomUrlInput] = useState('');
-  const [refreshKey, setRefreshKey] = useState(0);
 
   const handleNav = (route: string) => {
     setCurrentRoute(route);
@@ -148,50 +114,6 @@ export default function HomePage() {
       return localStorage.getItem(`fanpage_bg_${id}`) || defaultBg;
     }
     return defaultBg;
-  };
-
-  const openBgModal = (fp: FanpageConfig) => {
-    setSelectedFp(fp);
-    setCustomBgInput(getFanpageBg(fp.id, fp.defaultBg));
-    setCustomUrlInput(getFanpageUrl(fp.id, fp.defaultUrl));
-    setBgModalOpen(true);
-  };
-
-  const handleSaveFanpageConfig = () => {
-    if (!selectedFp) return;
-    if (typeof window !== 'undefined') {
-      if (customBgInput.trim()) {
-        localStorage.setItem(`fanpage_bg_${selectedFp.id}`, customBgInput.trim());
-      } else {
-        localStorage.removeItem(`fanpage_bg_${selectedFp.id}`);
-      }
-      if (customUrlInput.trim()) {
-        localStorage.setItem(`fanpage_url_${selectedFp.id}`, customUrlInput.trim());
-      } else {
-        localStorage.removeItem(`fanpage_url_${selectedFp.id}`);
-      }
-    }
-    setRefreshKey(k => k + 1);
-    setBgModalOpen(false);
-    addNotification(
-      'Cập nhật thành công',
-      `Đã cập nhật ảnh nền & thông tin Fanpage ${selectedFp.name}`,
-      'success'
-    );
-  };
-
-  const handleResetFanpageBg = () => {
-    if (!selectedFp) return;
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem(`fanpage_bg_${selectedFp.id}`);
-    }
-    setCustomBgInput(selectedFp.defaultBg);
-    setRefreshKey(k => k + 1);
-    addNotification(
-      'Khôi phục ảnh nền',
-      `Ảnh nền ${selectedFp.name} đã trở về mặc định`,
-      'info'
-    );
   };
 
   /* ─── Phong trào sub-items ─── */
@@ -287,81 +209,58 @@ export default function HomePage() {
     </motion.button>
   );
 
-  /* ─── Vibrant Colored Tab Fanpage Card (Chỉ Logo + Tên, có ảnh nền & đổi ảnh nền) ─── */
+  /* ─── Vibrant Colored Tab Fanpage Card (Chỉ Logo + Tên, người dân chỉ click truy cập) ─── */
   const ColorTabCard = ({
     index,
     item,
-    onEdit,
   }: {
     index: number;
     item: FanpageConfig;
-    onEdit: (item: FanpageConfig) => void;
   }) => {
     const bg = getFanpageBg(item.id, item.defaultBg);
     const url = getFanpageUrl(item.id, item.defaultUrl);
 
     return (
-      <motion.div
+      <motion.button
         {...fadeUpProps(index)}
         whileHover={{ scale: 1.03, y: -4 }}
         whileTap={{ scale: 0.97 }}
-        className="relative group h-full"
+        onClick={() => handleExternal(url)}
+        className={cn(
+          "relative flex flex-col items-center justify-center p-4 sm:p-5 rounded-3xl",
+          "border overflow-hidden cursor-pointer transition-all duration-300 text-center w-full select-none group",
+          "h-full min-h-[175px] sm:min-h-[195px] md:min-h-[210px] shadow-lg",
+          item.borderColor,
+          item.shadowColor
+        )}
       >
-        <div
-          role="button"
-          tabIndex={0}
-          onClick={() => handleExternal(url)}
-          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleExternal(url); }}
-          className={cn(
-            "relative flex flex-col items-center justify-center p-4 sm:p-5 rounded-3xl",
-            "border overflow-hidden cursor-pointer transition-all duration-300 text-center w-full select-none",
-            "h-full min-h-[175px] sm:min-h-[195px] md:min-h-[210px] shadow-lg",
-            item.borderColor,
-            item.shadowColor
-          )}
-        >
-          {/* Background image with gentle zoom on hover */}
+        {/* Background image with gentle zoom on hover */}
+        <img
+          src={bg}
+          alt={item.name}
+          className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+        />
+
+        {/* Tint gradient overlay matching organization identity */}
+        <div className={cn("absolute inset-0 bg-gradient-to-t pointer-events-none", item.gradient)} />
+        <div className="absolute inset-0 bg-black/20 pointer-events-none group-hover:bg-black/10 transition-colors duration-300" />
+
+        {/* Official Emblem / Logo Badge */}
+        <div className="relative z-10 w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 rounded-2xl bg-white/95 dark:bg-white/90 p-2 sm:p-2.5 shadow-xl group-hover:scale-110 transition-transform duration-300 flex items-center justify-center border border-white/40 mb-2 sm:mb-2.5 flex-shrink-0">
           <img
-            src={bg}
+            src={item.logo}
             alt={item.name}
-            key={`${item.id}-${refreshKey}`}
-            className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+            className="w-full h-full object-contain filter drop-shadow-sm"
           />
-
-          {/* Tint gradient overlay matching organization identity */}
-          <div className={cn("absolute inset-0 bg-gradient-to-t pointer-events-none", item.gradient)} />
-          <div className="absolute inset-0 bg-black/20 pointer-events-none group-hover:bg-black/10 transition-colors duration-300" />
-
-          {/* Quick edit button for changing background image */}
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onEdit(item);
-            }}
-            title={`Đổi ảnh nền Fanpage ${item.name}`}
-            className="absolute top-2.5 right-2.5 z-20 p-2 rounded-full bg-black/45 hover:bg-black/75 backdrop-blur-md text-white/90 hover:text-white transition-all shadow-md active:scale-90 border border-white/20 cursor-pointer"
-          >
-            <Camera className="w-3.5 h-3.5" />
-          </button>
-
-          {/* Official Emblem / Logo Badge */}
-          <div className="relative z-10 w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 rounded-2xl bg-white/95 dark:bg-white/90 p-2 sm:p-2.5 shadow-xl group-hover:scale-110 transition-transform duration-300 flex items-center justify-center border border-white/40 mb-2 sm:mb-2.5 flex-shrink-0">
-            <img
-              src={item.logo}
-              alt={item.name}
-              className="w-full h-full object-contain filter drop-shadow-sm"
-            />
-          </div>
-
-          {/* Name: Only Logo + Name as requested */}
-          <div className="relative z-10 h-[44px] flex items-center justify-center px-1">
-            <span className="text-xs sm:text-sm md:text-[15px] font-black text-white uppercase leading-snug tracking-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] text-center select-none line-clamp-2">
-              {item.name}
-            </span>
-          </div>
         </div>
-      </motion.div>
+
+        {/* Name: Only Logo + Name as requested */}
+        <div className="relative z-10 h-[44px] flex items-center justify-center px-1">
+          <span className="text-xs sm:text-sm md:text-[15px] font-black text-white uppercase leading-snug tracking-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] text-center select-none line-clamp-2">
+            {item.name}
+          </span>
+        </div>
+      </motion.button>
     );
   };
 
@@ -600,19 +499,14 @@ export default function HomePage() {
         {/* ═══════════════════════════════════════════
             ROW 3 — 4 Tab Màu Cổng Fanpage Đoàn Thể
             Mặt trận Tổ quốc | Công đoàn | Đoàn Thanh niên | Hội Phụ nữ
-            (Chỉ Logo + Tên, có ảnh nền và nút đổi ảnh nền)
+            (Chỉ Logo + Tên, người dân nhấn để truy cập trực tiếp)
         ═══════════════════════════════════════════ */}
         <div className="mb-8 sm:mb-10">
-          <div className="flex items-center justify-between mb-3 pl-1">
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
-              <h3 className="text-xs sm:text-sm font-black text-slate-700 dark:text-slate-200 uppercase tracking-wider">
-                Cổng Fanpage Đoàn thể • Truy cập nhanh
-              </h3>
-            </div>
-            <span className="text-[11px] font-medium text-slate-400 dark:text-slate-500 hidden sm:inline">
-              Nhấn icon 📷 để đổi ảnh nền từng Fanpage
-            </span>
+          <div className="flex items-center gap-2 mb-3 pl-1">
+            <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
+            <h3 className="text-xs sm:text-sm font-black text-slate-700 dark:text-slate-200 uppercase tracking-wider">
+              Cổng Fanpage Đoàn thể • Truy cập nhanh
+            </h3>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 lg:gap-5 items-stretch">
@@ -621,7 +515,6 @@ export default function HomePage() {
                 key={item.id}
                 index={8 + index}
                 item={item}
-                onEdit={openBgModal}
               />
             ))}
           </div>
@@ -648,132 +541,6 @@ export default function HomePage() {
         </div>
 
       </PageContainer>
-
-      {/* ═══════════════════════════════════════════
-          MODAL ĐỔI ẢNH NỀN VÀ LINK FANPAGE
-      ═══════════════════════════════════════════ */}
-      <Modal
-        isOpen={bgModalOpen}
-        onClose={() => setBgModalOpen(false)}
-        title={selectedFp ? `Đổi ảnh nền Fanpage: ${selectedFp.name}` : 'Đổi ảnh nền'}
-        size="md"
-      >
-        {selectedFp && (
-          <div className="flex flex-col gap-4 text-left">
-            {/* Live Preview Box */}
-            <div className="relative w-full h-36 sm:h-44 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-inner flex flex-col items-center justify-center">
-              <img
-                src={customBgInput || selectedFp.defaultBg}
-                alt="Preview"
-                className="absolute inset-0 w-full h-full object-cover"
-              />
-              <div className={cn("absolute inset-0 bg-gradient-to-t pointer-events-none", selectedFp.gradient)} />
-              <div className="absolute inset-0 bg-black/20 pointer-events-none" />
-
-              {/* Logo & Title preview */}
-              <div className="relative z-10 w-12 h-12 rounded-xl bg-white/95 p-2 shadow-lg flex items-center justify-center mb-1.5 border border-white/40">
-                <img src={selectedFp.logo} alt={selectedFp.name} className="w-full h-full object-contain" />
-              </div>
-              <span className="relative z-10 text-xs sm:text-sm font-black text-white uppercase drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
-                {selectedFp.name}
-              </span>
-              <span className="absolute bottom-2 right-2.5 z-10 text-[10px] font-bold bg-black/50 text-white/90 px-2 py-0.5 rounded-md backdrop-blur-sm">
-                Xem trước
-              </span>
-            </div>
-
-            {/* Presets Gallery */}
-            <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-1.5">
-                <ImageIcon className="w-3.5 h-3.5 text-blue-500" />
-                Chọn ảnh mẫu sẵn có:
-              </label>
-              <div className="grid grid-cols-4 gap-2">
-                {selectedFp.presets.map((presetUrl, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => setCustomBgInput(presetUrl)}
-                    className={cn(
-                      "relative h-14 rounded-xl overflow-hidden border-2 transition-all cursor-pointer group",
-                      customBgInput === presetUrl
-                        ? "border-blue-500 ring-2 ring-blue-500/30 scale-95"
-                        : "border-slate-200 dark:border-slate-700 hover:border-slate-400"
-                    )}
-                  >
-                    <img src={presetUrl} alt={`Preset ${idx + 1}`} className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
-                    {customBgInput === presetUrl && (
-                      <div className="absolute inset-0 bg-blue-600/30 flex items-center justify-center">
-                        <Check className="w-4 h-4 text-white stroke-[3px]" />
-                      </div>
-                    )}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Custom Background Image URL Input */}
-            <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-1.5">
-                <ImageIcon className="w-3.5 h-3.5 text-slate-500" />
-                Hoặc dán liên kết ảnh (URL):
-              </label>
-              <input
-                type="url"
-                value={customBgInput}
-                onChange={(e) => setCustomBgInput(e.target.value)}
-                placeholder="https://images.unsplash.com/..."
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono"
-              />
-            </div>
-
-            {/* Fanpage Link URL Input */}
-            <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-1.5">
-                <LinkIcon className="w-3.5 h-3.5 text-slate-500" />
-                Đường dẫn liên kết Fanpage:
-              </label>
-              <input
-                type="url"
-                value={customUrlInput}
-                onChange={(e) => setCustomUrlInput(e.target.value)}
-                placeholder="https://www.facebook.com/..."
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono"
-              />
-            </div>
-
-            {/* Actions */}
-            <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
-              <button
-                type="button"
-                onClick={handleResetFanpageBg}
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all cursor-pointer"
-              >
-                <RotateCcw className="w-3.5 h-3.5" />
-                Khôi phục mặc định
-              </button>
-
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setBgModalOpen(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 transition-all cursor-pointer"
-                >
-                  Hủy
-                </button>
-                <button
-                  type="button"
-                  onClick={handleSaveFanpageConfig}
-                  className="inline-flex items-center gap-1.5 px-5 py-2 rounded-xl text-xs font-black text-white bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-500/20 active:scale-95 transition-all cursor-pointer"
-                >
-                  <Check className="w-3.5 h-3.5 stroke-[3px]" />
-                  Lưu thay đổi
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-      </Modal>
 
     </div>
   );
