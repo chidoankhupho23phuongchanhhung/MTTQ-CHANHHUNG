@@ -163,7 +163,8 @@ export default function FanpageSection({ className }: { className?: string }) {
   const processFile = async (file: File) => {
     if (!file) return;
 
-    if (!file.type.startsWith('image/')) {
+    const isImage = file.type.startsWith('image/') || /\.(jpe?g|png|webp|gif|bmp|heic|heif)$/i.test(file.name);
+    if (!isImage && file.type) {
       alert('Vui lòng chọn tệp hình ảnh (JPG, PNG, WebP...)');
       return;
     }
@@ -172,6 +173,27 @@ export default function FanpageSection({ className }: { className?: string }) {
     setUploadedFileName(file.name);
 
     try {
+      // 1. Try uploading to local server API first
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+        const res = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && data.url) {
+            setTempBg(data.url);
+            setUploading(false);
+            return;
+          }
+        }
+      } catch (apiErr) {
+        console.warn('API upload error, using canvas fallback', apiErr);
+      }
+
+      // 2. Fallback to client-side canvas compression
       const reader = new FileReader();
       reader.onload = (event) => {
         const rawDataUrl = event.target?.result as string;
@@ -180,7 +202,7 @@ export default function FanpageSection({ className }: { className?: string }) {
           try {
             const canvas = document.createElement('canvas');
             let { width, height } = img;
-            const maxDim = 1200;
+            const maxDim = 1000;
             if (width > maxDim || height > maxDim) {
               if (width > height) {
                 height = Math.round((height * maxDim) / width);
@@ -195,7 +217,7 @@ export default function FanpageSection({ className }: { className?: string }) {
             const ctx = canvas.getContext('2d');
             if (ctx) {
               ctx.drawImage(img, 0, 0, width, height);
-              const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+              const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.80);
               setTempBg(compressedDataUrl);
 
               // Attempt upload to Firebase Storage
@@ -220,13 +242,11 @@ export default function FanpageSection({ className }: { className?: string }) {
           }
         };
         img.onerror = () => {
-          console.error('Failed to load image element');
           setUploading(false);
         };
         img.src = rawDataUrl;
       };
       reader.onerror = () => {
-        console.error('Failed to read file');
         setUploading(false);
       };
       reader.readAsDataURL(file);
@@ -285,16 +305,20 @@ export default function FanpageSection({ className }: { className?: string }) {
     setBgs(newBgs);
 
     if (typeof window !== 'undefined') {
-      if (trimmedUrl && trimmedUrl !== editingItem.defaultUrl) {
-        localStorage.setItem(`fanpage_url_${editingItem.id}`, trimmedUrl);
-      } else {
-        localStorage.removeItem(`fanpage_url_${editingItem.id}`);
-      }
+      try {
+        if (trimmedUrl && trimmedUrl !== editingItem.defaultUrl) {
+          localStorage.setItem(`fanpage_url_${editingItem.id}`, trimmedUrl);
+        } else {
+          localStorage.removeItem(`fanpage_url_${editingItem.id}`);
+        }
 
-      if (trimmedBg && trimmedBg !== editingItem.defaultBg) {
-        localStorage.setItem(`fanpage_bg_${editingItem.id}`, trimmedBg);
-      } else {
-        localStorage.removeItem(`fanpage_bg_${editingItem.id}`);
+        if (trimmedBg && trimmedBg !== editingItem.defaultBg) {
+          localStorage.setItem(`fanpage_bg_${editingItem.id}`, trimmedBg);
+        } else {
+          localStorage.removeItem(`fanpage_bg_${editingItem.id}`);
+        }
+      } catch (storageErr) {
+        console.warn('localStorage quota exceeded', storageErr);
       }
     }
 

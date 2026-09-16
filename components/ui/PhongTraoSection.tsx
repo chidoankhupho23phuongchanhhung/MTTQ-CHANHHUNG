@@ -69,49 +69,55 @@ export default function PhongTraoSection({ className }: PhongTraoSectionProps) {
   const handleSave = () => {
     if (!editingItem) return;
 
-    const trimmedBg = tempBg.trim();
-    const isDefault = trimmedBg === editingItem.defaultBg || !trimmedBg;
+    try {
+      const trimmedBg = tempBg.trim();
+      const isDefault = trimmedBg === editingItem.defaultBg || !trimmedBg;
 
-    if (isDefault) {
-      resetPhongTraoBg(editingItem.id);
-      const newBgs = { ...bgs };
-      delete newBgs[editingItem.id];
-      setBgs(newBgs);
-    } else {
-      setPhongTraoBg(editingItem.id, trimmedBg);
-      setBgs({ ...bgs, [editingItem.id]: trimmedBg });
+      if (isDefault) {
+        resetPhongTraoBg(editingItem.id);
+        const newBgs = { ...bgs };
+        delete newBgs[editingItem.id];
+        setBgs(newBgs);
+      } else {
+        setPhongTraoBg(editingItem.id, trimmedBg);
+        setBgs({ ...bgs, [editingItem.id]: trimmedBg });
+      }
+
+      addNotification(
+        'Cập nhật thành công',
+        `Đã lưu ảnh nền mới cho phong trào "${editingItem.shortLabel}"`,
+        'success'
+      );
+    } catch (err) {
+      console.error('Save error:', err);
     }
-
-    addNotification(
-      'Cập nhật thành công',
-      `Đã lưu ảnh nền mới cho phong trào "${editingItem.shortLabel}"`,
-      'success'
-    );
 
     setEditingItem(null);
   };
 
   const handleResetToDefault = (item: PhongTraoItem) => {
-    resetPhongTraoBg(item.id);
-    const newBgs = { ...bgs };
-    delete newBgs[item.id];
-    setBgs(newBgs);
-    addNotification(
-      'Đã khôi phục',
-      `Đã đặt lại ảnh nền mặc định cho "${item.shortLabel}"`,
-      'info'
-    );
+    try {
+      resetPhongTraoBg(item.id);
+      const newBgs = { ...bgs };
+      delete newBgs[item.id];
+      setBgs(newBgs);
+      addNotification(
+        'Đã khôi phục',
+        `Đã đặt lại ảnh nền mặc định cho "${item.shortLabel}"`,
+        'info'
+      );
+    } catch (err) {
+      console.error('Reset error:', err);
+    }
   };
 
-  // Process uploaded local image with canvas compression
-  const processFile = (file: File) => {
-    if (!file.type.startsWith('image/')) {
-      alert('Vui lòng chọn tệp hình ảnh hợp lệ (PNG, JPG, JPEG, WEBP)');
-      return;
-    }
+  // Process uploaded local image with server API upload + client canvas fallback
+  const processFile = async (file: File) => {
+    if (!file) return;
 
-    if (file.size > 15 * 1024 * 1024) {
-      alert('Kích thước ảnh tối đa là 15MB');
+    const isImage = file.type.startsWith('image/') || /\.(jpe?g|png|webp|gif|bmp|heic|heif)$/i.test(file.name);
+    if (!isImage && file.type) {
+      alert('Vui lòng chọn tệp hình ảnh (PNG, JPG, WEBP...)');
       return;
     }
 
@@ -119,14 +125,35 @@ export default function PhongTraoSection({ className }: PhongTraoSectionProps) {
     setUploadedFileName(file.name);
 
     try {
+      // 1. Try uploading to local server API first
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+        const res = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && data.url) {
+            setTempBg(data.url);
+            setUploading(false);
+            return;
+          }
+        }
+      } catch (apiErr) {
+        console.warn('API upload error, using canvas fallback', apiErr);
+      }
+
+      // 2. Client-side canvas compression fallback
       const reader = new FileReader();
       reader.onload = (e) => {
         const rawDataUrl = e.target?.result as string;
         const img = new Image();
         img.onload = async () => {
           try {
-            const maxWidth = 1200;
-            const maxHeight = 800;
+            const maxWidth = 1000;
+            const maxHeight = 700;
             let targetW = img.width;
             let targetH = img.height;
 
@@ -142,7 +169,7 @@ export default function PhongTraoSection({ className }: PhongTraoSectionProps) {
             const ctx = canvas.getContext('2d');
             if (ctx) {
               ctx.drawImage(img, 0, 0, targetW, targetH);
-              const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.82);
+              const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.80);
               setTempBg(compressedDataUrl);
 
               // Upload to Firebase Storage if available
@@ -167,13 +194,11 @@ export default function PhongTraoSection({ className }: PhongTraoSectionProps) {
           }
         };
         img.onerror = () => {
-          console.error('Failed to load image element');
           setUploading(false);
         };
         img.src = rawDataUrl;
       };
       reader.onerror = () => {
-        console.error('Failed to read file');
         setUploading(false);
       };
       reader.readAsDataURL(file);
@@ -420,21 +445,39 @@ export default function PhongTraoSection({ className }: PhongTraoSectionProps) {
                     <Upload className="w-3.5 h-3.5 text-purple-500" />
                     Tải ảnh từ máy tính hoặc điện thoại:
                   </label>
-                  <div
-                    onClick={() => fileInputRef.current?.click()}
+                  <label
+                    htmlFor="phongtrao-file-upload"
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      const file = e.dataTransfer.files?.[0];
+                      if (file) processFile(file);
+                    }}
                     className={cn(
                       "relative flex flex-col items-center justify-center gap-2 w-full p-4 rounded-2xl border-2 border-dashed transition-all cursor-pointer select-none",
                       uploading
                         ? "border-purple-500 bg-purple-50/50 dark:bg-purple-950/20 pointer-events-none"
-                        : "border-slate-300 dark:border-slate-700 hover:border-purple-500 hover:bg-purple-50/20 dark:hover:bg-purple-950/10"
+                        : uploadedFileName
+                        ? "border-emerald-400 dark:border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/20 hover:bg-emerald-100/50"
+                        : "border-purple-400 dark:border-purple-500 bg-purple-50/60 dark:bg-purple-950/30 hover:bg-purple-100/70 dark:hover:bg-purple-900/40"
                     )}
                   >
                     <input
-                      ref={fileInputRef}
+                      id="phongtrao-file-upload"
                       type="file"
                       accept="image/*"
                       onChange={handleFileInputChange}
-                      className="hidden"
+                      style={{
+                        position: 'absolute',
+                        width: '1px',
+                        height: '1px',
+                        padding: 0,
+                        margin: '-1px',
+                        overflow: 'hidden',
+                        clip: 'rect(0, 0, 0, 0)',
+                        whiteSpace: 'nowrap',
+                        border: 0,
+                      }}
                     />
 
                     {uploading ? (
@@ -450,16 +493,16 @@ export default function PhongTraoSection({ className }: PhongTraoSectionProps) {
                       </div>
                     ) : (
                       <div className="flex flex-col items-center text-center">
-                        <Camera className="w-6 h-6 text-slate-400 mb-1" />
+                        <Camera className="w-6 h-6 text-purple-600 dark:text-purple-400 mb-1" />
                         <span className="text-xs font-bold text-slate-700 dark:text-slate-200">
-                          Bấm vào đây để chọn ảnh
+                          Bấm vào đây để chọn ảnh từ thiết bị
                         </span>
                         <span className="text-[10px] text-slate-400 mt-0.5">
                           Hỗ trợ PNG, JPG, WEBP (Tự động nén tối ưu hiển thị nhanh)
                         </span>
                       </div>
                     )}
-                  </div>
+                  </label>
                 </div>
 
                 {/* Custom Image URL */}

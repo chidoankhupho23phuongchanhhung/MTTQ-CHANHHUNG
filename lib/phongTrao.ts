@@ -88,10 +88,14 @@ export const getPhongTraoBg = (id: string, defaultBg: string): string => {
 
 export const setPhongTraoBg = (id: string, bg: string): void => {
   if (typeof window !== 'undefined') {
-    if (bg) {
-      localStorage.setItem(`phongtrao_bg_${id}`, bg);
-    } else {
-      localStorage.removeItem(`phongtrao_bg_${id}`);
+    try {
+      if (bg) {
+        localStorage.setItem(`phongtrao_bg_${id}`, bg);
+      } else {
+        localStorage.removeItem(`phongtrao_bg_${id}`);
+      }
+    } catch (e) {
+      console.warn('localStorage quota exceeded, saving to memory/fallback', e);
     }
     window.dispatchEvent(new Event('phongtrao-bg-updated'));
   }
@@ -99,7 +103,11 @@ export const setPhongTraoBg = (id: string, bg: string): void => {
 
 export const resetPhongTraoBg = (id: string): void => {
   if (typeof window !== 'undefined') {
-    localStorage.removeItem(`phongtrao_bg_${id}`);
+    try {
+      localStorage.removeItem(`phongtrao_bg_${id}`);
+    } catch (e) {
+      console.warn('localStorage remove error', e);
+    }
     window.dispatchEvent(new Event('phongtrao-bg-updated'));
   }
 };
