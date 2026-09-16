@@ -509,34 +509,34 @@ export default function StaffDashboardPage() {
         {/* Column Left (2/3 Width) - Weekly Schedule & Urgent Items */}
         <div className="lg:col-span-2 flex flex-col gap-6">
           {/* Lịch công tác tuần */}
-          <GlassCard hoverable={false} className="p-5 bg-white/50 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/50">
+          <GlassCard hoverable={false} className="p-5 bg-white/70 dark:bg-slate-900/80 border border-slate-200/70 dark:border-slate-700/70 shadow-xs dark:shadow-md">
             <GoogleSheetSchedule />
           </GlassCard>
 
           {/* Urgent Feedbacks Table */}
           <div>
-            <h3 className="text-xs font-black text-slate-500 pl-1 mb-3.5 uppercase tracking-wider flex items-center gap-1.5">
+            <h3 className="text-xs font-black text-slate-700 dark:text-slate-200 pl-1 mb-3.5 uppercase tracking-wider flex items-center gap-1.5">
               <AlertTriangle className="h-4 w-4 text-rose-500" />
               Kiến nghị khẩn cấp & Phản ánh mới cần duyệt
             </h3>
             
-            <div className="overflow-x-auto rounded-2xl border border-slate-200/50 dark:border-slate-800/50 bg-white/40 dark:bg-slate-900/40 backdrop-blur-md">
+            <div className="overflow-x-auto rounded-2xl border border-slate-200/70 dark:border-slate-700/70 bg-white/70 dark:bg-slate-900/80 backdrop-blur-md">
               <Table headers={["Mã số", "Tiêu đề", "Khu vực", "Độ ưu tiên", "Thao tác"]}>
                 {urgentFeedbacks.map((fb) => (
                   <tr
                     key={fb.id}
                     onClick={() => setSelectedFbId(fb.id)}
-                    className={`hover:bg-slate-100/30 dark:hover:bg-slate-800/20 cursor-pointer transition-colors border-b border-slate-200/30 dark:border-slate-800/30 ${
-                      selectedFb?.id === fb.id ? "bg-blue-600/5 dark:bg-blue-950/15" : ""
+                    className={`hover:bg-slate-100/50 dark:hover:bg-slate-800/40 cursor-pointer transition-colors border-b border-slate-200/40 dark:border-slate-700/40 ${
+                      selectedFb?.id === fb.id ? "bg-blue-600/10 dark:bg-blue-900/25" : ""
                     }`}
                   >
-                    <td className="px-6 py-3.5 font-bold text-xs text-slate-850 dark:text-white tracking-wider">
+                    <td className="px-6 py-3.5 font-bold text-xs text-slate-900 dark:text-white tracking-wider">
                       {fb.feedbackCode}
                     </td>
-                    <td className="px-6 py-3.5 font-semibold text-slate-700 dark:text-slate-350 max-w-[240px] truncate">
+                    <td className="px-6 py-3.5 font-semibold text-slate-800 dark:text-slate-100 max-w-[240px] truncate">
                       {fb.title}
                     </td>
-                    <td className="px-6 py-3.5 text-xs font-semibold text-slate-500 dark:text-slate-400">
+                    <td className="px-6 py-3.5 text-xs font-semibold text-slate-600 dark:text-slate-300">
                       {fb.wardGroup}
                     </td>
                     <td className="px-6 py-3.5 text-xs">
@@ -553,7 +553,7 @@ export default function StaffDashboardPage() {
                         }}
                         size="sm"
                         variant="secondary"
-                        className="py-1 px-2.5 text-[10px] bg-blue-600/5 border-blue-200/50 text-blue-600 dark:text-blue-400 dark:bg-blue-950/10 font-bold"
+                        className="py-1 px-2.5 text-[10px] bg-blue-600/10 border-blue-200/60 text-blue-700 dark:text-blue-300 dark:bg-blue-950/30 dark:border-blue-800/50 font-bold"
                       >
                         Xử lý nhanh
                       </Button>
@@ -562,7 +562,7 @@ export default function StaffDashboardPage() {
                 ))}
                 {urgentFeedbacks.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="text-center py-6 text-xs text-slate-400 italic">Không có phản ánh khẩn cấp nào cần xử lý hôm nay.</td>
+                    <td colSpan={5} className="text-center py-6 text-xs text-slate-500 dark:text-slate-300 italic">Không có phản ánh khẩn cấp nào cần xử lý hôm nay.</td>
                   </tr>
                 )}
               </Table>
@@ -573,8 +573,8 @@ export default function StaffDashboardPage() {
         {/* Column Right (1/3 Width) - Pipeline Stepper & Mini-Stats & AI */}
         <div className="flex flex-col gap-6">
           {/* Vertical Stepper: Quy trình xử lý */}
-          <GlassCard hoverable={false} className="p-5 bg-white/50 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/50">
-            <h3 className="text-xs font-black text-slate-500 mb-4 uppercase tracking-wider pl-1">
+          <GlassCard hoverable={false} className="p-5 bg-white/70 dark:bg-slate-900/80 border border-slate-200/70 dark:border-slate-700/70 shadow-xs dark:shadow-md">
+            <h3 className="text-xs font-black text-slate-700 dark:text-slate-200 mb-4 uppercase tracking-wider pl-1">
               Tiến độ Quy trình Tiếp nhận
             </h3>
             
@@ -585,10 +585,10 @@ export default function StaffDashboardPage() {
                   <div key={step.id} className="flex items-start gap-3 relative">
                     {/* Stepper Line connector */}
                     {idx < pipelineSteps.length - 1 && (
-                      <div className="absolute left-4.5 top-9 bottom-[-16px] w-0.5 bg-slate-200 dark:bg-slate-800" />
+                      <div className="absolute left-4.5 top-9 bottom-[-16px] w-0.5 bg-slate-200 dark:bg-slate-700" />
                     )}
 
-                    <div className="p-2 bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 rounded-xl relative shadow-xs flex-shrink-0 z-10">
+                    <div className="p-2 bg-blue-50 text-blue-600 dark:bg-blue-900/40 dark:text-blue-300 rounded-xl relative shadow-xs flex-shrink-0 z-10 border border-blue-100 dark:border-blue-800/50">
                       <StepIcon className="h-4.5 w-4.5" />
                       <span className="absolute -top-1.5 -right-1.5 bg-blue-600 text-white text-[8px] font-black w-3.5 h-3.5 rounded-full flex items-center justify-center">
                         {idx + 1}
@@ -597,12 +597,12 @@ export default function StaffDashboardPage() {
 
                     <div className="flex-1 min-w-0 text-left pt-0.5">
                       <div className="flex items-center justify-between gap-2">
-                        <span className="text-[11px] font-black text-slate-700 dark:text-white uppercase tracking-wider">{step.label}</span>
+                        <span className="text-[11px] font-black text-slate-800 dark:text-white uppercase tracking-wider">{step.label}</span>
                         <Badge variant="neutral" className="text-[9px] font-bold py-0.5 px-1.5">
                           {step.count} hồ sơ
                         </Badge>
                       </div>
-                      <p className="text-[9.5px] text-slate-400 mt-0.5">
+                      <p className="text-[10px] text-slate-500 dark:text-slate-300 mt-0.5 font-medium leading-normal">
                         {idx === 0 && "Kiểm tra thông tin biểu mẫu người dân gửi"}
                         {idx === 1 && "Phân loại theo ban ngành phụ trách đô thị / môi trường"}
                         {idx === 2 && "Chuyển giao cán bộ kỹ thuật kiểm tra hiện địa bàn"}
@@ -618,22 +618,22 @@ export default function StaffDashboardPage() {
           </GlassCard>
 
           {/* AI Helper tool box */}
-          <GlassCard className="p-5 bg-gradient-to-br from-blue-600/5 via-blue-600/[0.02] to-amber-600/[0.02] border-blue-200/50 dark:border-blue-900/30 flex flex-col gap-4">
-            <div className="flex items-center gap-2 border-b border-slate-200/40 pb-3">
+          <GlassCard className="p-5 bg-gradient-to-br from-blue-600/10 via-blue-600/[0.04] to-amber-600/[0.04] dark:bg-slate-900/80 border-blue-200/60 dark:border-blue-800/50 flex flex-col gap-4 shadow-xs dark:shadow-md">
+            <div className="flex items-center gap-2 border-b border-slate-200/50 dark:border-slate-700/60 pb-3">
               <div className="p-2 bg-blue-600 text-white rounded-xl shadow-md flex-shrink-0">
                 <Bot className="h-4.5 w-4.5 animate-pulse-glow" />
               </div>
               <div>
                 <h4 className="text-xs font-bold text-slate-800 dark:text-white uppercase tracking-wider">Trợ lý AI nhanh</h4>
-                <span className="text-[9px] text-slate-400 font-medium">Xử lý ngay văn bản phản hồi</span>
+                <span className="text-[10px] text-slate-500 dark:text-slate-300 font-medium">Xử lý ngay văn bản phản hồi</span>
               </div>
             </div>
 
             {selectedFb ? (
               <div className="flex flex-col gap-3">
-                <div className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200/50 dark:border-slate-800/50 flex flex-col gap-1 text-xs">
-                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Đang lựa chọn:</span>
-                  <span className="font-bold text-slate-800 dark:text-white truncate">{selectedFb.feedbackCode} - {selectedFb.title}</span>
+                <div className="p-3 bg-white dark:bg-slate-950/60 rounded-xl border border-slate-200/60 dark:border-slate-700/60 flex flex-col gap-1 text-xs">
+                  <span className="text-[9px] font-bold text-slate-500 dark:text-slate-300 uppercase tracking-wider">Đang lựa chọn:</span>
+                  <span className="font-bold text-slate-900 dark:text-white truncate">{selectedFb.feedbackCode} - {selectedFb.title}</span>
                 </div>
 
                 <div className="flex flex-col gap-2">
@@ -641,7 +641,7 @@ export default function StaffDashboardPage() {
                     onClick={() => setAiSummaryModal(true)}
                     variant="secondary"
                     size="sm"
-                    className="w-full text-[10px] font-bold justify-start gap-1.5 bg-white/40"
+                    className="w-full text-[10px] font-bold justify-start gap-1.5 bg-white/60 dark:bg-slate-800/70 text-slate-800 dark:text-slate-200"
                   >
                     <Sparkles className="h-3.5 w-3.5 text-amber-500" />
                     Tóm tắt phản ánh hỏa tốc
@@ -650,7 +650,7 @@ export default function StaffDashboardPage() {
                     onClick={() => setAiSuggestionModal(true)}
                     variant="secondary"
                     size="sm"
-                    className="w-full text-[10px] font-bold justify-start gap-1.5 bg-white/40"
+                    className="w-full text-[10px] font-bold justify-start gap-1.5 bg-white/60 dark:bg-slate-800/70 text-slate-800 dark:text-slate-200"
                   >
                     <Bot className="h-3.5 w-3.5 text-blue-500" />
                     Gợi ý biên bản phản hồi
@@ -658,15 +658,15 @@ export default function StaffDashboardPage() {
                 </div>
               </div>
             ) : (
-              <div className="text-center py-2 text-[10px] text-slate-400 italic">
+              <div className="text-center py-2 text-[10px] text-slate-500 dark:text-slate-300 italic">
                 Lựa chọn phản ánh khẩn bên trái để sử dụng Trợ lý AI.
               </div>
             )}
           </GlassCard>
 
           {/* Quick Donut Chart (Overview status) */}
-          <GlassCard hoverable={false} className="p-4 bg-white/50 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/50">
-            <h4 className="text-[10px] font-black text-slate-500 mb-3.5 uppercase tracking-widest pl-1">Phân bố trạng thái xử lý</h4>
+          <GlassCard hoverable={false} className="p-4 bg-white/70 dark:bg-slate-900/80 border border-slate-200/70 dark:border-slate-700/70 shadow-xs dark:shadow-md">
+            <h4 className="text-[10px] font-black text-slate-700 dark:text-slate-200 mb-3.5 uppercase tracking-widest pl-1">Phân bố trạng thái xử lý</h4>
             <div className="h-36">
               <DonutChart data={staffDonutData} />
             </div>

@@ -13,14 +13,14 @@ export default function Table({
   ...props
 }: TableProps) {
   return (
-    <div className="w-full overflow-x-auto rounded-2xl border border-slate-200/50 dark:border-slate-800/50 bg-white/40 dark:bg-slate-900/40 backdrop-blur-md no-scrollbar">
+    <div className="w-full overflow-x-auto rounded-2xl border border-slate-200/70 dark:border-slate-700/70 bg-white/70 dark:bg-slate-900/80 backdrop-blur-md no-scrollbar">
       <table className={cn("w-full text-left border-collapse", className)} {...props}>
         <thead>
-          <tr className="border-b border-slate-200/50 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-950/30">
+          <tr className="border-b border-slate-200/70 dark:border-slate-700/70 bg-slate-50/80 dark:bg-slate-950/60">
             {headers.map((header, idx) => (
               <th
                 key={idx}
-                className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400"
+                className="px-6 py-4 text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-200"
               >
                 {header}
               </th>

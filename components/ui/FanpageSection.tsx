@@ -186,7 +186,7 @@ export default function FanpageSection({ className }: { className?: string }) {
               transition={{ duration: 0.35, delay: index * 0.08 }}
               className={cn(
                 "relative rounded-3xl p-5 border flex flex-col justify-between transition-all duration-300",
-                "bg-white/70 dark:bg-slate-900/60 backdrop-blur-md shadow-sm hover:shadow-md group",
+                "bg-white/80 dark:bg-slate-900/85 backdrop-blur-md shadow-xs hover:shadow-md group",
                 item.colorScheme.border
               )}
             >
@@ -217,17 +217,17 @@ export default function FanpageSection({ className }: { className?: string }) {
 
               {/* Title & Description */}
               <div className="flex-1 flex flex-col justify-start mb-4">
-                <h4 className="text-xs sm:text-[13px] font-black text-slate-800 dark:text-white uppercase leading-snug group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                <h4 className="text-xs sm:text-[13px] font-black text-slate-900 dark:text-white uppercase leading-snug group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                   {item.name}
                 </h4>
-                <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed line-clamp-2">
+                <p className="text-[10px] sm:text-[11px] text-slate-600 dark:text-slate-200 mt-1.5 leading-relaxed line-clamp-2 font-medium">
                   {item.desc}
                 </p>
               </div>
 
               {/* URL Display Bar */}
-              <div className="mb-4 p-2 rounded-xl bg-slate-100/70 dark:bg-slate-800/60 border border-slate-200/50 dark:border-slate-700/50 flex items-center justify-between gap-2">
-                <span className="text-[10px] font-medium text-slate-600 dark:text-slate-300 truncate max-w-[170px]" title={currentUrl}>
+              <div className="mb-4 p-2 rounded-xl bg-slate-100/80 dark:bg-slate-950/70 border border-slate-200/70 dark:border-slate-700/70 flex items-center justify-between gap-2">
+                <span className="text-[10px] font-semibold text-slate-700 dark:text-slate-200 truncate max-w-[170px]" title={currentUrl}>
                   {currentUrl}
                 </span>
                 <div className="flex items-center gap-1 flex-shrink-0">

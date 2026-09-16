@@ -172,11 +172,11 @@ function ScheduleCard({ row, index }: { row: ScheduleRow; index: number }) {
             {row.thoigian && (
               <div className="flex items-center gap-1 mb-0.5">
                 <Clock className="h-3 w-3 text-slate-400 flex-shrink-0" />
-                <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400">{row.thoigian}</span>
+                <span className="text-[10px] font-semibold text-slate-600 dark:text-slate-200">{row.thoigian}</span>
               </div>
             )}
             {row.noidung && (
-              <p className="text-[11px] font-bold text-slate-800 dark:text-white leading-snug pr-4">{row.noidung}</p>
+              <p className="text-[11px] font-bold text-slate-900 dark:text-white leading-snug pr-4">{row.noidung}</p>
             )}
           </div>
         </div>
@@ -185,13 +185,13 @@ function ScheduleCard({ row, index }: { row: ScheduleRow; index: number }) {
         {(row.diaDiem || row.thanhphan) && (
           <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2 pl-0">
             {row.diaDiem && (
-              <span className="flex items-center gap-1 text-[10px] text-slate-500 dark:text-slate-400">
+              <span className="flex items-center gap-1 text-[10px] text-slate-600 dark:text-slate-200 font-medium">
                 <MapPin className="h-3 w-3 text-rose-400 flex-shrink-0" />
                 <span className="truncate max-w-[160px]">{row.diaDiem}</span>
               </span>
             )}
             {row.thanhphan && (
-              <span className="flex items-center gap-1 text-[10px] text-slate-500 dark:text-slate-400">
+              <span className="flex items-center gap-1 text-[10px] text-slate-600 dark:text-slate-200 font-medium">
                 <Users className="h-3 w-3 text-blue-400 flex-shrink-0" />
                 <span className="truncate max-w-[180px]">{row.thanhphan}</span>
               </span>
@@ -318,13 +318,13 @@ export default function GoogleSheetSchedule() {
             </h3>
             <div className="flex items-center gap-2 mt-0.5">
               {lastTime && (
-                <span className="flex items-center gap-1 text-[9px] text-slate-400">
+                <span className="flex items-center gap-1 text-[9px] text-slate-500 dark:text-slate-300 font-medium">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                   Cập nhật {lastTime}
                 </span>
               )}
               {trongTamCount > 0 && (
-                <span className="flex items-center gap-1 bg-yellow-100 dark:bg-yellow-950/30 text-yellow-700 dark:text-yellow-400 text-[8px] font-black px-2 py-0.5 rounded-full border border-yellow-200/50">
+                <span className="flex items-center gap-1 bg-yellow-100 dark:bg-yellow-950/40 text-yellow-800 dark:text-yellow-300 text-[8px] font-black px-2 py-0.5 rounded-full border border-yellow-300/60 dark:border-yellow-700/50">
                   <Star className="h-2.5 w-2.5" /> {trongTamCount} trọng tâm
                 </span>
               )}
@@ -334,29 +334,29 @@ export default function GoogleSheetSchedule() {
 
         <div className="flex items-center gap-1.5">
           <button onClick={() => fetchSheet()} disabled={loading} title="Tải lại"
-            className="p-1.5 rounded-lg bg-white/70 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 text-slate-400 hover:text-blue-500 transition-all cursor-pointer disabled:opacity-40">
+            className="p-1.5 rounded-lg bg-white/70 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 text-slate-500 dark:text-slate-300 hover:text-blue-500 transition-all cursor-pointer disabled:opacity-40">
             <RefreshCw className={cn('h-3.5 w-3.5', loading && 'animate-spin')} />
           </button>
           <button onClick={() => setExpanded(true)} title="Phóng to"
-            className="p-1.5 rounded-lg bg-white/70 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 text-slate-400 hover:text-blue-500 transition-all cursor-pointer">
+            className="p-1.5 rounded-lg bg-white/70 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 text-slate-500 dark:text-slate-300 hover:text-blue-500 transition-all cursor-pointer">
             <Maximize2 className="h-3.5 w-3.5" />
           </button>
           <a href={SHEET_URL} target="_blank" rel="noopener noreferrer" title="Mở Google Sheets"
-            className="p-1.5 rounded-lg bg-white/70 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 text-slate-400 hover:text-emerald-500 transition-all">
+            className="p-1.5 rounded-lg bg-white/70 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 text-slate-500 dark:text-slate-300 hover:text-emerald-500 transition-all">
             <ExternalLink className="h-3.5 w-3.5" />
           </a>
         </div>
       </div>
 
       {/* ── Search & Filter Controls ── */}
-      <div className="flex flex-wrap sm:flex-nowrap gap-2 items-center mb-4 bg-slate-50/50 dark:bg-slate-950/20 p-2 rounded-xl border border-slate-150 dark:border-slate-850">
+      <div className="flex flex-wrap sm:flex-nowrap gap-2 items-center mb-4 bg-slate-100/70 dark:bg-slate-950/50 p-2 rounded-xl border border-slate-200/70 dark:border-slate-700/70">
         <div className="relative flex-1 w-full">
           <input
             type="text"
             placeholder="Tìm kiếm công tác..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-2.5 pr-2 py-1.5 text-[11px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500"
+            className="w-full pl-2.5 pr-2 py-1.5 text-[11px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-400 focus:outline-none focus:border-emerald-500"
           />
         </div>
         <button
@@ -365,7 +365,7 @@ export default function GoogleSheetSchedule() {
             "w-full sm:w-auto px-3 py-1.5 rounded-lg text-[10px] font-bold border transition-all cursor-pointer whitespace-nowrap",
             showOnlyHighlight
               ? "bg-yellow-400 border-yellow-400 text-yellow-950 shadow-sm"
-              : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-500"
+              : "bg-white dark:bg-slate-850 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200"
           )}
         >
           {showOnlyHighlight ? "★ Hiện tất cả" : "★ Chỉ trọng tâm"}

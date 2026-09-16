@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '@/store/useAppStore';
 import PageContainer from '../layout/PageContainer';
 import FacebookFeed from '../ui/FacebookFeed';
+import FanpageSection from '../ui/FanpageSection';
 import { cn } from '@/lib/utils';
 import {
   MessageSquare, Bot, PhoneCall, Compass, BookOpen,
@@ -193,9 +194,6 @@ export default function HomePage() {
       ════════════════════════════════════════════ */}
       <PageContainer className="relative z-10 -mt-8 sm:-mt-10">
 
-        {/* ─── SECTION LABEL ─── */}
-        <p className="text-xs sm:text-sm font-black text-slate-500 uppercase tracking-widest pl-1 mb-5">Lối tắt chức năng</p>
-
         {/* ═══════════════════════════════════════════
             ROW 1 — 4 cards per row
             Không gian VH HCM | Tài liệu | Kiến nghị | Phong trào
@@ -374,6 +372,9 @@ export default function HomePage() {
           />
 
         </div>
+
+        {/* ─── Hệ thống 4 Fanpage Đoàn thể Phường Chánh Hưng ─── */}
+        <FanpageSection className="mb-8" />
 
         {/* ─── Facebook Live Feed ─── */}
         <div className="mb-8">
