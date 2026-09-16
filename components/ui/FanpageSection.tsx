@@ -16,6 +16,8 @@ import { useAppStore } from '@/store/useAppStore';
 interface FanpageItem {
   id: string;
   name: string;
+  orgName: string;
+  wardName: string;
   shortName: string;
   tag: string;
   desc: string;
@@ -38,7 +40,9 @@ const DEFAULT_FANPAGES: FanpageItem[] = [
   {
     id: 'mttq',
     name: 'Mặt trận Tổ Quốc Việt Nam Phường Chánh Hưng',
-    shortName: 'Mặt trận Tổ Quốc Việt Nam Phường Chánh Hưng',
+    orgName: 'Mặt trận Tổ Quốc Việt Nam',
+    wardName: 'Phường Chánh Hưng',
+    shortName: 'MTTQ Phường Chánh Hưng',
     tag: 'Cổng Mặt Trận',
     desc: 'Đại đoàn kết toàn dân tộc - Lắng nghe ý kiến và tâm tư nguyện vọng của nhân dân',
     defaultUrl: 'https://www.facebook.com/profile.php?id=61580661372890',
@@ -63,6 +67,8 @@ const DEFAULT_FANPAGES: FanpageItem[] = [
   {
     id: 'congdoan',
     name: 'Công Đoàn Phường Chánh Hưng',
+    orgName: 'Công Đoàn',
+    wardName: 'Phường Chánh Hưng',
     shortName: 'Công Đoàn Phường Chánh Hưng',
     tag: 'Công đoàn VN',
     desc: 'Chăm lo, đại diện, bảo vệ quyền và lợi ích hợp pháp, chính đáng của người lao động',
@@ -88,7 +94,9 @@ const DEFAULT_FANPAGES: FanpageItem[] = [
   {
     id: 'doanthanhnien',
     name: 'Đoàn TNCS Hồ Chí Minh Phường Chánh Hưng',
-    shortName: 'Đoàn TNCS Hồ Chí Minh Phường Chánh Hưng',
+    orgName: 'Đoàn TNCS Hồ Chí Minh',
+    wardName: 'Phường Chánh Hưng',
+    shortName: 'Đoàn TNCS Phường Chánh Hưng',
     tag: 'Tuổi trẻ Chánh Hưng',
     desc: 'Khát vọng - Tiên phong - Bản lĩnh - Đoàn kết - Sáng tạo vì cộng đồng văn minh',
     defaultUrl: 'https://www.facebook.com/search/top?q=%C4%90o%C3%A0n%20Thanh%20Ni%C3%AAn%20Ph%C6%B0%E1%BB%9Dng%20Ch%C3%A1nh%20H%C6%B0ng',
@@ -113,7 +121,9 @@ const DEFAULT_FANPAGES: FanpageItem[] = [
   {
     id: 'phunu',
     name: 'Hội Liên Hiệp Phụ Nữ Phường Chánh Hưng',
-    shortName: 'Hội Liên Hiệp Phụ Nữ Phường Chánh Hưng',
+    orgName: 'Hội Liên Hiệp Phụ Nữ',
+    wardName: 'Phường Chánh Hưng',
+    shortName: 'Hội LHPN Phường Chánh Hưng',
     tag: 'Phụ nữ VN',
     desc: 'Tự tin - Tự trọng - Trung hậu - Đảm đang, xây dựng gia đình hạnh phúc, bình đẳng',
     defaultUrl: 'https://www.facebook.com/search/top?q=H%E1%BB%99i%20Li%C3%AAn%20hi%E1%BB%87p%20Ph%E1%BB%A5%20n%E1%BB%AF%20Ph%C6%B0%E1%BB%9Dng%20Ch%C3%A1nh%20H%C6%B0ng',
@@ -373,7 +383,10 @@ export default function FanpageSection({ className }: { className?: string }) {
               {/* Title & Description */}
               <div className="flex-1 flex flex-col justify-start mb-3">
                 <h4 className="text-xs sm:text-[13px] font-black text-slate-900 dark:text-white uppercase leading-snug group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                  {item.name}
+                  <span>{item.orgName}</span>
+                  <span className="block text-[11px] sm:text-xs font-bold text-red-600 dark:text-red-400 mt-0.5 whitespace-nowrap">
+                    {item.wardName}
+                  </span>
                 </h4>
                 <p className="text-[10px] sm:text-[11px] text-slate-600 dark:text-slate-300 mt-1 leading-relaxed line-clamp-2 font-medium">
                   {item.desc}
@@ -465,9 +478,14 @@ export default function FanpageSection({ className }: { className?: string }) {
                 <div className="relative z-10 w-12 h-12 rounded-xl bg-white/95 p-2 shadow-lg flex items-center justify-center mb-1.5 border border-white/40">
                   <img src={editingItem.logo} alt={editingItem.name} className="w-full h-full object-contain" />
                 </div>
-                <span className="relative z-10 text-xs sm:text-sm font-black text-white uppercase drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
-                  {editingItem.shortName}
-                </span>
+                <div className="relative z-10 text-center flex flex-col items-center px-2">
+                  <span className="text-xs sm:text-sm font-black text-white uppercase drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] leading-tight">
+                    {editingItem.orgName}
+                  </span>
+                  <span className="text-[10px] sm:text-xs font-black text-yellow-300 uppercase tracking-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] whitespace-nowrap mt-0.5">
+                    {editingItem.wardName}
+                  </span>
+                </div>
                 <span className="absolute bottom-2 right-2.5 z-10 text-[10px] font-bold bg-black/50 text-white/90 px-2 py-0.5 rounded-md backdrop-blur-sm">
                   Trực tiếp
                 </span>

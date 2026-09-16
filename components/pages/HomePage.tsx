@@ -28,6 +28,8 @@ const DICH_VU_CONG_URL = 'https://dichvucong.gov.vn';
 interface FanpageConfig {
   id: string;
   name: string;
+  orgName: string;
+  wardName: string;
   shortName: string;
   logo: string;
   defaultBg: string;
@@ -41,6 +43,8 @@ const FANPAGES: FanpageConfig[] = [
   {
     id: 'mttq',
     name: 'Mặt trận Tổ Quốc Việt Nam Phường Chánh Hưng',
+    orgName: 'Mặt trận Tổ Quốc Việt Nam',
+    wardName: 'Phường Chánh Hưng',
     shortName: 'MTTQ Chánh Hưng',
     logo: '/mttq-logo.png',
     defaultBg: 'https://images.unsplash.com/photo-1541872703-74c5e44368f9?w=800&auto=format&fit=crop&q=80',
@@ -52,6 +56,8 @@ const FANPAGES: FanpageConfig[] = [
   {
     id: 'congdoan',
     name: 'Công Đoàn Phường Chánh Hưng',
+    orgName: 'Công Đoàn',
+    wardName: 'Phường Chánh Hưng',
     shortName: 'Công Đoàn Chánh Hưng',
     logo: '/congdoan-logo.svg',
     defaultBg: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&auto=format&fit=crop&q=80',
@@ -63,6 +69,8 @@ const FANPAGES: FanpageConfig[] = [
   {
     id: 'doanthanhnien',
     name: 'Đoàn TNCS Hồ Chí Minh Phường Chánh Hưng',
+    orgName: 'Đoàn TNCS Hồ Chí Minh',
+    wardName: 'Phường Chánh Hưng',
     shortName: 'Đoàn TNCS Chánh Hưng',
     logo: '/doan-logo.png',
     defaultBg: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&auto=format&fit=crop&q=80',
@@ -74,6 +82,8 @@ const FANPAGES: FanpageConfig[] = [
   {
     id: 'phunu',
     name: 'Hội Liên Hiệp Phụ Nữ Phường Chánh Hưng',
+    orgName: 'Hội Liên Hiệp Phụ Nữ',
+    wardName: 'Phường Chánh Hưng',
     shortName: 'Hội LHPN Chánh Hưng',
     logo: '/phunu-logo.png',
     defaultBg: 'https://images.unsplash.com/photo-1509099836639-18ba1795216d?w=800&auto=format&fit=crop&q=80',
@@ -229,7 +239,7 @@ export default function HomePage() {
         className={cn(
           "relative flex flex-col items-center justify-between p-3.5 sm:p-4 md:p-5 rounded-3xl",
           "border overflow-hidden cursor-pointer transition-all duration-150 text-center w-full select-none group",
-          "h-full min-h-[185px] sm:min-h-[205px] md:min-h-[220px] shadow-lg",
+          "h-full min-h-[190px] sm:min-h-[210px] md:min-h-[225px] shadow-lg",
           item.borderColor,
           item.shadowColor
         )}
@@ -246,7 +256,7 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-black/20 pointer-events-none group-hover:bg-black/10 transition-colors duration-150" />
 
         {/* Official Emblem / Logo Badge */}
-        <div className="relative z-10 w-13 h-13 sm:w-15 sm:h-15 md:w-16 md:h-16 rounded-2xl bg-white/95 dark:bg-white/90 p-2 sm:p-2.5 shadow-xl group-hover:scale-105 transition-transform duration-150 flex items-center justify-center border border-white/40 mb-1.5 flex-shrink-0 my-auto">
+        <div className="relative z-10 w-12 h-12 sm:w-14 sm:h-14 md:w-15 md:h-15 rounded-2xl bg-white/95 dark:bg-white/90 p-2 sm:p-2.5 shadow-xl group-hover:scale-105 transition-transform duration-150 flex items-center justify-center border border-white/40 mb-1 flex-shrink-0 my-auto">
           <img
             src={item.logo}
             alt={item.name}
@@ -254,10 +264,13 @@ export default function HomePage() {
           />
         </div>
 
-        {/* Name: Full official name written clearly */}
-        <div className="relative z-10 min-h-[50px] sm:min-h-[58px] flex items-center justify-center px-1 w-full mt-auto">
-          <span className="text-[11px] sm:text-xs md:text-[13px] font-black text-white uppercase leading-snug tracking-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.95)] text-center select-none line-clamp-3">
-            {item.name}
+        {/* Name: Tách riêng Tên tổ chức và Phường Chánh Hưng chống rớt chữ */}
+        <div className="relative z-10 min-h-[52px] sm:min-h-[58px] md:min-h-[62px] flex flex-col items-center justify-center px-0.5 w-full mt-auto text-center">
+          <span className="text-[11px] sm:text-xs md:text-[13px] font-black text-white uppercase leading-tight tracking-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.95)] select-none">
+            {item.orgName}
+          </span>
+          <span className="text-[10px] sm:text-[11px] md:text-xs font-black text-yellow-300 uppercase tracking-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.95)] select-none mt-0.5 sm:mt-1 whitespace-nowrap">
+            {item.wardName}
           </span>
         </div>
       </motion.button>
