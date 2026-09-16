@@ -277,7 +277,7 @@ export default function FanpageSection({ className }: { className?: string }) {
         {editingItem && (
           <div className="flex flex-col gap-4 text-left">
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-200 mb-1.5 block">
+              <label className="text-xs font-bold text-slate-800 dark:text-slate-100 mb-1.5 block">
                 Đường dẫn URL Fanpage Facebook chính thức:
               </label>
               <Input
@@ -286,17 +286,17 @@ export default function FanpageSection({ className }: { className?: string }) {
                 placeholder="https://www.facebook.com/..."
                 className="w-full text-xs font-mono"
               />
-              <p className="text-[10px] text-slate-400 mt-1">
-                Dán đường dẫn trực tiếp đến Fanpage của {editingItem.name}. Link sẽ được lưu tự động trên máy của bạn.
+              <p className="text-[11px] text-slate-600 dark:text-slate-300 mt-1.5 font-medium leading-relaxed">
+                Dán đường dẫn trực tiếp đến Fanpage của <strong className="text-slate-900 dark:text-white">{editingItem.name}</strong>. Liên kết sẽ được lưu tự động trên trình duyệt của bạn.
               </p>
             </div>
 
-            <div className="flex items-center justify-between pt-3 border-t border-slate-200/60 dark:border-slate-800">
+            <div className="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-slate-800 gap-3">
               <Button
                 variant="secondary"
                 size="sm"
                 onClick={handleResetUrl}
-                className="text-[10px] font-bold text-slate-500"
+                className="text-[11px] font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
               >
                 Khôi phục mặc định
               </Button>
@@ -305,6 +305,7 @@ export default function FanpageSection({ className }: { className?: string }) {
                   variant="ghost"
                   size="sm"
                   onClick={() => setEditingItem(null)}
+                  className="text-slate-600 dark:text-slate-300 font-bold"
                 >
                   Hủy
                 </Button>
@@ -312,7 +313,7 @@ export default function FanpageSection({ className }: { className?: string }) {
                   variant="primary"
                   size="sm"
                   onClick={handleSaveUrl}
-                  className="font-bold"
+                  className="font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/20"
                 >
                   Lưu liên kết
                 </Button>

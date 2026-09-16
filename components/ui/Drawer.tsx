@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -22,6 +23,12 @@ export default function Drawer({
   size = 'md',
   className
 }: DrawerProps) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // Handle escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -43,21 +50,23 @@ export default function Drawer({
     lg: "max-w-3xl"
   };
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 overflow-hidden">
+        <div className="fixed inset-0 z-[9999] overflow-hidden">
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm dark:bg-black/75"
+            className="fixed inset-0 bg-slate-950/75 backdrop-blur-md"
           />
 
           {/* Drawer Container */}
-          <div className="absolute inset-y-0 right-0 pl-10 max-w-full flex">
+          <div className="fixed inset-y-0 right-0 pl-10 max-w-full flex z-10">
             <motion.div
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
@@ -80,7 +89,7 @@ export default function Drawer({
                 )}
                 <button
                   onClick={onClose}
-                  className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors"
+                  className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors cursor-pointer"
                   aria-label="Đóng"
                 >
                   <X className="h-4 w-4" />
@@ -95,6 +104,7 @@ export default function Drawer({
           </div>
         </div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 }
