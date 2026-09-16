@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { formatDate, cn } from '@/lib/utils';
 import { StaffWorkItem, FeedbackItem } from '@/lib/types';
+import FanpageSection from '../ui/FanpageSection';
 
 /* ── Tab-section sub-page renderers ── */
 function TabQuanLySo() {
@@ -36,6 +37,9 @@ function TabQuanLySo() {
         <StatCard title="Lượt tương tác" value="12.4K" change="+28%" trend="up" description="lượt like & share" icon={<Bell className="h-4 w-4 text-purple-500" />} />
         <StatCard title="Dữ liệu đồng bộ" value="98.2%" change="+0.4%" trend="up" description="tỉ lệ đồng bộ" icon={<RefreshCw className="h-4 w-4 text-emerald-500" />} />
       </div>
+
+      {/* Hệ thống 4 Fanpage Đoàn thể */}
+      <FanpageSection className="mb-6" />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <GlassCard className="p-5 flex flex-col gap-4">
           <h3 className="text-xs font-black text-slate-700 dark:text-white uppercase tracking-wider">Kết nối Fanpage Facebook</h3>
@@ -495,6 +499,9 @@ export default function StaffDashboardPage() {
         <StatCard title="Đã xử lý" value="892" change="+20%" trend="up" description="Đã giải quyết phản hồi" icon={<CheckCircle2 className="h-4.5 w-4.5 text-emerald-500" />} />
         <StatCard title="Đúng hạn / Hài lòng" value="96.5%" change="4.8/5 ★" trend="up" description="Đánh giá của bà con" icon={<Award className="h-4.5 w-4.5 text-rose-500" />} />
       </div>
+
+      {/* 2. Hệ thống 4 Fanpage Đoàn thể Phường Chánh Hưng */}
+      <FanpageSection className="mb-6" />
 
       {/* 2-Column Scientific Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 text-left items-start">
