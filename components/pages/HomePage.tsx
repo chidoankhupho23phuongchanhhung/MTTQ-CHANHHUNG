@@ -146,13 +146,11 @@ export default function HomePage() {
     </motion.button>
   );
 
-  /* ─── Vibrant Colored Tab Card Component ─── */
+  /* ─── Vibrant Colored Tab Card Component (Chỉ Logo + Tên) ─── */
   const ColorTabCard = ({
     index,
     onClick,
-    tag,
     title,
-    subtitle,
     gradient,
     shadowColor,
     borderColor,
@@ -161,9 +159,7 @@ export default function HomePage() {
   }: {
     index: number;
     onClick: () => void;
-    tag: string;
-    title: string;
-    subtitle: string;
+    title: React.ReactNode;
     gradient: string;
     shadowColor: string;
     borderColor: string;
@@ -172,56 +168,30 @@ export default function HomePage() {
   }) => (
     <motion.button
       {...fadeUpProps(index)}
-      whileHover={{ scale: 1.03, y: -4 }}
-      whileTap={{ scale: 0.97 }}
+      whileHover={{ scale: 1.04, y: -4 }}
+      whileTap={{ scale: 0.96 }}
       onClick={onClick}
       className={cn(
-        "relative flex flex-col items-center justify-between p-4 sm:p-5 lg:p-6 rounded-3xl",
+        "relative flex flex-col items-center justify-center p-5 sm:p-6 rounded-3xl",
         "border overflow-hidden cursor-pointer transition-all duration-300 text-center w-full group",
-        "min-h-[210px] sm:min-h-[230px] lg:min-h-[250px] shadow-lg",
+        "min-h-[145px] sm:min-h-[165px] md:min-h-[180px] shadow-lg",
         gradient,
         borderColor,
         shadowColor
       )}
     >
       {/* Decorative background glow overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-white/10 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-white/15 pointer-events-none" />
 
-      {/* Top Tag / Tab Pill */}
-      <div className="relative z-10 flex items-center justify-center mb-2">
-        <span className="inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white shadow-xs">
-          {tag}
-        </span>
+      {/* Icon / Logo Container */}
+      <div className="relative z-10 p-3.5 sm:p-4 rounded-2xl bg-white/20 backdrop-blur-md border border-white/35 text-white shadow-md group-hover:scale-110 transition-transform duration-300 mb-2.5 sm:mb-3">
+        {customIcon ? customIcon : Icon && <Icon className="h-7 w-7 sm:h-9 sm:w-9 text-white" />}
       </div>
 
-      {/* Icon Container */}
-      <div className="relative z-10 p-3 sm:p-3.5 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 text-white shadow-sm group-hover:scale-110 transition-transform duration-300 my-1">
-        {customIcon ? customIcon : Icon && <Icon className="h-6 w-6 sm:h-7 sm:w-7 text-white" />}
-      </div>
-
-      {/* Title & Subtitle */}
-      <div className="relative z-10 my-auto py-1 flex flex-col items-center justify-center">
-        <span className="text-xs sm:text-sm lg:text-base font-black text-white uppercase leading-snug tracking-tight drop-shadow-md">
-          {title}
-        </span>
-        <span className="text-[10px] sm:text-[11px] text-white/90 font-bold mt-0.5 drop-shadow-sm">
-          {subtitle}
-        </span>
-      </div>
-
-      {/* Action Button Box */}
-      <div className="relative z-10 w-full mt-3">
-        <div className={cn(
-          "flex items-center justify-center gap-1.5 w-full py-2 sm:py-2.5 px-3 sm:px-4 rounded-2xl",
-          "text-[11px] sm:text-xs font-black uppercase tracking-wider",
-          "bg-white/25 group-hover:bg-white text-white group-hover:text-slate-900",
-          "backdrop-blur-md border border-white/35 group-hover:border-white",
-          "transition-all duration-300 shadow-sm"
-        )}>
-          <span>Vào Fanpage</span>
-          <ArrowRight className="h-3 w-3 sm:h-3.5 sm:w-3.5 transition-transform group-hover:translate-x-1" />
-        </div>
-      </div>
+      {/* Title (Tên đoàn thể) */}
+      <span className="relative z-10 text-xs sm:text-sm md:text-base font-black text-white uppercase leading-snug tracking-tight drop-shadow-md text-center select-none">
+        {title}
+      </span>
     </motion.button>
   );
 
@@ -476,9 +446,7 @@ export default function HomePage() {
             <ColorTabCard
               index={8}
               onClick={() => handleExternal(getFanpageUrl('mttq', 'https://www.facebook.com/profile.php?id=61580661372890'))}
-              tag="🔴 MTTQ VIỆT NAM"
               title="Mặt trận Tổ quốc"
-              subtitle="Phường Chánh Hưng"
               gradient="bg-gradient-to-br from-red-600 via-red-700 to-amber-700"
               borderColor="border-red-400/40"
               shadowColor="shadow-red-900/30 hover:shadow-red-600/40"
@@ -486,7 +454,7 @@ export default function HomePage() {
                 <img
                   src="/mttq-logo.png"
                   alt="Logo MTTQ"
-                  className="h-7 w-7 sm:h-8 sm:w-8 object-contain filter drop-shadow-md"
+                  className="h-8 w-8 sm:h-9 sm:w-9 object-contain filter drop-shadow-md"
                 />
               }
             />
@@ -495,9 +463,7 @@ export default function HomePage() {
             <ColorTabCard
               index={9}
               onClick={() => handleExternal(getFanpageUrl('congdoan', 'https://www.facebook.com/search/top?q=C%C3%B4ng%20%C4%90o%C3%A0n%20Ph%C6%B0%E1%BB%9Dng%20Ch%C3%A1nh%20H%C6%B0ng'))}
-              tag="🔵 CÔNG ĐOÀN VN"
               title="Công Đoàn"
-              subtitle="Phường Chánh Hưng"
               gradient="bg-gradient-to-br from-blue-600 via-indigo-700 to-sky-800"
               borderColor="border-blue-400/40"
               shadowColor="shadow-blue-900/30 hover:shadow-blue-600/40"
@@ -508,9 +474,7 @@ export default function HomePage() {
             <ColorTabCard
               index={10}
               onClick={() => handleExternal(getFanpageUrl('doanthanhnien', 'https://www.facebook.com/search/top?q=%C4%90o%C3%A0n%20Thanh%20Ni%C3%AAn%20Ph%C6%B0%E1%BB%9Dng%20Ch%C3%A1nh%20H%C6%B0ng'))}
-              tag="🟢 TUỔI TRẺ CHÁNH HƯNG"
               title="Đoàn Thanh Niên"
-              subtitle="TNCS Hồ Chí Minh"
               gradient="bg-gradient-to-br from-emerald-600 via-teal-700 to-green-800"
               borderColor="border-emerald-400/40"
               shadowColor="shadow-emerald-900/30 hover:shadow-emerald-600/40"
@@ -521,9 +485,7 @@ export default function HomePage() {
             <ColorTabCard
               index={11}
               onClick={() => handleExternal(getFanpageUrl('phunu', 'https://www.facebook.com/search/top?q=H%E1%BB%99i%20Li%C3%AAn%20hi%E1%BB%87p%20Ph%E1%BB%A5%20n%E1%BB%AF%20Ph%C6%B0%E1%BB%9Dng%20Ch%C3%A1nh%20H%C6%B0ng'))}
-              tag="🌸 PHỤ NỮ VIỆT NAM"
               title="Hội Phụ Nữ"
-              subtitle="Phường Chánh Hưng"
               gradient="bg-gradient-to-br from-rose-600 via-pink-700 to-purple-800"
               borderColor="border-pink-400/40"
               shadowColor="shadow-pink-900/30 hover:shadow-pink-600/40"
