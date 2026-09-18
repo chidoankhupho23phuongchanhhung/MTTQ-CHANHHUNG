@@ -265,20 +265,51 @@ export default function FanpageSection({ className }: { className?: string }) {
     e.target.value = '';
   };
 
-  // Load custom URLs & Backgrounds from localStorage
+  // Load custom URLs & Backgrounds from localStorage & /api/settings
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const savedUrls: Record<string, string> = {};
-      const savedBgs: Record<string, string> = {};
-      DEFAULT_FANPAGES.forEach(item => {
-        const u = localStorage.getItem(`fanpage_url_${item.id}`);
-        if (u) savedUrls[item.id] = u;
-        const b = localStorage.getItem(`fanpage_bg_${item.id}`);
-        if (b) savedBgs[item.id] = b;
-      });
-      setUrls(savedUrls);
-      setBgs(savedBgs);
-    }
+    const loadSettings = async () => {
+      // 1. Instant local storage read
+      if (typeof window !== 'undefined') {
+        const savedUrls: Record<string, string> = {};
+        const savedBgs: Record<string, string> = {};
+        DEFAULT_FANPAGES.forEach(item => {
+          const u = localStorage.getItem(`fanpage_url_${item.id}`);
+          if (u) savedUrls[item.id] = u;
+          const b = localStorage.getItem(`fanpage_bg_${item.id}`);
+          if (b) savedBgs[item.id] = b;
+        });
+        setUrls(savedUrls);
+        setBgs(savedBgs);
+      }
+
+      // 2. Server settings sync
+      try {
+        const res = await fetch('/api/settings');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.fanpages) {
+            const serverUrls: Record<string, string> = {};
+            const serverBgs: Record<string, string> = {};
+            Object.keys(data.fanpages).forEach(k => {
+              if (data.fanpages[k]?.url) serverUrls[k] = data.fanpages[k].url;
+              if (data.fanpages[k]?.bg) serverBgs[k] = data.fanpages[k].bg;
+            });
+            setUrls(prev => ({ ...prev, ...serverUrls }));
+            setBgs(prev => ({ ...prev, ...serverBgs }));
+          }
+        }
+      } catch (err) {
+        // Fallback to local storage
+      }
+    };
+
+    loadSettings();
+    window.addEventListener('fanpage-bg-updated', loadSettings);
+    window.addEventListener('storage', loadSettings);
+    return () => {
+      window.removeEventListener('fanpage-bg-updated', loadSettings);
+      window.removeEventListener('storage', loadSettings);
+    };
   }, []);
 
   const getUrl = (item: FanpageItem) => urls[item.id] || item.defaultUrl;
@@ -320,6 +351,26 @@ export default function FanpageSection({ className }: { className?: string }) {
       } catch (storageErr) {
         console.warn('localStorage quota exceeded', storageErr);
       }
+    }
+
+    // Save to server API
+    try {
+      fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'fanpage',
+          id: editingItem.id,
+          bg: trimmedBg,
+          url: trimmedUrl,
+        }),
+      }).catch(err => console.warn('API save error:', err));
+    } catch (e) {}
+
+    // Dispatch real-time update event
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('fanpage-bg-updated'));
+      window.dispatchEvent(new Event('storage'));
     }
 
     addNotification(

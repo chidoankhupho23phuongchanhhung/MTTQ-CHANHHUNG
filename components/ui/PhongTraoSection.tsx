@@ -35,7 +35,7 @@ export default function PhongTraoSection({ className }: PhongTraoSectionProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Sync backgrounds on mount & listen for custom storage update events
-  const loadBackgrounds = () => {
+  const loadBackgrounds = async () => {
     if (typeof window !== 'undefined') {
       const savedBgs: Record<string, string> = {};
       DEFAULT_PHONG_TRAO.forEach(item => {
@@ -43,6 +43,28 @@ export default function PhongTraoSection({ className }: PhongTraoSectionProps) {
         if (b) savedBgs[item.id] = b;
       });
       setBgs(savedBgs);
+
+      // Server settings sync
+      try {
+        const res = await fetch('/api/settings');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.phongtrao) {
+            const serverBgs: Record<string, string> = {};
+            Object.keys(data.phongtrao).forEach(k => {
+              if (data.phongtrao[k]) {
+                serverBgs[k] = data.phongtrao[k];
+                try {
+                  localStorage.setItem(`phongtrao_bg_${k}`, data.phongtrao[k]);
+                } catch (e) {}
+              }
+            });
+            setBgs(prev => ({ ...prev, ...serverBgs }));
+          }
+        }
+      } catch (err) {
+        // Fallback
+      }
     }
   };
 
@@ -83,6 +105,24 @@ export default function PhongTraoSection({ className }: PhongTraoSectionProps) {
         setBgs({ ...bgs, [editingItem.id]: trimmedBg });
       }
 
+      // Save to server API
+      try {
+        fetch('/api/settings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'phongtrao',
+            id: editingItem.id,
+            bg: isDefault ? '' : trimmedBg,
+          }),
+        }).catch(err => console.warn('API save error:', err));
+      } catch (e) {}
+
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('phongtrao-bg-updated'));
+        window.dispatchEvent(new Event('storage'));
+      }
+
       addNotification(
         'Cập nhật thành công',
         `Đã lưu ảnh nền mới cho phong trào "${editingItem.shortLabel}"`,
@@ -101,6 +141,25 @@ export default function PhongTraoSection({ className }: PhongTraoSectionProps) {
       const newBgs = { ...bgs };
       delete newBgs[item.id];
       setBgs(newBgs);
+
+      // Save to server API
+      try {
+        fetch('/api/settings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'phongtrao',
+            id: item.id,
+            bg: '',
+          }),
+        }).catch(err => console.warn('API save error:', err));
+      } catch (e) {}
+
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('phongtrao-bg-updated'));
+        window.dispatchEvent(new Event('storage'));
+      }
+
       addNotification(
         'Đã khôi phục',
         `Đã đặt lại ảnh nền mặc định cho "${item.shortLabel}"`,
@@ -549,7 +608,7 @@ export default function PhongTraoSection({ className }: PhongTraoSectionProps) {
                   <button
                     type="button"
                     onClick={handleSave}
-                    disabled={uploading}
+                    disabled={uploading && !tempBg}
                     className="flex items-center gap-1.5 px-5 py-2 rounded-xl text-xs font-bold text-white bg-purple-600 hover:bg-purple-700 shadow-md shadow-purple-500/20 transition-all cursor-pointer active:scale-95 disabled:opacity-50"
                   >
                     <Check className="w-4 h-4" />

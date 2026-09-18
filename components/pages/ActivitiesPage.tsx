@@ -6,6 +6,7 @@ import SectionTitle from '../ui/SectionTitle';
 import GlassCard from '../ui/GlassCard';
 import Select from '../ui/Select';
 import { Calendar, User, MapPin, Tag, Image as ImageIcon, Flame, Clock } from 'lucide-react';
+import MTTQIntroSection from '../ui/MTTQIntroSection';
 
 interface ActivityItem {
   id: string;
@@ -96,6 +97,11 @@ export default function ActivitiesPage() {
 
   return (
     <PageContainer>
+      {/* ════════════════════════════════════════════
+          GIỚI THIỆU CHỨC NĂNG & CƠ CẤU TỔ CHỨC MTTQ
+      ════════════════════════════════════════════ */}
+      <MTTQIntroSection className="mb-12" />
+
       <SectionTitle
         title="Hoạt động Mặt trận Tổ quốc"
         subtitle="Lịch sử và tiến trình tổ chức các phong trào, hội nghị, chăm lo cộng đồng của Mặt trận Tổ quốc Việt Nam Phường Chánh Hưng"

@@ -15,6 +15,7 @@ import {
   getPhongTraoIcon,
   getPhongTraoBg
 } from '@/lib/phongTrao';
+import MTTQIntroSection from '../ui/MTTQIntroSection';
 
 /* ─── per-index fade-up (Fast & snappy animation) ─── */
 const fadeUpProps = (i = 0) => ({
@@ -129,24 +130,76 @@ export default function HomePage() {
     return defaultBg;
   };
 
-  /* ─── Phong trào real-time backgrounds ─── */
+  /* ─── Real-time synchronized backgrounds (Fanpages & Phong Trào) ─── */
+  const [fanpageBgs, setFanpageBgs] = useState<Record<string, string>>({});
   const [phongTraoBgs, setPhongTraoBgs] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    const updateBgs = () => {
-      const bgs: Record<string, string> = {};
-      DEFAULT_PHONG_TRAO.forEach(p => {
-        bgs[p.id] = getPhongTraoBg(p.id, p.defaultBg);
-      });
-      setPhongTraoBgs(bgs);
+    const updateAllBgs = async () => {
+      // 1. Instant local storage read
+      if (typeof window !== 'undefined') {
+        const fpBgs: Record<string, string> = {};
+        FANPAGES.forEach(item => {
+          const b = localStorage.getItem(`fanpage_bg_${item.id}`);
+          if (b) fpBgs[item.id] = b;
+        });
+        setFanpageBgs(fpBgs);
+
+        const ptBgs: Record<string, string> = {};
+        DEFAULT_PHONG_TRAO.forEach(item => {
+          const b = localStorage.getItem(`phongtrao_bg_${item.id}`);
+          if (b) ptBgs[item.id] = b;
+        });
+        setPhongTraoBgs(ptBgs);
+      }
+
+      // 2. Server settings sync (persists across devices & restarts)
+      try {
+        const res = await fetch('/api/settings');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.fanpages) {
+            const mergedFp: Record<string, string> = {};
+            Object.keys(data.fanpages).forEach(k => {
+              if (data.fanpages[k]?.bg) {
+                mergedFp[k] = data.fanpages[k].bg;
+                if (typeof window !== 'undefined') {
+                  try {
+                    localStorage.setItem(`fanpage_bg_${k}`, data.fanpages[k].bg);
+                  } catch (e) {}
+                }
+              }
+            });
+            setFanpageBgs(prev => ({ ...prev, ...mergedFp }));
+          }
+          if (data.phongtrao) {
+            const mergedPt: Record<string, string> = {};
+            Object.keys(data.phongtrao).forEach(k => {
+              if (data.phongtrao[k]) {
+                mergedPt[k] = data.phongtrao[k];
+                if (typeof window !== 'undefined') {
+                  try {
+                    localStorage.setItem(`phongtrao_bg_${k}`, data.phongtrao[k]);
+                  } catch (e) {}
+                }
+              }
+            });
+            setPhongTraoBgs(prev => ({ ...prev, ...mergedPt }));
+          }
+        }
+      } catch (e) {
+        // Fallback to localStorage
+      }
     };
 
-    updateBgs();
-    window.addEventListener('phongtrao-bg-updated', updateBgs);
-    window.addEventListener('storage', updateBgs);
+    updateAllBgs();
+    window.addEventListener('fanpage-bg-updated', updateAllBgs);
+    window.addEventListener('phongtrao-bg-updated', updateAllBgs);
+    window.addEventListener('storage', updateAllBgs);
     return () => {
-      window.removeEventListener('phongtrao-bg-updated', updateBgs);
-      window.removeEventListener('storage', updateBgs);
+      window.removeEventListener('fanpage-bg-updated', updateAllBgs);
+      window.removeEventListener('phongtrao-bg-updated', updateAllBgs);
+      window.removeEventListener('storage', updateAllBgs);
     };
   }, []);
 
@@ -227,7 +280,7 @@ export default function HomePage() {
     index: number;
     item: FanpageConfig;
   }) => {
-    const bg = getFanpageBg(item.id, item.defaultBg);
+    const bg = fanpageBgs[item.id] || getFanpageBg(item.id, item.defaultBg);
     const url = getFanpageUrl(item.id, item.defaultUrl);
 
     return (
@@ -323,6 +376,22 @@ export default function HomePage() {
             <p className="text-xs sm:text-sm font-semibold text-yellow-200 italic border-l-2 border-yellow-400 pl-3 leading-relaxed text-left">
               &quot;Đoàn kết – Dân chủ – Đổi mới – Phát triển&quot;
             </p>
+
+            <button
+              onClick={() => {
+                const el = document.getElementById('co-cau-to-chuc-mttq');
+                if (el) {
+                  el.scrollIntoView({ behavior: 'smooth' });
+                } else {
+                  handleNav('/hoat-dong-mttq');
+                }
+              }}
+              className="mt-2 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-md border border-white/30 text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer"
+            >
+              <BookOpen className="h-3.5 w-3.5 text-yellow-300" />
+              <span>Xem Chức năng & Cơ cấu tổ chức MTTQ</span>
+              <ArrowRight className="h-3.5 w-3.5" />
+            </button>
           </motion.div>
         </div>
       </div>
@@ -544,6 +613,13 @@ export default function HomePage() {
               />
             ))}
           </div>
+        </div>
+
+        {/* ═══════════════════════════════════════════
+            CHỨC NĂNG, NHIỆM VỤ & CƠ CẤU TỔ CHỨC MTTQ
+        ═══════════════════════════════════════════ */}
+        <div id="co-cau-to-chuc-mttq" className="mb-10 pt-4 border-t border-slate-200/60 dark:border-slate-800/60 scroll-mt-24">
+          <MTTQIntroSection />
         </div>
 
       </PageContainer>
