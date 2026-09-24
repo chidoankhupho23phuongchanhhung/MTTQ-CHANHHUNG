@@ -10,7 +10,7 @@ import {
   MessageSquare, Search, Bot, FolderKanban, Calendar,
   Mail, Compass, LayoutDashboard, Database,
   Inbox, ClipboardList, BarChart3, Settings,
-  LogOut, ChevronRight
+  LogOut, ChevronRight, Info
 } from 'lucide-react';
 
 /* Facebook inline SVG */
@@ -20,7 +20,7 @@ const FbIcon = ({ className = 'h-4 w-4' }: { className?: string }) => (
   </svg>
 );
 
-/* ─── Staff menu: 6 main sections ─── */
+/* ─── Staff menu: main sections ─── */
 const STAFF_SECTIONS = [
   {
     id: 'tong-quan',
@@ -28,6 +28,13 @@ const STAFF_SECTIONS = [
     icon: LayoutDashboard,
     route: '/cong-lam-viec-can-bo',
     desc: 'Dashboard điều hành'
+  },
+  {
+    id: 'quan-ly-gioi-thieu',
+    label: 'Quản lý Giới thiệu',
+    icon: Info,
+    route: '/cong-lam-viec-can-bo?tab=quan-ly-gioi-thieu',
+    desc: 'Nội dung, ảnh & nhân sự'
   },
   {
     id: 'quan-ly-so',

@@ -27,8 +27,18 @@ import { formatDate, cn } from '@/lib/utils';
 import { StaffWorkItem, FeedbackItem } from '@/lib/types';
 import FanpageSection from '../ui/FanpageSection';
 import PhongTraoSection from '../ui/PhongTraoSection';
+import MTTQIntroAdminSection from '../ui/MTTQIntroAdminSection';
 
 /* ── Tab-section sub-page renderers ── */
+function TabQuanLyGioiThieu() {
+  return (
+    <PageContainer>
+      <SectionTitle title="Quản lý Giới thiệu MTTQ" subtitle="Chỉnh sửa nội dung, khẩu hiệu, danh sách Ban Thường trực và hình ảnh chân dung" />
+      <MTTQIntroAdminSection className="mb-6" />
+    </PageContainer>
+  );
+}
+
 function TabQuanLySo() {
   return (
     <PageContainer>
@@ -38,6 +48,9 @@ function TabQuanLySo() {
         <StatCard title="Lượt tương tác" value="12.4K" change="+28%" trend="up" description="lượt like & share" icon={<Bell className="h-4 w-4 text-purple-500" />} />
         <StatCard title="Dữ liệu đồng bộ" value="98.2%" change="+0.4%" trend="up" description="tỉ lệ đồng bộ" icon={<RefreshCw className="h-4 w-4 text-emerald-500" />} />
       </div>
+
+      {/* Quản lý Nội dung & Hình ảnh Giới thiệu MTTQ */}
+      <MTTQIntroAdminSection className="mb-6" />
 
       {/* Hệ thống 4 Fanpage Đoàn thể */}
       <FanpageSection className="mb-6" />
@@ -458,6 +471,7 @@ export default function StaffDashboardPage() {
   }, []);
 
   // Route to sub-tab components
+  if (activeTab === 'quan-ly-gioi-thieu') return <TabQuanLyGioiThieu />;
   if (activeTab === 'quan-ly-so') return <TabQuanLySo />;
   if (activeTab === 'giai-quyet') return (
     <TabGiaiQuyet 

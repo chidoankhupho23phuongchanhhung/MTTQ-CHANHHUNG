@@ -1,66 +1,21 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Info, Users, GitFork, Building2, ShieldCheck, Scale, Globe2,
   Sparkles, Flame, Briefcase, Heart, Award, ChevronDown, ChevronUp,
   Clock, Shield, Star
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  IntroSettings,
+  LeaderItem,
+  HistorySectionItem,
+  DEFAULT_INTRO_SETTINGS,
+  getCachedIntroSettings
+} from "@/lib/introSettings";
 
 type IntroTabId = "lich-su" | "co-cau" | "ban-thuong-truc";
-
-interface LeaderItem {
-  id: string;
-  salutation: string;
-  name: string;
-  title: string;
-  photoUrl: string;
-  level: "city" | "ward";
-}
-
-const LEADERS: LeaderItem[] = [
-  {
-    id: "loc",
-    salutation: "Ông",
-    name: "Nguyễn Phước Lộc",
-    title: "Ủy viên Ban Chấp hành Trung ương Đảng, Phó Bí thư Thành ủy, Chủ tịch Ủy ban Mặt trận Tổ quốc Việt Nam Thành phố Hồ Chí Minh",
-    photoUrl: "/leaders/nguyen-phuoc-loc.png",
-    level: "city",
-  },
-  {
-    id: "hanh",
-    salutation: "Bà",
-    name: "Trương Thị Bích Hạnh",
-    title: "Ủy viên Ban Thường vụ Thành ủy, Phó Chủ tịch Thường trực Ủy ban Mặt trận Tổ quốc Việt Nam Thành phố Hồ Chí Minh",
-    photoUrl: "/leaders/truong-thi-bich-hanh.png",
-    level: "city",
-  },
-  {
-    id: "ward-ct",
-    salutation: "Đồng chí",
-    name: "Chủ tịch Ủy ban MTTQ Phường",
-    title: "Ủy viên Ban Thường vụ Đảng ủy, Chủ tịch Ủy ban Mặt trận Tổ quốc Việt Nam Phường Chánh Hưng",
-    photoUrl: "/mttq-logo.png",
-    level: "ward",
-  },
-  {
-    id: "ward-pct",
-    salutation: "Đồng chí",
-    name: "Phó Chủ tịch Ủy ban MTTQ Phường",
-    title: "Phó Chủ tịch Ủy ban Mặt trận Tổ quốc Việt Nam Phường Chánh Hưng",
-    photoUrl: "/mttq-logo.png",
-    level: "ward",
-  },
-  {
-    id: "ward-uvtt",
-    salutation: "Đồng chí",
-    name: "Ủy viên Thường trực MTTQ Phường",
-    title: "Ủy viên Thường trực Ủy ban Mặt trận Tổ quốc Việt Nam Phường Chánh Hưng",
-    photoUrl: "/mttq-logo.png",
-    level: "ward",
-  },
-];
 
 interface DepartmentItem {
   id: string;
@@ -81,7 +36,7 @@ const DEPARTMENTS: DepartmentItem[] = [
     category: "chuyen-mon", categoryLabel: "Bộ phận Chuyên môn",
     icon: Building2, badgeBg: "bg-blue-50 text-blue-700 border-blue-200", badgeColor: "text-blue-600",
     summary: "Tham mưu, tổng hợp, hành chính quản trị, hậu cần và chuyển đổi số cơ sở dữ liệu Mặt trận.",
-    content: "Có chức năng tham mưu, giúp việc, tổ chức phục vụ các hoạt động và công tác chỉ đạo, điều hành của Đảng ủy, Ủy ban, Ban Thường trực Ủy ban Mặt trận Tổ quốc Việt Nam phường và các tổ chức chính trị - xã hội phường. Tổ chức ứng dụng triển khai chuyển đổi số, phát triển quản lý các nền tảng số về các cơ sở dữ liệu đoàn viên, hội viên, thành viên của Mặt trận Tổ quốc Việt Nam phường."
+    content: "Có chức năng tham mưu, giúp việc, tổ chức phục vụ các hoạt động và công tác chỉ đạo, điều hành của Đảng ủy, Ủy ban, Ban Thường trực Ủy ban Mặt trận Tổ quốc Việt Nam phường và các tổ chức chính trị - xã hội phường. Tham mưu xây dựng chương trình làm việc và phối hợp tổ chức thực hiện chương trình làm việc của Ủy ban, Ban Thường trực và Cơ quan. Tổ chức ứng dụng triển khai chuyển đổi số, phát triển quản lý các nền tảng số về các cơ sở dữ liệu đoàn viên, hội viên, thành viên của Mặt trận Tổ quốc Việt Nam phường."
   },
   {
     id: "to-chuc-kiem-tra", number: "(2)", name: "Bộ phận Tổ chức, Kiểm tra",
@@ -145,6 +100,44 @@ export default function MTTQIntroSection({ className }: { className?: string }) 
   const [activeTab, setActiveTab] = useState<IntroTabId>("ban-thuong-truc");
   const [expandedDeptId, setExpandedDeptId] = useState<string | null>(null);
   const [deptFilter, setDeptFilter] = useState<"all" | "chuyen-mon" | "doan-the">("all");
+
+  const [settings, setSettings] = useState<IntroSettings>(DEFAULT_INTRO_SETTINGS);
+
+  // Sync settings from cache and server API
+  const loadSettings = async () => {
+    // 1. Instant local read
+    const cached = getCachedIntroSettings();
+    setSettings(cached);
+
+    // 2. Fetch server API
+    try {
+      const res = await fetch("/api/settings");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.intro && Object.keys(data.intro).length > 0) {
+          setSettings(prev => ({
+            ...prev,
+            ...data.intro,
+            leaders: data.intro.leaders && data.intro.leaders.length > 0 ? data.intro.leaders : prev.leaders,
+            historySections: data.intro.historySections && data.intro.historySections.length > 0 ? data.intro.historySections : prev.historySections,
+          }));
+        }
+      }
+    } catch (e) {
+      // Fallback to cached
+    }
+  };
+
+  useEffect(() => {
+    loadSettings();
+    const handleUpdate = () => loadSettings();
+    window.addEventListener("intro-settings-updated", handleUpdate);
+    window.addEventListener("storage", handleUpdate);
+    return () => {
+      window.removeEventListener("intro-settings-updated", handleUpdate);
+      window.removeEventListener("storage", handleUpdate);
+    };
+  }, []);
 
   const filteredDepts = DEPARTMENTS.filter(d => {
     if (deptFilter === "all") return true;
@@ -242,11 +235,11 @@ export default function MTTQIntroSection({ className }: { className?: string }) 
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-200 dark:divide-slate-800 text-xs sm:text-sm">
-                      {LEADERS.map((leader) => (
+                      {settings.leaders.map((leader) => (
                         <tr key={leader.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors">
                           <td className="py-3 px-4 text-center align-middle border-r border-slate-200 dark:border-slate-800">
                             <div className="w-20 h-24 mx-auto rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
-                              {leader.photoUrl.includes("mttq-logo") ? (
+                              {leader.photoUrl.endsWith(".svg") || leader.photoUrl.includes("mttq-logo") ? (
                                 <img src={leader.photoUrl} alt={leader.name} className="w-12 h-12 object-contain" />
                               ) : (
                                 <img src={leader.photoUrl} alt={leader.name} className="w-full h-full object-cover object-top" />
@@ -284,10 +277,10 @@ export default function MTTQIntroSection({ className }: { className?: string }) 
                 </h3>
                 <div className="p-4 sm:p-5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 mb-6 text-xs sm:text-sm text-slate-800 dark:text-slate-200 leading-relaxed space-y-3">
                   <p className="text-justify">
-                    <strong>Cơ quan Ủy ban Mặt trận Tổ quốc Việt Nam phường</strong> có chức năng tham mưu, giúp Ban Thường trực Ủy ban Mặt trận Tổ quốc Việt Nam phường quản lý, hướng dẫn hoạt động của các tổ chức chính trị - xã hội, hội quần chúng và tổ chức thành viên khác.
+                    {settings.introText}
                   </p>
                   <div className="pt-2 border-t border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300">
-                    <span className="font-bold text-red-700 dark:text-red-400">Về tổ chức bộ máy:</span> Được cơ cấu tổ chức theo <strong>05 bộ phận chuyên môn</strong> và <strong>04 tổ chức chính trị - xã hội</strong>.
+                    <span className="font-bold text-red-700 dark:text-red-400">Về tổ chức bộ máy:</span> {settings.introSubtext}
                   </div>
                 </div>
 
@@ -361,37 +354,35 @@ export default function MTTQIntroSection({ className }: { className?: string }) 
                 <div className="p-3.5 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 mb-5 flex items-center gap-3">
                   <Star className="w-5 h-5 text-red-600 flex-shrink-0" />
                   <p className="text-xs sm:text-sm font-bold text-red-700 dark:text-red-300 uppercase tracking-wide">
-                    &quot;ĐOÀN KẾT - DÂN CHỦ - ĐỔI MỚI - SÁNG TẠO - PHÁT TRIỂN&quot;
+                    &quot;{settings.slogan}&quot;
                   </p>
                 </div>
                 <div className="space-y-4 text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
-                  <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
-                    <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-2">
-                      <Clock className="w-4 h-4 text-red-600" />
-                      Mặt trận Dân tộc Thống nhất Việt Nam (18/11/1930)
-                    </h4>
-                    <p className="text-justify text-xs leading-relaxed">
-                      Ngày 18 tháng 11 năm 1930, Ban Thường vụ Trung ương Đảng Cộng sản Đông Dương ra chỉ thị thành lập Hội Phản đế Đồng minh - hình thức đầu tiên của Mặt trận Dân tộc Thống nhất Việt Nam. Suốt chặng đường lịch sử vẻ vang gần một thế kỷ, Mặt trận đã không ngừng được củng cố và lớn mạnh qua các thời kỳ: Hội Phản đế Đồng minh (1930), Mặt trận Việt Minh (1941), Mặt trận Liên Việt (1951), Mặt trận Dân tộc Giải phóng miền Nam Việt Nam (1960), và Mặt trận Tổ quốc Việt Nam (từ 1977 đến nay).
-                    </p>
-                  </div>
-                  <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
-                    <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-2">
-                      <Shield className="w-4 h-4 text-blue-600" />
-                      Ủy ban MTTQ Việt Nam Phường Chánh Hưng
-                    </h4>
-                    <p className="text-justify text-xs leading-relaxed">
-                      Ủy ban Mặt trận Tổ quốc Việt Nam Phường Chánh Hưng luôn kế thừa và phát huy cao độ truyền thống yêu nước, đoàn kết, gắn bó mật thiết với nhân dân. Dưới sự lãnh đạo trực tiếp của Đảng bộ phường, MTTQ phường đã luôn là trung tâm đoàn kết, cầu nối tin cậy giữa Đảng, chính quyền và các tầng lớp nhân dân.
-                    </p>
-                  </div>
-                  <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
-                    <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-2">
-                      <Sparkles className="w-4 h-4 text-emerald-600" />
-                      Sứ mệnh giai đoạn mới: Mặt Trận Số
-                    </h4>
-                    <p className="text-justify text-xs leading-relaxed">
-                      Bước vào kỷ nguyên số, Ủy ban MTTQ Việt Nam Phường Chánh Hưng tiên phong ứng dụng công nghệ thông tin, xây dựng Cổng Thông tin Mặt trận số nhằm nâng cao hiệu quả giám sát, phản biện xã hội, tiếp nhận ý kiến cử tri và phục vụ nhân dân ngày càng tận tâm, minh bạch, nhanh chóng.
-                    </p>
-                  </div>
+                  {settings.historySections.map((hist, idx) => {
+                    const iconList = [Clock, Shield, Sparkles];
+                    const colorList = ["text-red-600", "text-blue-600", "text-emerald-600"];
+                    const CurrIcon = iconList[idx % iconList.length];
+                    const currColor = colorList[idx % colorList.length];
+
+                    return (
+                      <div key={hist.id} className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+                        <div className="flex items-center justify-between gap-2 mb-2">
+                          <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                            <CurrIcon className={cn("w-4 h-4", currColor)} />
+                            {hist.title}
+                          </h4>
+                          {hist.badge && (
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-200/70 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
+                              {hist.badge}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-justify text-xs leading-relaxed">
+                          {hist.content}
+                        </p>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}

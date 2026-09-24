@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import {
   Home, MessageSquare, Newspaper, Compass, Bot,
-  Briefcase, Calendar, LogOut, Sparkles
+  Briefcase, Calendar, LogOut, Sparkles, Info
 } from 'lucide-react';
 
 export default function MobileNav() {
@@ -26,7 +26,7 @@ export default function MobileNav() {
       ]
     : [
         { id: '/', label: "Trang chủ", icon: Home },
-        { id: '/tin-tuc', label: "Tin tức", icon: Newspaper },
+        { id: '/hoat-dong-mttq', label: "Giới thiệu", icon: Info },
         { id: '/tong-dai-ai', label: "Trợ lý AI", icon: Bot, isSpecial: true },
         { id: '/phan-anh', label: "Phản ánh", icon: MessageSquare },
         { id: '/khong-gian-van-hoa-hcm', label: "Thư viện", icon: Compass }

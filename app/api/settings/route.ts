@@ -7,9 +7,14 @@ const SETTINGS_FILE = path.join(process.cwd(), 'data', 'settings.json');
 async function readSettings() {
   try {
     const data = await fs.readFile(SETTINGS_FILE, 'utf-8');
-    return JSON.parse(data);
+    const parsed = JSON.parse(data);
+    return {
+      fanpages: parsed.fanpages || {},
+      phongtrao: parsed.phongtrao || {},
+      intro: parsed.intro || {},
+    };
   } catch {
-    return { fanpages: {}, phongtrao: {} };
+    return { fanpages: {}, phongtrao: {}, intro: {} };
   }
 }
 
@@ -29,26 +34,33 @@ export async function GET() {
   return NextResponse.json(settings);
 }
 
-// POST /api/settings - Update a fanpage or phongtrao setting
+// POST /api/settings - Update a fanpage, phongtrao, or intro setting
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { type, id, bg, url } = body;
+    const { type, id, bg, url, data } = body;
 
-    if (!type || !id) {
-      return NextResponse.json({ error: 'Missing type or id' }, { status: 400 });
+    if (!type) {
+      return NextResponse.json({ error: 'Missing type' }, { status: 400 });
     }
 
     const current = await readSettings();
 
     if (type === 'fanpage') {
+      if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });
       current.fanpages = current.fanpages || {};
       current.fanpages[id] = current.fanpages[id] || {};
       if (bg !== undefined) current.fanpages[id].bg = bg;
       if (url !== undefined) current.fanpages[id].url = url;
     } else if (type === 'phongtrao') {
+      if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });
       current.phongtrao = current.phongtrao || {};
       if (bg !== undefined) current.phongtrao[id] = bg;
+    } else if (type === 'intro') {
+      current.intro = current.intro || {};
+      if (data) {
+        current.intro = { ...current.intro, ...data };
+      }
     }
 
     await writeSettings(current);
