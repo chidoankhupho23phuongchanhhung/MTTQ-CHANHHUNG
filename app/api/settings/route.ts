@@ -12,9 +12,21 @@ async function readSettings() {
       fanpages: parsed.fanpages || {},
       phongtrao: parsed.phongtrao || {},
       intro: parsed.intro || {},
+      drive: parsed.drive || {
+        folderId: '1IEL2r2RZf1UnIeYiD6p753rWaSeTAi6J',
+        scriptUrl: process.env.GOOGLE_APPS_SCRIPT_URL || '',
+      },
     };
   } catch {
-    return { fanpages: {}, phongtrao: {}, intro: {} };
+    return {
+      fanpages: {},
+      phongtrao: {},
+      intro: {},
+      drive: {
+        folderId: '1IEL2r2RZf1UnIeYiD6p753rWaSeTAi6J',
+        scriptUrl: process.env.GOOGLE_APPS_SCRIPT_URL || '',
+      },
+    };
   }
 }
 
@@ -34,7 +46,7 @@ export async function GET() {
   return NextResponse.json(settings);
 }
 
-// POST /api/settings - Update a fanpage, phongtrao, or intro setting
+// POST /api/settings - Update a fanpage, phongtrao, intro, or drive setting
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -60,6 +72,11 @@ export async function POST(req: NextRequest) {
       current.intro = current.intro || {};
       if (data) {
         current.intro = { ...current.intro, ...data };
+      }
+    } else if (type === 'drive') {
+      current.drive = current.drive || {};
+      if (data) {
+        current.drive = { ...current.drive, ...data };
       }
     }
 
