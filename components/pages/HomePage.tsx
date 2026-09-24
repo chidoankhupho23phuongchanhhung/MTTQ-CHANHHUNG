@@ -15,7 +15,6 @@ import {
   getPhongTraoIcon,
   getPhongTraoBg
 } from '@/lib/phongTrao';
-import MTTQIntroSection from '../ui/MTTQIntroSection';
 
 /* ─── per-index fade-up (Fast & snappy animation) ─── */
 const fadeUpProps = (i = 0) => ({
@@ -373,23 +372,16 @@ export default function HomePage() {
               <span className="text-yellow-300">Phường Chánh Hưng</span>
             </h1>
 
-            <p className="text-xs sm:text-sm font-semibold text-yellow-200 italic border-l-2 border-yellow-400 pl-3 leading-relaxed text-left">
-              &quot;Đoàn kết – Dân chủ – Đổi mới – Phát triển&quot;
+            <p className="text-xs sm:text-sm font-bold text-yellow-300 uppercase tracking-wide border-l-2 border-yellow-400 pl-3 leading-relaxed text-left drop-shadow-sm">
+              &quot;ĐOÀN KẾT - DÂN CHỦ - ĐỔI MỚI - SÁNG TẠO - PHÁT TRIỂN&quot;
             </p>
 
             <button
-              onClick={() => {
-                const el = document.getElementById('co-cau-to-chuc-mttq');
-                if (el) {
-                  el.scrollIntoView({ behavior: 'smooth' });
-                } else {
-                  handleNav('/hoat-dong-mttq');
-                }
-              }}
+              onClick={() => handleNav('/hoat-dong-mttq')}
               className="mt-2 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-md border border-white/30 text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer"
             >
               <BookOpen className="h-3.5 w-3.5 text-yellow-300" />
-              <span>Xem Chức năng & Cơ cấu tổ chức MTTQ</span>
+              <span>Xem Giới thiệu & Cơ cấu tổ chức MTTQ</span>
               <ArrowRight className="h-3.5 w-3.5" />
             </button>
           </motion.div>
@@ -570,8 +562,8 @@ export default function HomePage() {
             buttonHoverColor="group-hover:border-sky-500/20 group-hover:text-sky-600 dark:group-hover:text-sky-400"
             customIcon={
               <img
-                src="/ubnd-logo.svg"
-                alt="Logo UBND"
+                src="/quoc-huy.png"
+                alt="Quốc huy Việt Nam"
                 className="h-8 w-8 sm:h-9 sm:w-9 object-contain"
               />
             }
@@ -613,13 +605,6 @@ export default function HomePage() {
               />
             ))}
           </div>
-        </div>
-
-        {/* ═══════════════════════════════════════════
-            CHỨC NĂNG, NHIỆM VỤ & CƠ CẤU TỔ CHỨC MTTQ
-        ═══════════════════════════════════════════ */}
-        <div id="co-cau-to-chuc-mttq" className="mb-10 pt-4 border-t border-slate-200/60 dark:border-slate-800/60 scroll-mt-24">
-          <MTTQIntroSection />
         </div>
 
       </PageContainer>
