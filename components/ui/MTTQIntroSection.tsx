@@ -105,11 +105,9 @@ export default function MTTQIntroSection({ className }: { className?: string }) 
 
   // Sync settings from cache and server API
   const loadSettings = async () => {
-    // 1. Instant local read
     const cached = getCachedIntroSettings();
     setSettings(cached);
 
-    // 2. Fetch server API
     try {
       const res = await fetch("/api/settings");
       if (res.ok) {
@@ -124,7 +122,7 @@ export default function MTTQIntroSection({ className }: { className?: string }) 
         }
       }
     } catch (e) {
-      // Fallback to cached
+      // Fallback
     }
   };
 
@@ -145,10 +143,10 @@ export default function MTTQIntroSection({ className }: { className?: string }) 
   });
 
   return (
-    <div className={cn("w-full mb-10", className)}>
+    <div className={cn("w-full mb-6", className)}>
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
-        {/* CỘT TRÁI: SIDEBAR 3 MỤC */}
+        {/* CỘT TRÁI: SIDEBAR 3 MỤC (Đã bỏ box phường chánh hưng ở dưới theo yêu cầu) */}
         <div className="lg:col-span-4 xl:col-span-3">
           <div className="flex items-center gap-2 mb-4">
             <span className="w-1.5 h-5 bg-red-600 rounded-full flex-shrink-0" />
@@ -200,16 +198,6 @@ export default function MTTQIntroSection({ className }: { className?: string }) 
               <span>Ban thường trực</span>
             </button>
           </div>
-
-          <div className="mt-5 p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-400 space-y-2">
-            <div className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-500" />
-              <span>Ủy ban MTTQ Việt Nam</span>
-            </div>
-            <p className="text-[11px] leading-relaxed">
-              Phường Chánh Hưng — Nền tảng đoàn kết toàn dân tộc, kết nối chính quyền và nhân dân.
-            </p>
-          </div>
         </div>
 
         {/* CỘT PHẢI: NỘI DUNG CHÍNH */}
@@ -219,7 +207,7 @@ export default function MTTQIntroSection({ className }: { className?: string }) 
             {/* TAB: BAN THƯỜNG TRỰC */}
             {activeTab === "ban-thuong-truc" && (
               <div>
-                <h3 className="text-base sm:text-lg font-black text-red-600 uppercase tracking-wide mb-4">
+                <h3 className="text-base sm:text-lg font-black text-red-600 uppercase tracking-wide mb-1.5">
                   Danh sách Ban Thường trực
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mb-5">
@@ -249,11 +237,6 @@ export default function MTTQIntroSection({ className }: { className?: string }) 
                           <td className="py-3.5 px-4 align-middle border-r border-slate-200 dark:border-slate-800">
                             <span className="text-xs text-slate-500 dark:text-slate-400 block mb-0.5 font-medium">{leader.salutation}</span>
                             <span className="text-sm font-bold text-slate-900 dark:text-white block">{leader.name}</span>
-                            {leader.level === "ward" && (
-                              <span className="inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-bold bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-300 border border-red-200 dark:border-red-900">
-                                Phường Chánh Hưng
-                              </span>
-                            )}
                           </td>
                           <td className="py-3.5 px-4 align-middle text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
                             {leader.title}
@@ -275,12 +258,31 @@ export default function MTTQIntroSection({ className }: { className?: string }) 
                 <h3 className="text-base sm:text-lg font-black text-red-600 uppercase tracking-wide mb-4">
                   Cơ cấu tổ chức và Chức năng nhiệm vụ
                 </h3>
-                <div className="p-4 sm:p-5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 mb-6 text-xs sm:text-sm text-slate-800 dark:text-slate-200 leading-relaxed space-y-3">
-                  <p className="text-justify">
+
+                {/* Box tóm tắt: Ghi rõ ràng 05 bộ phận chuyên môn và các tổ chức chính trị - xã hội */}
+                <div className="p-4 sm:p-5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 mb-6 text-xs sm:text-sm text-slate-800 dark:text-slate-200 leading-relaxed space-y-3.5">
+                  <p className="text-justify leading-relaxed">
                     {settings.introText}
                   </p>
-                  <div className="pt-2 border-t border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300">
-                    <span className="font-bold text-red-700 dark:text-red-400">Về tổ chức bộ máy:</span> {settings.introSubtext}
+                  
+                  <div className="pt-3 border-t border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 space-y-2.5">
+                    <div className="bg-white dark:bg-slate-900/80 p-3 rounded-lg border border-slate-200/60 dark:border-slate-700/60">
+                      <span className="font-bold text-blue-700 dark:text-blue-400 block mb-1">
+                        🔹 05 Bộ phận Chuyên môn:
+                      </span>
+                      <p className="text-xs leading-relaxed text-slate-700 dark:text-slate-300 font-medium">
+                        (1) Bộ phận Văn phòng &bull; (2) Bộ phận Tổ chức, Kiểm tra &bull; (3) Bộ phận Dân chủ, Giám sát và Phản biện xã hội &bull; (4) Bộ phận Dân tộc và Tôn giáo &bull; (5) Bộ phận Công tác xã hội.
+                      </p>
+                    </div>
+
+                    <div className="bg-white dark:bg-slate-900/80 p-3 rounded-lg border border-slate-200/60 dark:border-slate-700/60">
+                      <span className="font-bold text-emerald-700 dark:text-emerald-400 block mb-1">
+                        🔹 04 Tổ chức Chính trị - Xã hội và các Hội:
+                      </span>
+                      <p className="text-xs leading-relaxed text-slate-700 dark:text-slate-300 font-medium">
+                        (6) Đoàn TNCS Hồ Chí Minh phường &bull; (7) Công đoàn phường &bull; (8) Hội Liên hiệp Phụ nữ phường &bull; (9) Hội Cựu chiến binh phường.
+                      </p>
+                    </div>
                   </div>
                 </div>
 
@@ -299,11 +301,12 @@ export default function MTTQIntroSection({ className }: { className?: string }) 
                           : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50"
                       )}
                     >
-                      {f === "all" ? "Tất cả (09)" : f === "chuyen-mon" ? "05 Bộ phận Chuyên môn" : "04 Tổ chức CT-XH"}
+                      {f === "all" ? "Tất cả (09 đơn vị)" : f === "chuyen-mon" ? "05 Bộ phận Chuyên môn" : "04 Tổ chức CT-XH"}
                     </button>
                   ))}
                 </div>
 
+                {/* Các box: ĐÃ BỎ THẺ GHIM PHÍA TRÊN MỖI BOX */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                   {filteredDepts.map((dept) => {
                     const Icon = dept.icon;
@@ -311,18 +314,21 @@ export default function MTTQIntroSection({ className }: { className?: string }) 
                     return (
                       <div key={dept.id} className="rounded-xl border border-slate-200 dark:border-slate-800 p-4 bg-white dark:bg-slate-800/40 hover:border-slate-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between">
                         <div>
-                          <div className="flex items-center justify-between gap-2 mb-2">
-                            <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-md border", dept.badgeBg)}>{dept.categoryLabel}</span>
-                            <span className="text-xs font-bold text-slate-400">{dept.number}</span>
-                          </div>
-                          <div className="flex items-start gap-2.5 mb-2">
-                            <div className={cn("p-2 rounded-lg bg-slate-100 dark:bg-slate-800 flex-shrink-0 mt-0.5", dept.badgeColor)}>
+                          {/* Tiêu đề & Icon trực tiếp - Không còn thẻ ghim */}
+                          <div className="flex items-center gap-3 mb-2.5">
+                            <div className={cn("p-2 rounded-xl bg-slate-100 dark:bg-slate-800 flex-shrink-0", dept.badgeColor)}>
                               <Icon className="w-4 h-4" />
                             </div>
-                            <h4 className="text-sm font-bold text-slate-900 dark:text-white leading-snug">{dept.name}</h4>
+                            <h4 className="text-sm font-bold text-slate-900 dark:text-white leading-snug">
+                              {dept.number} {dept.name}
+                            </h4>
                           </div>
-                          <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-3">{dept.summary}</p>
+
+                          <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-3">
+                            {dept.summary}
+                          </p>
                         </div>
+
                         <div>
                           {isExpanded && (
                             <div className="pt-3 border-t border-slate-100 dark:border-slate-700 text-xs text-slate-700 dark:text-slate-300 leading-relaxed text-justify mb-3 bg-slate-50 dark:bg-slate-900/60 p-3 rounded-lg">
@@ -334,7 +340,7 @@ export default function MTTQIntroSection({ className }: { className?: string }) 
                             onClick={() => setExpandedDeptId(isExpanded ? null : dept.id)}
                             className="w-full py-1.5 px-3 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors flex items-center justify-center gap-1 cursor-pointer"
                           >
-                            <span>{isExpanded ? "Thu gọn" : "Xem chi tiết"}</span>
+                            <span>{isExpanded ? "Thu gọn" : "Xem chi tiết chức năng nhiệm vụ"}</span>
                             {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                           </button>
                         </div>
@@ -345,19 +351,23 @@ export default function MTTQIntroSection({ className }: { className?: string }) 
               </div>
             )}
 
-            {/* TAB: LỊCH SỬ HÌNH THÀNH */}
+            {/* TAB: LỊCH SỬ HÌNH THÀNH (1 BOX DÀI, KHÔNG TÁCH LÀM 3 THEO YÊU CẦU) */}
             {activeTab === "lich-su" && (
               <div>
                 <h3 className="text-base sm:text-lg font-black text-red-600 uppercase tracking-wide mb-2">
                   Lịch sử hình thành và phát triển
                 </h3>
+
+                {/* Khẩu hiệu */}
                 <div className="p-3.5 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 mb-5 flex items-center gap-3">
                   <Star className="w-5 h-5 text-red-600 flex-shrink-0" />
                   <p className="text-xs sm:text-sm font-bold text-red-700 dark:text-red-300 uppercase tracking-wide">
                     &quot;{settings.slogan}&quot;
                   </p>
                 </div>
-                <div className="space-y-4 text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+
+                {/* 1 BOX DÀI LIÊN TỤC DUY NHẤT */}
+                <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40 p-5 sm:p-7 space-y-6 text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed shadow-2xs">
                   {settings.historySections.map((hist, idx) => {
                     const iconList = [Clock, Shield, Sparkles];
                     const colorList = ["text-red-600", "text-blue-600", "text-emerald-600"];
@@ -365,19 +375,19 @@ export default function MTTQIntroSection({ className }: { className?: string }) 
                     const currColor = colorList[idx % colorList.length];
 
                     return (
-                      <div key={hist.id} className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
-                        <div className="flex items-center justify-between gap-2 mb-2">
-                          <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                            <CurrIcon className={cn("w-4 h-4", currColor)} />
-                            {hist.title}
+                      <div key={hist.id} className={cn(idx > 0 && "pt-6 border-t border-slate-200/80 dark:border-slate-700/80")}>
+                        <div className="flex items-center justify-between gap-3 mb-2.5">
+                          <h4 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                            <CurrIcon className={cn("w-4 h-4 flex-shrink-0", currColor)} />
+                            <span>{hist.title}</span>
                           </h4>
                           {hist.badge && (
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-200/70 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
+                            <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 shadow-2xs">
                               {hist.badge}
                             </span>
                           )}
                         </div>
-                        <p className="text-justify text-xs leading-relaxed">
+                        <p className="text-justify text-xs sm:text-sm leading-relaxed text-slate-600 dark:text-slate-300">
                           {hist.content}
                         </p>
                       </div>

@@ -363,7 +363,7 @@ export default function MTTQIntroAdminSection({ className }: { className?: strin
           )}
         >
           <Clock className="w-3.5 h-3.5" />
-          <span>Mục Lịch sử hình thành (3 phần)</span>
+          <span>Mục Lịch sử hình thành (1 box dài)</span>
         </button>
       </div>
 
