@@ -376,14 +376,6 @@ export default function HomePage() {
               &quot;ĐOÀN KẾT - DÂN CHỦ - ĐỔI MỚI - SÁNG TẠO - PHÁT TRIỂN&quot;
             </p>
 
-            <button
-              onClick={() => handleNav('/hoat-dong-mttq')}
-              className="mt-2 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-md border border-white/30 text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer"
-            >
-              <BookOpen className="h-3.5 w-3.5 text-yellow-300" />
-              <span>Xem Giới thiệu & Cơ cấu tổ chức MTTQ</span>
-              <ArrowRight className="h-3.5 w-3.5" />
-            </button>
           </motion.div>
         </div>
       </div>
