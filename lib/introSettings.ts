@@ -18,8 +18,9 @@ export interface IntroSettings {
   slogan: string;
   introText: string;
   introSubtext: string;
+  historyContent: string;
   leaders: LeaderItem[];
-  historySections: HistorySectionItem[];
+  historySections?: HistorySectionItem[];
 }
 
 export const DEFAULT_LEADERS: LeaderItem[] = [
@@ -71,33 +72,18 @@ export const DEFAULT_INTRO_TEXT = "Cơ quan Ủy ban Mặt trận Tổ quốc Vi
 
 export const DEFAULT_INTRO_SUBTEXT = "Được cơ cấu tổ chức theo 05 bộ phận chuyên môn và 04 tổ chức chính trị - xã hội, các hội do Đảng, Nhà nước giao nhiệm vụ, có tính đến những chức năng, nhiệm vụ chung, quan trọng, đặc thù.";
 
-export const DEFAULT_HISTORY_SECTIONS: HistorySectionItem[] = [
-  {
-    id: "hist-1",
-    title: "Mặt trận Dân tộc Thống nhất Việt Nam (18/11/1930)",
-    content: "Ngày 18 tháng 11 năm 1930, Ban Thường vụ Trung ương Đảng Cộng sản Đông Dương ra chỉ thị thành lập Hội Phản đế Đồng minh - hình thức đầu tiên của Mặt trận Dân tộc Thống nhất Việt Nam. Suốt chặng đường lịch sử vẻ vang gần một thế kỷ, Mặt trận đã không ngừng được củng cố và lớn mạnh qua các thời kỳ: Hội Phản đế Đồng minh (1930), Mặt trận Việt Minh (1941), Mặt trận Liên Việt (1951), Mặt trận Dân tộc Giải phóng miền Nam Việt Nam (1960), và Mặt trận Tổ quốc Việt Nam (từ 1977 đến nay).",
-    badge: "18/11/1930"
-  },
-  {
-    id: "hist-2",
-    title: "Ủy ban MTTQ Việt Nam Phường Chánh Hưng",
-    content: "Ủy ban Mặt trận Tổ quốc Việt Nam Phường Chánh Hưng luôn kế thừa và phát huy cao độ truyền thống yêu nước, đoàn kết, gắn bó mật thiết với nhân dân. Dưới sự lãnh đạo trực tiếp của Đảng bộ phường, MTTQ phường đã luôn là trung tâm đoàn kết, cầu nối tin cậy giữa Đảng, chính quyền và các tầng lớp nhân dân.",
-    badge: "Truyền thống"
-  },
-  {
-    id: "hist-3",
-    title: "Sứ mệnh giai đoạn mới: Mặt Trận Số",
-    content: "Bước vào kỷ nguyên số, Ủy ban MTTQ Việt Nam Phường Chánh Hưng tiên phong ứng dụng công nghệ thông tin, xây dựng Cổng Thông tin Mặt trận số nhằm nâng cao hiệu quả giám sát, phản biện xã hội, tiếp nhận ý kiến cử tri và phục vụ nhân dân ngày càng tận tâm, minh bạch, nhanh chóng.",
-    badge: "Chuyển đổi số"
-  }
-];
+export const DEFAULT_HISTORY_CONTENT = `Ngày 18 tháng 11 năm 1930, Ban Thường vụ Trung ương Đảng Cộng sản Đông Dương ra chỉ thị thành lập Hội Phản đế Đồng minh - hình thức đầu tiên của Mặt trận Dân tộc Thống nhất Việt Nam. Suốt chặng đường lịch sử vẻ vang gần một thế kỷ, Mặt trận đã không ngừng được củng cố và lớn mạnh qua các thời kỳ: Hội Phản đế Đồng minh (1930), Mặt trận Việt Minh (1941), Mặt trận Liên Việt (1951), Mặt trận Dân tộc Giải phóng miền Nam Việt Nam (1960), và Mặt trận Tổ quốc Việt Nam (từ 1977 đến nay).
+
+Kế thừa và phát huy cao độ truyền thống vẻ vang đó, Ủy ban Mặt trận Tổ quốc Việt Nam Phường Chánh Hưng luôn giữ vững vai trò là trung tâm khối đại đoàn kết toàn dân, là cầu nối vững chắc, tin cậy giữa Đảng bộ, chính quyền và các tầng lớp nhân dân. Dưới sự lãnh đạo trực tiếp của Đảng ủy phường, MTTQ phường luôn chủ động đổi mới nội dung, phương thức hoạt động, gắn bó mật thiết với nhân dân; đồng thời đẩy mạnh các cuộc vận động thi đua yêu nước, phát huy tinh thần tương thân tương ái, chăm lo an sinh xã hội cho nhân dân trên địa bàn.
+
+Bước vào kỷ nguyên mới, Ủy ban MTTQ Việt Nam Phường Chánh Hưng tiên phong ứng dụng công nghệ thông tin và chuyển đổi số, xây dựng Cổng Thông tin Mặt trận số nhằm nâng cao hiệu quả giám sát, phản biện xã hội, tiếp nhận và xử lý ý kiến phản ánh của cử tri nhanh chóng, công khai, minh bạch; chung sức xây dựng Phường Chánh Hưng ngày càng văn minh, hiện đại, nghĩa tình.`;
 
 export const DEFAULT_INTRO_SETTINGS: IntroSettings = {
   slogan: DEFAULT_SLOGAN,
   introText: DEFAULT_INTRO_TEXT,
   introSubtext: DEFAULT_INTRO_SUBTEXT,
+  historyContent: DEFAULT_HISTORY_CONTENT,
   leaders: DEFAULT_LEADERS,
-  historySections: DEFAULT_HISTORY_SECTIONS,
 };
 
 export const getCachedIntroSettings = (): IntroSettings => {
@@ -110,8 +96,8 @@ export const getCachedIntroSettings = (): IntroSettings => {
           slogan: parsed.slogan || DEFAULT_SLOGAN,
           introText: parsed.introText || DEFAULT_INTRO_TEXT,
           introSubtext: parsed.introSubtext || DEFAULT_INTRO_SUBTEXT,
+          historyContent: parsed.historyContent || (parsed.historySections ? parsed.historySections.map((s: any) => s.content).join('\n\n') : DEFAULT_HISTORY_CONTENT),
           leaders: parsed.leaders && parsed.leaders.length > 0 ? parsed.leaders : DEFAULT_LEADERS,
-          historySections: parsed.historySections && parsed.historySections.length > 0 ? parsed.historySections : DEFAULT_HISTORY_SECTIONS,
         };
       }
     } catch (e) {

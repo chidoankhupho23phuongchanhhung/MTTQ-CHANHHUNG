@@ -10,8 +10,8 @@ import { cn } from "@/lib/utils";
 import {
   IntroSettings,
   LeaderItem,
-  HistorySectionItem,
   DEFAULT_INTRO_SETTINGS,
+  DEFAULT_HISTORY_CONTENT,
   getCachedIntroSettings
 } from "@/lib/introSettings";
 
@@ -24,7 +24,6 @@ interface DepartmentItem {
   category: "chuyen-mon" | "doan-the";
   categoryLabel: string;
   icon: React.ElementType;
-  badgeBg: string;
   badgeColor: string;
   summary: string;
   content: string;
@@ -34,63 +33,63 @@ const DEPARTMENTS: DepartmentItem[] = [
   {
     id: "van-phong", number: "(1)", name: "Bộ phận Văn phòng",
     category: "chuyen-mon", categoryLabel: "Bộ phận Chuyên môn",
-    icon: Building2, badgeBg: "bg-blue-50 text-blue-700 border-blue-200", badgeColor: "text-blue-600",
+    icon: Building2, badgeColor: "text-blue-600",
     summary: "Tham mưu, tổng hợp, hành chính quản trị, hậu cần và chuyển đổi số cơ sở dữ liệu Mặt trận.",
     content: "Có chức năng tham mưu, giúp việc, tổ chức phục vụ các hoạt động và công tác chỉ đạo, điều hành của Đảng ủy, Ủy ban, Ban Thường trực Ủy ban Mặt trận Tổ quốc Việt Nam phường và các tổ chức chính trị - xã hội phường. Tham mưu xây dựng chương trình làm việc và phối hợp tổ chức thực hiện chương trình làm việc của Ủy ban, Ban Thường trực và Cơ quan. Tổ chức ứng dụng triển khai chuyển đổi số, phát triển quản lý các nền tảng số về các cơ sở dữ liệu đoàn viên, hội viên, thành viên của Mặt trận Tổ quốc Việt Nam phường."
   },
   {
     id: "to-chuc-kiem-tra", number: "(2)", name: "Bộ phận Tổ chức, Kiểm tra",
     category: "chuyen-mon", categoryLabel: "Bộ phận Chuyên môn",
-    icon: ShieldCheck, badgeBg: "bg-amber-50 text-amber-700 border-amber-200", badgeColor: "text-amber-600",
+    icon: ShieldCheck, badgeColor: "text-amber-600",
     summary: "Tổ chức cán bộ, quản lý biên chế, thi đua khen thưởng và kiểm tra giám sát Điều lệ.",
     content: "Có chức năng tham mưu, giúp việc cho Ủy ban, Ban Thường trực Mặt trận Tổ quốc Việt Nam phường và các tổ chức chính trị - xã hội phường về công tác tổ chức, quản lý, phát triển thành viên; hướng dẫn và tổ chức các hoạt động, nghiệp vụ, thực hiện quản lý biên chế, tổ chức cán bộ; công tác kiểm tra, giám sát thi hành Điều lệ."
   },
   {
     id: "dan-chu-giam-sat", number: "(3)", name: "Bộ phận Dân chủ, Giám sát và Phản biện xã hội",
     category: "chuyen-mon", categoryLabel: "Bộ phận Chuyên môn",
-    icon: Scale, badgeBg: "bg-emerald-50 text-emerald-700 border-emerald-200", badgeColor: "text-emerald-600",
+    icon: Scale, badgeColor: "text-emerald-600",
     summary: "Thực hiện dân chủ, dân nguyện, pháp luật, giám sát và phản biện xã hội đối với chủ trương, chính sách.",
     content: "Có chức năng tham mưu, giúp việc chung cho Ủy ban, Ban Thường trực và các tổ chức chính trị - xã hội phường tổ chức và thực hiện về công tác dân chủ, dân nguyện, công tác pháp luật, công tác giám sát và phản biện xã hội đối với các chủ trương của Đảng, chính sách, pháp luật Nhà nước."
   },
   {
     id: "dan-toc-ton-giao", number: "(4)", name: "Bộ phận Dân tộc và Tôn giáo",
     category: "chuyen-mon", categoryLabel: "Bộ phận Chuyên môn",
-    icon: Globe2, badgeBg: "bg-cyan-50 text-cyan-700 border-cyan-200", badgeColor: "text-cyan-600",
+    icon: Globe2, badgeColor: "text-cyan-600",
     summary: "Công tác dân tộc, tín ngưỡng, tôn giáo, đối ngoại Nhân dân và người Việt Nam ở nước ngoài.",
     content: "Có chức năng, nhiệm vụ tham mưu, giúp việc cho Ủy ban Mặt trận Tổ quốc Việt Nam phường và các tổ chức chính trị - xã hội phường về công tác dân tộc và tín ngưỡng, tôn giáo; công tác đối ngoại Nhân dân; công tác đối với người Việt Nam ở nước ngoài."
   },
   {
     id: "cong-tac-xa-hoi", number: "(5)", name: "Bộ phận Công tác xã hội",
     category: "chuyen-mon", categoryLabel: "Bộ phận Chuyên môn",
-    icon: Sparkles, badgeBg: "bg-purple-50 text-purple-700 border-purple-200", badgeColor: "text-purple-600",
+    icon: Sparkles, badgeColor: "text-purple-600",
     summary: "Phong trào thi đua, an sinh xã hội, đền ơn đáp nghĩa, cứu trợ từ thiện, quản lý quỹ và tuyên giáo.",
     content: "Có chức năng, nhiệm vụ tham mưu, giúp việc cho Đảng ủy Ủy ban Mặt trận Tổ quốc Việt Nam phường, Ban Thường trực về công tác xã hội: tổ chức các cuộc vận động, phong trào thi đua yêu nước, an sinh xã hội. Công tác tuyên giáo: tuyên truyền, lý luận chính trị, bảo vệ nền tảng tư tưởng của Đảng."
   },
   {
     id: "doan-thanh-nien", number: "(6)", name: "Đoàn TNCS Hồ Chí Minh phường",
     category: "doan-the", categoryLabel: "Tổ chức CT-XH",
-    icon: Flame, badgeBg: "bg-green-50 text-green-700 border-green-200", badgeColor: "text-green-600",
+    icon: Flame, badgeColor: "text-green-600",
     summary: "Tập hợp, giáo dục lý tưởng cách mạng cho thanh thiếu nhi, các phong trào hành động cách mạng tuổi trẻ.",
     content: "Tham mưu, giúp việc cho Ban Chấp hành, Ban Thường vụ, trực tiếp trong tập hợp, vận động đoàn viên, thanh niên tích cực học tập, lao động, nâng cao trình độ; giáo dục lý tưởng cách mạng, đạo đức, lối sống văn hóa cho thanh, thiếu nhi."
   },
   {
     id: "cong-doan", number: "(7)", name: "Công đoàn phường",
     category: "doan-the", categoryLabel: "Tổ chức CT-XH",
-    icon: Briefcase, badgeBg: "bg-blue-50 text-blue-700 border-blue-200", badgeColor: "text-blue-700",
+    icon: Briefcase, badgeColor: "text-blue-700",
     summary: "Bảo vệ quyền và lợi ích hợp pháp của công nhân, người lao động, an toàn vệ sinh lao động.",
     content: "Tham mưu, giúp việc cho Ban Chấp hành, Ban Thường vụ Công đoàn phường trong tập hợp, vận động đoàn viên, công nhân phát huy quyền làm chủ, tích cực lao động, học tập nâng cao trình độ."
   },
   {
     id: "phu-nu", number: "(8)", name: "Hội Liên hiệp Phụ nữ phường",
     category: "doan-the", categoryLabel: "Tổ chức CT-XH",
-    icon: Heart, badgeBg: "bg-rose-50 text-rose-700 border-rose-200", badgeColor: "text-rose-600",
+    icon: Heart, badgeColor: "text-rose-600",
     summary: "Đại diện phụ nữ, xây dựng gia đình hạnh phúc, bình đẳng giới và bảo vệ quyền phụ nữ, trẻ em.",
     content: "Tham mưu, giúp việc cho Ban Chấp hành, Ban Thường vụ Hội Liên hiệp Phụ nữ phường trong tập hợp, vận động hội viên, phụ nữ phát huy nội lực; đại diện các tầng lớp phụ nữ tham gia xây dựng Đảng, Nhà nước và khối đại đoàn kết toàn dân tộc."
   },
   {
     id: "cuu-chien-binh", number: "(9)", name: "Hội Cựu chiến binh phường",
     category: "doan-the", categoryLabel: "Tổ chức CT-XH",
-    icon: Award, badgeBg: "bg-amber-50 text-amber-700 border-amber-200", badgeColor: "text-amber-700",
+    icon: Award, badgeColor: "text-amber-700",
     summary: "Giữ gìn bản chất Bộ đội Cụ Hồ, tham gia bảo vệ Đảng, chính quyền, hỗ trợ đồng đội.",
     content: "Tham mưu, giúp việc cho Ban Chấp hành, Ban Thường vụ Hội Cựu chiến binh phường trong công tác tập hợp, đoàn kết, vận động hội viên, Cựu chiến binh giữ gìn phẩm chất, đạo đức cách mạng, nâng cao bản lĩnh chính trị."
   }
@@ -116,8 +115,8 @@ export default function MTTQIntroSection({ className }: { className?: string }) 
           setSettings(prev => ({
             ...prev,
             ...data.intro,
+            historyContent: data.intro.historyContent || (data.intro.historySections ? data.intro.historySections.map((s: any) => s.content).join('\n\n') : prev.historyContent),
             leaders: data.intro.leaders && data.intro.leaders.length > 0 ? data.intro.leaders : prev.leaders,
-            historySections: data.intro.historySections && data.intro.historySections.length > 0 ? data.intro.historySections : prev.historySections,
           }));
         }
       }
@@ -146,7 +145,7 @@ export default function MTTQIntroSection({ className }: { className?: string }) 
     <div className={cn("w-full mb-6", className)}>
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
-        {/* CỘT TRÁI: SIDEBAR 3 MỤC (Đã bỏ box phường chánh hưng ở dưới theo yêu cầu) */}
+        {/* CỘT TRÁI: SIDEBAR 3 MỤC */}
         <div className="lg:col-span-4 xl:col-span-3">
           <div className="flex items-center gap-2 mb-4">
             <span className="w-1.5 h-5 bg-red-600 rounded-full flex-shrink-0" />
@@ -351,7 +350,7 @@ export default function MTTQIntroSection({ className }: { className?: string }) 
               </div>
             )}
 
-            {/* TAB: LỊCH SỬ HÌNH THÀNH (1 BOX DÀI, KHÔNG TÁCH LÀM 3 THEO YÊU CẦU) */}
+            {/* TAB: LỊCH SỬ HÌNH THÀNH (1 NỘI DUNG DÀI XUYÊN SUỐT DUY NHẤT) */}
             {activeTab === "lich-su" && (
               <div>
                 <h3 className="text-base sm:text-lg font-black text-red-600 uppercase tracking-wide mb-2">
@@ -366,33 +365,13 @@ export default function MTTQIntroSection({ className }: { className?: string }) 
                   </p>
                 </div>
 
-                {/* 1 BOX DÀI LIÊN TỤC DUY NHẤT */}
-                <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40 p-5 sm:p-7 space-y-6 text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed shadow-2xs">
-                  {settings.historySections.map((hist, idx) => {
-                    const iconList = [Clock, Shield, Sparkles];
-                    const colorList = ["text-red-600", "text-blue-600", "text-emerald-600"];
-                    const CurrIcon = iconList[idx % iconList.length];
-                    const currColor = colorList[idx % colorList.length];
-
-                    return (
-                      <div key={hist.id} className={cn(idx > 0 && "pt-6 border-t border-slate-200/80 dark:border-slate-700/80")}>
-                        <div className="flex items-center justify-between gap-3 mb-2.5">
-                          <h4 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                            <CurrIcon className={cn("w-4 h-4 flex-shrink-0", currColor)} />
-                            <span>{hist.title}</span>
-                          </h4>
-                          {hist.badge && (
-                            <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 shadow-2xs">
-                              {hist.badge}
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-justify text-xs sm:text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-                          {hist.content}
-                        </p>
-                      </div>
-                    );
-                  })}
+                {/* 1 NỘI DUNG DÀI XUYÊN SUỐT DUY NHẤT */}
+                <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40 p-6 sm:p-8 text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed shadow-2xs space-y-4 text-justify">
+                  {(settings.historyContent || DEFAULT_HISTORY_CONTENT).split(/\n\n+/).map((para, idx) => (
+                    <p key={idx} className="leading-relaxed indent-4">
+                      {para.trim()}
+                    </p>
+                  ))}
                 </div>
               </div>
             )}

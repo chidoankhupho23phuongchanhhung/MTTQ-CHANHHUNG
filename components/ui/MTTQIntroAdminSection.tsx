@@ -12,7 +12,6 @@ import { cn } from '@/lib/utils';
 import {
   IntroSettings,
   LeaderItem,
-  HistorySectionItem,
   DEFAULT_INTRO_SETTINGS,
   DEFAULT_LEADERS,
   getCachedIntroSettings
@@ -48,7 +47,7 @@ export default function MTTQIntroAdminSection({ className }: { className?: strin
               ...prev,
               ...data.intro,
               leaders: data.intro.leaders && data.intro.leaders.length > 0 ? data.intro.leaders : prev.leaders,
-              historySections: data.intro.historySections && data.intro.historySections.length > 0 ? data.intro.historySections : prev.historySections,
+              historyContent: data.intro.historyContent || prev.historyContent,
             }));
           }
         }
@@ -180,14 +179,6 @@ export default function MTTQIntroAdminSection({ className }: { className?: strin
       if (editingLeaderId === id) setEditingLeaderId(null);
       addNotification('Đã xóa', `Đã xóa nhân sự "${name}"`, 'info');
     }
-  };
-
-  // Update history section
-  const updateHistoryField = (id: string, field: keyof HistorySectionItem, value: string) => {
-    setSettings(prev => ({
-      ...prev,
-      historySections: prev.historySections.map(h => h.id === id ? { ...h, [field]: value } : h)
-    }));
   };
 
   // Save all settings to API and localStorage
@@ -633,52 +624,25 @@ export default function MTTQIntroAdminSection({ className }: { className?: strin
       )}
 
       {/* ────────────────────────────────────────────────────────
-          TAB 3: NỘI DUNG 3 PHẦN LỊCH SỬ HÌNH THÀNH
+          TAB 3: NỘI DUNG LỊCH SỬ HÌNH THÀNH (1 VĂN BẢN XUYÊN SUỐT)
       ──────────────────────────────────────────────────────── */}
       {activeAdminSubTab === 'history' && (
         <div className="space-y-4">
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            Chỉnh sửa 3 mốc thời gian và giai đoạn truyền thống hiển thị ở mục <strong>"Lịch sử hình thành"</strong>:
-          </p>
-
-          <div className="grid grid-cols-1 gap-4">
-            {settings.historySections.map((item, idx) => (
-              <div
-                key={item.id}
-                className="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 space-y-3"
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-2 flex-1">
-                    <span className="w-6 h-6 rounded-lg bg-red-100 text-red-600 dark:bg-red-950/50 dark:text-red-400 flex items-center justify-center font-bold text-xs">
-                      {idx + 1}
-                    </span>
-                    <input
-                      type="text"
-                      value={item.title}
-                      onChange={(e) => updateHistoryField(item.id, 'title', e.target.value)}
-                      placeholder="Tiêu đề giai đoạn lịch sử..."
-                      className="flex-1 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-xs sm:text-sm text-slate-900 dark:text-white"
-                    />
-                  </div>
-
-                  <input
-                    type="text"
-                    value={item.badge}
-                    onChange={(e) => updateHistoryField(item.id, 'badge', e.target.value)}
-                    placeholder="Mốc thời gian"
-                    className="w-28 px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs text-center font-semibold text-slate-600 dark:text-slate-300"
-                  />
-                </div>
-
-                <textarea
-                  rows={4}
-                  value={item.content}
-                  onChange={(e) => updateHistoryField(item.id, 'content', e.target.value)}
-                  placeholder="Nội dung chi tiết..."
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 text-xs leading-relaxed"
-                />
-              </div>
-            ))}
+          <div className="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-3">
+            <label className="block font-bold text-slate-800 dark:text-white flex items-center justify-between">
+              <span>Nội dung Lịch sử hình thành và phát triển (1 văn bản xuyên suốt):</span>
+              <span className="text-[11px] font-normal text-slate-400">Cách các đoạn bằng 2 lần xuống dòng (Enter)</span>
+            </label>
+            <textarea
+              rows={12}
+              value={settings.historyContent || ''}
+              onChange={(e) => setSettings(prev => ({ ...prev, historyContent: e.target.value }))}
+              placeholder="Nhập nội dung lịch sử hình thành..."
+              className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs sm:text-sm leading-relaxed"
+            />
+            <p className="text-[11px] text-slate-500 dark:text-slate-400">
+              Nội dung trên sẽ được hiển thị thành một văn bản dài liền mạch, trang nhã trong mục Lịch sử hình thành.
+            </p>
           </div>
         </div>
       )}
