@@ -1,13 +1,17 @@
 "use client";
 
 import React, { useRef, useEffect, useState } from 'react';
-import { Send, Trash2, Bot, User, CornerDownLeft, FileSignature } from 'lucide-react';
+import { Send, Trash2, Bot, User, CornerDownLeft, FileSignature, X } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
 import TypingIndicator from './TypingIndicator';
 import QuickPrompts from './QuickPrompts';
 import { cn } from '@/lib/utils';
 
-export default function ChatPanel() {
+interface ChatPanelProps {
+  onClose?: () => void;
+}
+
+export default function ChatPanel({ onClose }: ChatPanelProps) {
   const { chatMessages, aiTyping, addChatMessage, setAiTyping, clearChat, setCurrentRoute } = useAppStore();
   const [inputValue, setInputValue] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -73,11 +77,11 @@ export default function ChatPanel() {
   };
 
   return (
-    <div className="flex flex-col h-[500px] sm:h-[600px] w-full bg-white/40 dark:bg-slate-900/40 backdrop-blur-md border border-slate-200/50 dark:border-slate-800/50 rounded-2xl overflow-hidden shadow-xl">
+    <div className="flex flex-col h-[460px] sm:h-[580px] max-h-[calc(100dvh-120px)] w-full bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl overflow-hidden shadow-2xl">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 bg-slate-50/80 dark:bg-slate-950/40 border-b border-slate-200/50 dark:border-slate-800/50">
+      <div className="flex items-center justify-between px-4 py-3 bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 flex-shrink-0">
         <div className="flex items-center gap-2.5">
-          <div className="p-1.5 rounded-xl bg-blue-500 text-white animate-pulse-glow">
+          <div className="p-1.5 rounded-xl bg-blue-500 text-white animate-pulse-glow flex-shrink-0">
             <Bot className="h-5 w-5" />
           </div>
           <div>
@@ -88,13 +92,26 @@ export default function ChatPanel() {
             </span>
           </div>
         </div>
-        <button
-          onClick={clearChat}
-          title="Xóa cuộc trò chuyện"
-          className="p-2 rounded-xl text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-all cursor-pointer"
-        >
-          <Trash2 className="h-4.5 w-4.5" />
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={clearChat}
+            title="Xóa cuộc trò chuyện"
+            className="p-2 rounded-xl text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-all cursor-pointer"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+          {onClose && (
+            <button
+              type="button"
+              onClick={onClose}
+              title="Đóng hộp chat"
+              className="p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-all cursor-pointer"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Messages */}
