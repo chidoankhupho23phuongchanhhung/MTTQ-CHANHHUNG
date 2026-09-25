@@ -1,6 +1,53 @@
 {
   "fanpages": {},
   "phongtrao": {},
+  "intro": {
+    "slogan": "ĐOÀN KẾT - DÂN CHỦ - ĐỔI MỚI - SÁNG TẠO - PHÁT TRIỂN",
+    "leaders": [
+      {
+        "id": "loc",
+        "salutation": "Ông",
+        "name": "Nguyễn Phước Lộc",
+        "title": "Ủy viên Ban Chấp hành Trung ương Đảng, Phó Bí thư Thành ủy, Chủ tịch Ủy ban Mặt trận Tổ quốc Việt Nam Thành phố Hồ Chí Minh",
+        "photoUrl": "/leaders/nguyen-phuoc-loc.png",
+        "level": "city"
+      },
+      {
+        "id": "hanh",
+        "salutation": "Bà",
+        "name": "Trương Thị Bích Hạnh",
+        "title": "Ủy viên Ban Thường vụ Thành ủy, Phó Chủ tịch Thường trực Ủy ban Mặt trận Tổ quốc Việt Nam Thành phố Hồ Chí Minh",
+        "photoUrl": "/leaders/truong-thi-bich-hanh.png",
+        "level": "city"
+      },
+      {
+        "id": "ward-ct",
+        "salutation": "Đồng chí",
+        "name": "Chủ tịch Ủy ban MTTQ Phường",
+        "title": "Ủy viên Ban Thường vụ Đảng ủy, Chủ tịch Ủy ban Mặt trận Tổ quốc Việt Nam Phường Chánh Hưng",
+        "photoUrl": "/mttq-logo.png",
+        "level": "ward"
+      },
+      {
+        "id": "ward-pct",
+        "salutation": "Đồng chí",
+        "name": "Phó Chủ tịch Ủy ban MTTQ Phường",
+        "title": "Phó Chủ tịch Ủy ban Mặt trận Tổ quốc Việt Nam Phường Chánh Hưng",
+        "photoUrl": "/mttq-logo.png",
+        "level": "ward"
+      },
+      {
+        "id": "ward-uvtt",
+        "salutation": "Đồng chí",
+        "name": "Ủy viên Thường trực MTTQ Phường",
+        "title": "Ủy viên Thường trực Ủy ban Mặt trận Tổ quốc Việt Nam Phường Chánh Hưng",
+        "photoUrl": "/mttq-logo.png",
+        "level": "ward"
+      }
+    ],
+    "introText": "Cơ quan Ủy ban Mặt trận Tổ quốc Việt Nam phường có chức năng tham mưu, giúp Ban Thường trực Ủy ban Mặt trận Tổ quốc Việt Nam phường quản lý, hướng dẫn hoạt động của các tổ chức chính trị - xã hội, hội quần chúng và tổ chức thành viên khác của Mặt trận Tổ quốc Việt Nam thực hiện các quy định của Đảng, Nhà nước, Điều lệ Mặt trận Tổ quốc Việt Nam và điều lệ của các tổ chức; đồng thời, là cơ quan chuyên môn, nghiệp vụ công tác Mặt trận và công tác đoàn thể, hội.",
+    "introSubtext": "Được cơ cấu tổ chức theo 05 bộ phận chuyên môn và 04 tổ chức chính trị - xã hội, các hội do Đảng, Nhà nước giao nhiệm vụ, có tính đến những chức năng, nhiệm vụ chung, quan trọng, đặc thù."
+  },
   "drive": {
     "folderId": "1IEL2r2RZf1UnIeYiD6p753rWaSeTAi6J",
     "scriptUrl": "https://script.google.com/macros/s/AKfycbxq_S5PqHL9WlL_Xxu9iAHzugEx1JugnLbgH-L079E8FRas8ukYH-VJdIwitEWAPhRlsA/exec"

@@ -12,7 +12,8 @@ import {
   LeaderItem,
   DEFAULT_INTRO_SETTINGS,
   DEFAULT_HISTORY_CONTENT,
-  getCachedIntroSettings
+  getCachedIntroSettings,
+  normalizePhotoUrl
 } from "@/lib/introSettings";
 
 type IntroTabId = "lich-su" | "co-cau" | "ban-thuong-truc";
@@ -229,7 +230,15 @@ export default function MTTQIntroSection({ className }: { className?: string }) 
                               {leader.photoUrl.endsWith(".svg") || leader.photoUrl.includes("mttq-logo") ? (
                                 <img src={leader.photoUrl} alt={leader.name} className="w-12 h-12 object-contain" />
                               ) : (
-                                <img src={leader.photoUrl} alt={leader.name} className="w-full h-full object-cover object-top" />
+                                <img
+                                  src={normalizePhotoUrl(leader.photoUrl)}
+                                  alt={leader.name}
+                                  referrerPolicy="no-referrer"
+                                  onError={(e) => {
+                                    (e.target as HTMLImageElement).src = '/mttq-logo.png';
+                                  }}
+                                  className="w-full h-full object-cover object-top"
+                                />
                               )}
                             </div>
                           </td>

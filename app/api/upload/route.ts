@@ -23,7 +23,19 @@ export async function POST(req: NextRequest) {
 
     const fileName = `mttq_${Date.now()}_${Math.random().toString(36).substring(2, 7)}${ext}`;
 
-    // 1. Try uploading to Google Drive via Google Apps Script if configured
+    // 1. Luôn lưu bản sao nội bộ tại public/uploads/ để website hiển thị tức thì 100% không lo lỗi mạng/CORS
+    const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
+    await fs.mkdir(uploadsDir, { recursive: true });
+    const filePath = path.join(uploadsDir, fileName);
+    await fs.writeFile(filePath, buffer);
+    const localUrl = `/uploads/${fileName}`;
+
+    // 2. Đồng bộ lưu ảnh lên thư mục Google Drive của MTTQ Phường Chánh Hưng qua Google Apps Script
+    let driveUrl = '';
+    let driveFileId = '';
+    let directDriveImageUrl = '';
+    let gasSuccess = false;
+
     try {
       const settingsPath = path.join(process.cwd(), 'data', 'settings.json');
       let gasUrl = process.env.GOOGLE_APPS_SCRIPT_URL || '';
@@ -52,29 +64,29 @@ export async function POST(req: NextRequest) {
 
         if (gasResponse.ok) {
           const gasResult = await gasResponse.json();
-          if (gasResult.success && gasResult.url) {
-            return NextResponse.json({
-              success: true,
-              url: gasResult.url,
-              driveUrl: gasResult.url,
-              source: 'google-drive'
-            });
+          if (gasResult.success) {
+            gasSuccess = true;
+            driveFileId = gasResult.fileId || '';
+            driveUrl = gasResult.driveUrl || gasResult.viewUrl || '';
+            directDriveImageUrl = gasResult.url || (driveFileId ? `https://lh3.googleusercontent.com/d/${driveFileId}` : '');
           }
         }
       }
     } catch (gasErr) {
-      console.warn('Google Drive Apps Script upload error, falling back to local server storage:', gasErr);
+      console.warn('Lưu Google Drive không thành công, đã lưu tại máy chủ:', gasErr);
     }
 
-    // 2. Fallback to local server uploads
-    const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
-    await fs.mkdir(uploadsDir, { recursive: true });
-
-    const filePath = path.join(uploadsDir, fileName);
-    await fs.writeFile(filePath, buffer);
-
-    const fileUrl = `/uploads/${fileName}`;
-    return NextResponse.json({ success: true, url: fileUrl, source: 'local-server' });
+    return NextResponse.json({
+      success: true,
+      url: localUrl,
+      localUrl: localUrl,
+      driveUrl: driveUrl,
+      driveFileId: driveFileId,
+      directDriveImageUrl: directDriveImageUrl,
+      proxyUrl: driveFileId ? `/api/drive-image?id=${driveFileId}` : localUrl,
+      gasSuccess: gasSuccess,
+      source: gasSuccess ? 'local-and-drive' : 'local-server'
+    });
   } catch (error: any) {
     console.error('API upload error:', error);
     return NextResponse.json({ error: error.message || 'Lỗi khi lưu ảnh lên máy chủ' }, { status: 500 });

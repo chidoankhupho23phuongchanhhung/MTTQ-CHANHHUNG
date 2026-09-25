@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Users, Save, RotateCcw, Plus, Trash2, Camera, Upload,
   Check, Info, Star, Clock, Shield, Sparkles, ExternalLink,
-  ChevronDown, ChevronUp, Image as ImageIcon, Eye
+  ChevronDown, ChevronUp, Image as ImageIcon, Eye, FolderOpen,
+  RefreshCw, CheckCircle2, AlertCircle, Link2
 } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
 import { cn } from '@/lib/utils';
@@ -14,7 +15,8 @@ import {
   LeaderItem,
   DEFAULT_INTRO_SETTINGS,
   DEFAULT_LEADERS,
-  getCachedIntroSettings
+  getCachedIntroSettings,
+  normalizePhotoUrl
 } from '@/lib/introSettings';
 
 export default function MTTQIntroAdminSection({ className }: { className?: string }) {
@@ -25,10 +27,68 @@ export default function MTTQIntroAdminSection({ className }: { className?: strin
   const [editingLeaderId, setEditingLeaderId] = useState<string | null>(null);
   const [uploadingForId, setUploadingForId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [lastSavedTime, setLastSavedTime] = useState<string | null>(null);
+  const [driveModalOpen, setDriveModalOpen] = useState(false);
+  const [driveFiles, setDriveFiles] = useState<Array<{ id: string; name: string; url: string; viewUrl?: string }>>([]);
+  const [loadingDriveFiles, setLoadingDriveFiles] = useState(false);
+  const [selectedLeaderForDrive, setSelectedLeaderForDrive] = useState<string | null>(null);
 
   // Hidden file input for uploading portrait photos
   const fileInputRef = useRef<HTMLInputElement>(null);
   const targetUploadLeaderIdRef = useRef<string | null>(null);
+  const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Core save function to persist to server API & localStorage
+  const saveSettingsToServer = useCallback(async (settingsToSave: IntroSettings, showToast = false) => {
+    setIsSaving(true);
+    try {
+      // 1. Cache to localStorage
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem('mttq_intro_settings', JSON.stringify(settingsToSave));
+          window.dispatchEvent(new Event('intro-settings-updated'));
+          window.dispatchEvent(new Event('storage'));
+        } catch (e) {
+          console.warn('Lỗi ghi localStorage:', e);
+        }
+      }
+
+      // 2. Post to server settings.json
+      const res = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'intro',
+          data: settingsToSave
+        })
+      });
+
+      if (res.ok) {
+        const timeStr = new Date().toLocaleTimeString('vi-VN');
+        setLastSavedTime(timeStr);
+        if (showToast) {
+          addNotification(
+            'Lưu thành công',
+            'Đã cập nhật toàn bộ nội dung & hình ảnh lên hệ thống và Google Drive!',
+            'success'
+          );
+        }
+      } else {
+        throw new Error('Server returned non-ok status');
+      }
+    } catch (err) {
+      console.error('Lỗi khi lưu cài đặt intro:', err);
+      if (showToast) {
+        addNotification(
+          'Đã lưu cục bộ',
+          'Nội dung đã được lưu vào bộ nhớ máy bạn (lỗi đồng bộ server)',
+          'warning'
+        );
+      }
+    } finally {
+      setIsSaving(false);
+    }
+  }, [addNotification]);
 
   // Load settings on mount from API + cache
   useEffect(() => {
@@ -59,6 +119,16 @@ export default function MTTQIntroAdminSection({ className }: { className?: strin
     fetchServerSettings();
   }, []);
 
+  // Debounced auto-save helper for text inputs
+  const triggerDebouncedAutoSave = useCallback((newSettings: IntroSettings) => {
+    if (autoSaveTimerRef.current) {
+      clearTimeout(autoSaveTimerRef.current);
+    }
+    autoSaveTimerRef.current = setTimeout(() => {
+      saveSettingsToServer(newSettings, false);
+    }, 700);
+  }, [saveSettingsToServer]);
+
   // Handle uploading portrait photo
   const handleTriggerUpload = (leaderId: string) => {
     targetUploadLeaderIdRef.current = leaderId;
@@ -81,33 +151,50 @@ export default function MTTQIntroAdminSection({ className }: { className?: strin
     setUploadingForId(leaderId);
 
     try {
-      // 1. Try server API upload
-      try {
-        const formData = new FormData();
-        formData.append('file', file);
-        const res = await fetch('/api/upload', {
-          method: 'POST',
-          body: formData,
-        });
-        if (res.ok) {
-          const data = await res.json();
-          if (data.success && data.url) {
-            updateLeaderField(leaderId, 'photoUrl', data.url);
-            addNotification('Tải ảnh thành công', 'Đã cập nhật ảnh chân dung mới', 'success');
-            setUploadingForId(null);
-            return;
-          }
+      // 1. Upload to server (which saves locally to /uploads and syncs to Google Drive)
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.url) {
+          const finalUrl = data.url;
+          const updatedLeaders = settings.leaders.map(l =>
+            l.id === leaderId
+              ? {
+                  ...l,
+                  photoUrl: finalUrl,
+                  driveUrl: data.driveUrl || l.driveUrl,
+                  driveFileId: data.driveFileId || l.driveFileId
+                }
+              : l
+          );
+          const newSettings = { ...settings, leaders: updatedLeaders };
+          setSettings(newSettings);
+          await saveSettingsToServer(newSettings, false);
+
+          addNotification(
+            'Tải & Lưu thành công!',
+            data.gasSuccess
+              ? 'Ảnh đã được lưu trên máy chủ và đồng bộ an toàn lên Google Drive MTTQ!'
+              : 'Ảnh đã được lưu và cập nhật trên website!',
+            'success'
+          );
+          setUploadingForId(null);
+          return;
         }
-      } catch (e) {
-        console.warn('API upload error, using canvas fallback', e);
       }
 
-      // 2. Fallback to client canvas compression
+      // 2. Client fallback compression if upload endpoint fails
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = async (e) => {
         const rawData = e.target?.result as string;
         const img = new Image();
-        img.onload = () => {
+        img.onload = async () => {
           const canvas = document.createElement('canvas');
           let { width, height } = img;
           const maxDim = 600;
@@ -126,8 +213,13 @@ export default function MTTQIntroAdminSection({ className }: { className?: strin
           if (ctx) {
             ctx.drawImage(img, 0, 0, width, height);
             const compressedUrl = canvas.toDataURL('image/jpeg', 0.85);
-            updateLeaderField(leaderId, 'photoUrl', compressedUrl);
-            addNotification('Tải ảnh thành công', 'Đã nén và lưu ảnh chân dung', 'success');
+            const updatedLeaders = settings.leaders.map(l =>
+              l.id === leaderId ? { ...l, photoUrl: compressedUrl } : l
+            );
+            const newSettings = { ...settings, leaders: updatedLeaders };
+            setSettings(newSettings);
+            await saveSettingsToServer(newSettings, false);
+            addNotification('Tải ảnh thành công', 'Đã nén và lưu ảnh chân dung vào hệ thống', 'success');
           }
           setUploadingForId(null);
         };
@@ -142,115 +234,107 @@ export default function MTTQIntroAdminSection({ className }: { className?: strin
     }
   };
 
-  // Helper to update a leader
+  // Helper to update a leader field and auto-save
   const updateLeaderField = (id: string, field: keyof LeaderItem, value: any) => {
-    setSettings(prev => ({
-      ...prev,
-      leaders: prev.leaders.map(l => l.id === id ? { ...l, [field]: value } : l)
-    }));
+    setSettings(prev => {
+      const updatedLeaders = prev.leaders.map(l => (l.id === id ? { ...l, [field]: value } : l));
+      const nextSettings = { ...prev, leaders: updatedLeaders };
+      triggerDebouncedAutoSave(nextSettings);
+      return nextSettings;
+    });
   };
 
   // Add new leader
-  const handleAddLeader = () => {
+  const handleAddLeader = async () => {
     const newId = `leader_${Date.now()}`;
     const newLeader: LeaderItem = {
       id: newId,
       salutation: 'Đồng chí',
-      name: 'Họ và tên mới',
+      name: 'Họ và tên nhân sự mới',
       title: 'Chức vụ công tác tại Ủy ban MTTQ Việt Nam Phường Chánh Hưng',
       photoUrl: '/mttq-logo.png',
       level: 'ward',
     };
-    setSettings(prev => ({
-      ...prev,
-      leaders: [...prev.leaders, newLeader]
-    }));
+    const newSettings = {
+      ...settings,
+      leaders: [...settings.leaders, newLeader]
+    };
+    setSettings(newSettings);
     setEditingLeaderId(newId);
-    addNotification('Đã thêm', 'Đã thêm một nhân sự mới vào danh sách. Vui lòng chỉnh sửa thông tin.', 'info');
+    await saveSettingsToServer(newSettings, false);
+    addNotification('Đã thêm nhân sự', 'Đã thêm một đồng chí mới vào danh sách và tự động lưu.', 'info');
   };
 
   // Delete a leader
-  const handleDeleteLeader = (id: string, name: string) => {
+  const handleDeleteLeader = async (id: string, name: string) => {
     if (confirm(`Bạn có chắc muốn xóa đồng chí "${name}" khỏi danh sách?`)) {
-      setSettings(prev => ({
-        ...prev,
-        leaders: prev.leaders.filter(l => l.id !== id)
-      }));
+      const newSettings = {
+        ...settings,
+        leaders: settings.leaders.filter(l => l.id !== id)
+      };
+      setSettings(newSettings);
       if (editingLeaderId === id) setEditingLeaderId(null);
-      addNotification('Đã xóa', `Đã xóa nhân sự "${name}"`, 'info');
+      await saveSettingsToServer(newSettings, false);
+      addNotification('Đã xóa', `Đã xóa nhân sự "${name}" và cập nhật hệ thống`, 'info');
     }
   };
 
-  // Save all settings to API and localStorage
+  // Manual save trigger
   const handleSaveAll = async () => {
-    setIsSaving(true);
+    await saveSettingsToServer(settings, true);
+  };
+
+  // Fetch drive files list
+  const handleOpenDriveBrowser = async (leaderId: string) => {
+    setSelectedLeaderForDrive(leaderId);
+    setDriveModalOpen(true);
+    setLoadingDriveFiles(true);
     try {
-      // 1. Save to local storage for instant cache
-      if (typeof window !== 'undefined') {
-        try {
-          localStorage.setItem('mttq_intro_settings', JSON.stringify(settings));
-        } catch (e) {
-          console.warn('Lỗi ghi localStorage', e);
-        }
-      }
-
-      // 2. Save to server API
-      const res = await fetch('/api/settings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type: 'intro',
-          data: settings
-        })
-      });
-
+      const res = await fetch('/api/drive-files');
       if (res.ok) {
-        // Dispatch real-time events for other tabs/components
-        if (typeof window !== 'undefined') {
-          window.dispatchEvent(new Event('intro-settings-updated'));
-          window.dispatchEvent(new Event('storage'));
+        const data = await res.json();
+        if (data.success && data.files) {
+          setDriveFiles(data.files);
+        } else {
+          setDriveFiles([]);
         }
-
-        addNotification(
-          'Lưu thành công',
-          'Đã cập nhật toàn bộ nội dung & hình ảnh phần Giới thiệu MTTQ lên hệ thống!',
-          'success'
-        );
-      } else {
-        throw new Error('Server returned non-ok status');
       }
-    } catch (err: any) {
-      console.error('Lỗi khi lưu cài đặt intro:', err);
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(new Event('intro-settings-updated'));
-      }
-      addNotification(
-        'Đã lưu cục bộ',
-        'Nội dung đã được lưu vào bộ nhớ máy bạn (lỗi đồng bộ server)',
-        'warning'
-      );
+    } catch (e) {
+      console.warn('Lỗi lấy danh sách Drive:', e);
     } finally {
-      setIsSaving(false);
+      setLoadingDriveFiles(false);
     }
+  };
+
+  const handleSelectDriveFile = async (fileId: string, fileName: string) => {
+    if (!selectedLeaderForDrive) return;
+    const photoUrl = `/api/drive-image?id=${fileId}`;
+    const updatedLeaders = settings.leaders.map(l =>
+      l.id === selectedLeaderForDrive
+        ? {
+            ...l,
+            photoUrl: photoUrl,
+            driveUrl: `https://drive.google.com/file/d/${fileId}/view`,
+            driveFileId: fileId,
+          }
+        : l
+    );
+    const newSettings = { ...settings, leaders: updatedLeaders };
+    setSettings(newSettings);
+    await saveSettingsToServer(newSettings, false);
+    setDriveModalOpen(false);
+    addNotification('Đã chọn ảnh Drive', `Đã áp dụng ảnh "${fileName}" từ Google Drive`, 'success');
   };
 
   // Reset to initial default settings
-  const handleResetToDefault = () => {
+  const handleResetToDefault = async () => {
     if (confirm('Khôi phục toàn bộ nội dung Giới thiệu về trạng thái mặc định ban đầu?')) {
       setSettings(DEFAULT_INTRO_SETTINGS);
       if (typeof window !== 'undefined') {
         localStorage.removeItem('mttq_intro_settings');
         window.dispatchEvent(new Event('intro-settings-updated'));
       }
-      fetch('/api/settings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type: 'intro',
-          data: DEFAULT_INTRO_SETTINGS
-        })
-      }).catch(e => console.warn('Reset server error:', e));
-
+      await saveSettingsToServer(DEFAULT_INTRO_SETTINGS, true);
       addNotification('Đã đặt lại', 'Đã khôi phục toàn bộ nội dung mặc định.', 'info');
     }
   };
@@ -277,11 +361,27 @@ export default function MTTQIntroAdminSection({ className }: { className?: strin
             <Users className="h-5 w-5" />
           </div>
           <div>
-            <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight">
-              Quản lý Nội dung & Hình ảnh Giới thiệu MTTQ
-            </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Tùy chỉnh danh sách Ban Thường trực, ảnh chân dung, khẩu hiệu và các phần lịch sử hiển thị
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight">
+                Quản lý Nội dung & Hình ảnh Giới thiệu MTTQ
+              </h3>
+              {/* Auto-save status indicator */}
+              <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60">
+                {isSaving ? (
+                  <>
+                    <RefreshCw className="w-3 h-3 animate-spin text-emerald-600" />
+                    <span>Đang lưu...</span>
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                    <span>{lastSavedTime ? `Đã lưu tự động lúc ${lastSavedTime}` : 'Tự động lưu kích hoạt'}</span>
+                  </>
+                )}
+              </div>
+            </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              Mọi thay đổi thông tin hoặc tải ảnh mới đều được tự động lưu ngay lập tức và đồng bộ lên Google Drive
             </p>
           </div>
         </div>
@@ -311,6 +411,33 @@ export default function MTTQIntroAdminSection({ className }: { className?: strin
             <span>{isSaving ? 'Đang lưu...' : 'Lưu tất cả thay đổi'}</span>
           </button>
         </div>
+      </div>
+
+      {/* Cloud Drive Sync Status Banner */}
+      <div className="mt-4 p-3 rounded-2xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200/80 dark:border-blue-900/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+        <div className="flex items-center gap-2.5">
+          <div className="p-1.5 rounded-lg bg-blue-600 text-white flex-shrink-0">
+            <FolderOpen className="w-4 h-4" />
+          </div>
+          <div>
+            <span className="font-bold text-blue-950 dark:text-blue-200 block">
+              Thư mục Google Drive MTTQ Phường Chánh Hưng đã kết nối
+            </span>
+            <span className="text-[11px] text-blue-700 dark:text-blue-300">
+              Mã thư mục: <code className="bg-white dark:bg-slate-900 px-1 py-0.5 rounded border border-blue-200 dark:border-blue-800 font-mono">1IEL2r2RZf1UnIeYiD6p753rWaSeTAi6J</code> &bull; Ảnh tải lên được lưu 2 nơi: Máy chủ website & Google Drive.
+            </span>
+          </div>
+        </div>
+
+        <a
+          href="https://drive.google.com/drive/folders/1IEL2r2RZf1UnIeYiD6p753rWaSeTAi6J"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-blue-700 dark:text-blue-300 bg-white dark:bg-slate-900 border border-blue-300 dark:border-blue-800 hover:bg-blue-50 transition-colors flex-shrink-0"
+        >
+          <span>Mở thư mục trên Google Drive</span>
+          <ExternalLink className="w-3.5 h-3.5" />
+        </a>
       </div>
 
       {/* Sub Tabs: Leaders | General & Slogan | History */}
@@ -365,7 +492,7 @@ export default function MTTQIntroAdminSection({ className }: { className?: strin
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-              Bấm vào từng đồng chí để chỉnh sửa thông tin hoặc bấm <strong>"Đổi ảnh chân dung"</strong> để tải ảnh từ máy tính/điện thoại.
+              Bấm <strong>"Đổi ảnh chân dung"</strong> để tải ảnh từ thiết bị (tự lưu lên Drive) hoặc bấm <strong>"Sửa chữ"</strong> để chỉnh sửa tên, chức danh.
             </span>
             <button
               type="button"
@@ -382,6 +509,7 @@ export default function MTTQIntroAdminSection({ className }: { className?: strin
             {settings.leaders.map((leader) => {
               const isEditing = editingLeaderId === leader.id;
               const isUploading = uploadingForId === leader.id;
+              const displayUrl = normalizePhotoUrl(leader.photoUrl);
 
               return (
                 <div
@@ -393,10 +521,18 @@ export default function MTTQIntroAdminSection({ className }: { className?: strin
                     <div className="flex items-center gap-3.5">
                       {/* Portrait Photo Container */}
                       <div className="relative w-16 h-20 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 flex-shrink-0 flex items-center justify-center shadow-2xs group">
-                        {leader.photoUrl.endsWith('.svg') || leader.photoUrl.includes('mttq-logo') ? (
-                          <img src={leader.photoUrl} alt={leader.name} className="w-10 h-10 object-contain" />
+                        {displayUrl.endsWith('.svg') || displayUrl.includes('mttq-logo') ? (
+                          <img src={displayUrl} alt={leader.name} className="w-10 h-10 object-contain" />
                         ) : (
-                          <img src={leader.photoUrl} alt={leader.name} className="w-full h-full object-cover object-top" />
+                          <img
+                            src={displayUrl}
+                            alt={leader.name}
+                            referrerPolicy="no-referrer"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = '/mttq-logo.png';
+                            }}
+                            className="w-full h-full object-cover object-top"
+                          />
                         )}
 
                         {/* Quick Camera Hover Button */}
@@ -404,7 +540,7 @@ export default function MTTQIntroAdminSection({ className }: { className?: strin
                           type="button"
                           onClick={() => handleTriggerUpload(leader.id)}
                           title="Tải ảnh mới từ thiết bị"
-                          className="absolute inset-0 bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-[9px] font-bold cursor-pointer"
+                          className="absolute inset-0 bg-black/60 text-white opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-[9px] font-bold cursor-pointer"
                         >
                           <Camera className="w-4 h-4 mb-0.5" />
                           <span>Đổi ảnh</span>
@@ -432,11 +568,22 @@ export default function MTTQIntroAdminSection({ className }: { className?: strin
                         <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-1 mt-0.5">
                           {leader.title}
                         </p>
+                        {leader.driveUrl && (
+                          <a
+                            href={leader.driveUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-[10px] text-blue-600 dark:text-blue-400 hover:underline mt-0.5"
+                          >
+                            <FolderOpen className="w-2.5 h-2.5" />
+                            <span>Đã sao lưu trên Google Drive</span>
+                          </a>
+                        )}
                       </div>
                     </div>
 
                     {/* Right: Action Buttons */}
-                    <div className="flex items-center gap-2 self-end sm:self-center">
+                    <div className="flex items-center gap-2 self-end sm:self-center flex-wrap">
                       {/* Upload photo button */}
                       <button
                         type="button"
@@ -449,7 +596,18 @@ export default function MTTQIntroAdminSection({ className }: { className?: strin
                         ) : (
                           <Camera className="w-3.5 h-3.5" />
                         )}
-                        <span>{isUploading ? 'Đang tải...' : 'Đổi ảnh'}</span>
+                        <span>{isUploading ? 'Đang tải lên...' : 'Đổi ảnh'}</span>
+                      </button>
+
+                      {/* Browse from Google Drive */}
+                      <button
+                        type="button"
+                        onClick={() => handleOpenDriveBrowser(leader.id)}
+                        className="px-3 py-1.5 rounded-xl text-xs font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-900 hover:bg-indigo-100 transition-colors flex items-center gap-1.5 cursor-pointer"
+                        title="Chọn ảnh từ kho ảnh Google Drive"
+                      >
+                        <FolderOpen className="w-3.5 h-3.5" />
+                        <span>Kho Drive</span>
                       </button>
 
                       {/* Expand / Collapse Details Edit */}
@@ -541,27 +699,37 @@ export default function MTTQIntroAdminSection({ className }: { className?: strin
                         />
                       </div>
 
-                      {/* Đường dẫn ảnh trực tiếp */}
-                      <div className="sm:col-span-12 flex items-center gap-2">
-                        <div className="flex-1">
+                      {/* Đường dẫn ảnh trực tiếp hoặc Google Drive */}
+                      <div className="sm:col-span-12 flex flex-col sm:flex-row items-start sm:items-end gap-2">
+                        <div className="flex-1 w-full">
                           <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
-                            Hoặc dán đường link ảnh chân dung trực tiếp (URL):
+                            Đường link ảnh chân dung trực tiếp (URL hoặc link Google Drive):
                           </label>
                           <input
                             type="text"
                             value={leader.photoUrl}
                             onChange={(e) => updateLeaderField(leader.id, 'photoUrl', e.target.value)}
-                            placeholder="https://... hoặc /leaders/..."
-                            className="w-full px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs"
+                            placeholder="Dán link Google Drive hoặc URL ảnh..."
+                            className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-xs font-mono"
                           />
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => updateLeaderField(leader.id, 'photoUrl', '/mttq-logo.png')}
-                          className="self-end px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-500 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 transition-colors"
-                        >
-                          Dùng logo MTTQ
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => updateLeaderField(leader.id, 'photoUrl', '/mttq-logo.png')}
+                            className="px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 transition-colors whitespace-nowrap cursor-pointer"
+                          >
+                            Logo MTTQ
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleTriggerUpload(leader.id)}
+                            className="px-3 py-2 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 transition-colors flex items-center gap-1 whitespace-nowrap cursor-pointer"
+                          >
+                            <Upload className="w-3 h-3" />
+                            <span>Tải ảnh mới</span>
+                          </button>
+                        </div>
                       </div>
                     </motion.div>
                   )}
@@ -586,7 +754,14 @@ export default function MTTQIntroAdminSection({ className }: { className?: strin
             <input
               type="text"
               value={settings.slogan}
-              onChange={(e) => setSettings(prev => ({ ...prev, slogan: e.target.value }))}
+              onChange={(e) => {
+                const val = e.target.value;
+                setSettings(prev => {
+                  const next = { ...prev, slogan: val };
+                  triggerDebouncedAutoSave(next);
+                  return next;
+                });
+              }}
               placeholder="ĐOÀN KẾT - DÂN CHỦ - ĐỔI MỚI - SÁNG TẠO - PHÁT TRIỂN"
               className="w-full px-4 py-2.5 rounded-xl border border-red-300 dark:border-red-800 bg-white dark:bg-slate-900 font-black text-red-600 dark:text-red-400 uppercase tracking-wide shadow-2xs"
             />
@@ -603,7 +778,14 @@ export default function MTTQIntroAdminSection({ className }: { className?: strin
             <textarea
               rows={4}
               value={settings.introText}
-              onChange={(e) => setSettings(prev => ({ ...prev, introText: e.target.value }))}
+              onChange={(e) => {
+                const val = e.target.value;
+                setSettings(prev => {
+                  const next = { ...prev, introText: val };
+                  triggerDebouncedAutoSave(next);
+                  return next;
+                });
+              }}
               className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 leading-relaxed text-xs sm:text-sm"
             />
           </div>
@@ -616,7 +798,14 @@ export default function MTTQIntroAdminSection({ className }: { className?: strin
             <textarea
               rows={2}
               value={settings.introSubtext}
-              onChange={(e) => setSettings(prev => ({ ...prev, introSubtext: e.target.value }))}
+              onChange={(e) => {
+                const val = e.target.value;
+                setSettings(prev => {
+                  const next = { ...prev, introSubtext: val };
+                  triggerDebouncedAutoSave(next);
+                  return next;
+                });
+              }}
               className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 leading-relaxed text-xs sm:text-sm"
             />
           </div>
@@ -636,7 +825,14 @@ export default function MTTQIntroAdminSection({ className }: { className?: strin
             <textarea
               rows={12}
               value={settings.historyContent || ''}
-              onChange={(e) => setSettings(prev => ({ ...prev, historyContent: e.target.value }))}
+              onChange={(e) => {
+                const val = e.target.value;
+                setSettings(prev => {
+                  const next = { ...prev, historyContent: val };
+                  triggerDebouncedAutoSave(next);
+                  return next;
+                });
+              }}
               placeholder="Nhập nội dung lịch sử hình thành..."
               className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs sm:text-sm leading-relaxed"
             />
@@ -651,7 +847,7 @@ export default function MTTQIntroAdminSection({ className }: { className?: strin
       <div className="mt-6 pt-4 border-t border-slate-200/70 dark:border-slate-800/70 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
         <span className="flex items-center gap-1.5">
           <Check className="w-4 h-4 text-emerald-500" />
-          <span>Mọi thay đổi sẽ hiển thị ngay lập tức trên trang Giới thiệu (/hoat-dong-mttq) sau khi bấm Lưu.</span>
+          <span>Hệ thống đã kích hoạt <strong>Tự động lưu</strong>. Mọi thay đổi hiển thị ngay trên website (/hoat-dong-mttq).</span>
         </span>
 
         <button
@@ -663,6 +859,98 @@ export default function MTTQIntroAdminSection({ className }: { className?: strin
           {isSaving ? 'Đang lưu cài đặt...' : 'Lưu tất cả thay đổi'}
         </button>
       </div>
+
+      {/* MODAL: CHỌN ẢNH TỪ GOOGLE DRIVE */}
+      {driveModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-2xl w-full max-h-[85vh] flex flex-col shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+            <div className="p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-blue-600 text-white">
+                  <FolderOpen className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-slate-900 dark:text-white text-base">
+                    Kho ảnh Google Drive MTTQ Phường Chánh Hưng
+                  </h4>
+                  <p className="text-xs text-slate-500">
+                    Chọn một ảnh để gán trực tiếp cho đồng chí đang chỉnh sửa
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setDriveModalOpen(false)}
+                className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-slate-200 flex items-center justify-center cursor-pointer text-sm font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="p-5 overflow-y-auto flex-1">
+              {loadingDriveFiles ? (
+                <div className="py-12 flex flex-col items-center justify-center gap-3 text-slate-500">
+                  <RefreshCw className="w-6 h-6 animate-spin text-blue-600" />
+                  <span className="text-xs font-medium">Đang tải danh sách ảnh từ Google Drive...</span>
+                </div>
+              ) : driveFiles.length > 0 ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {driveFiles.map((file) => (
+                    <div
+                      key={file.id}
+                      onClick={() => handleSelectDriveFile(file.id, file.name)}
+                      className="group border border-slate-200 dark:border-slate-800 rounded-xl p-2.5 hover:border-blue-500 dark:hover:border-blue-500 transition-all cursor-pointer bg-slate-50 dark:bg-slate-800/40 flex flex-col items-center gap-2"
+                    >
+                      <div className="w-full h-32 rounded-lg overflow-hidden bg-white dark:bg-slate-900 flex items-center justify-center border border-slate-100 dark:border-slate-700">
+                        <img
+                          src={`/api/drive-image?id=${file.id}`}
+                          alt={file.name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                          referrerPolicy="no-referrer"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = '/mttq-logo.png';
+                          }}
+                        />
+                      </div>
+                      <span className="text-[11px] font-medium text-slate-700 dark:text-slate-300 line-clamp-1 text-center w-full">
+                        {file.name}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="py-10 text-center space-y-3">
+                  <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 mx-auto flex items-center justify-center">
+                    <FolderOpen className="w-6 h-6" />
+                  </div>
+                  <p className="text-xs text-slate-600 dark:text-slate-400 max-w-md mx-auto">
+                    Bạn có thể tải ảnh trực tiếp bằng nút <strong>"Đổi ảnh"</strong> (ảnh sẽ tự động lưu cả lên máy chủ website và thư mục Google Drive).
+                  </p>
+                  <a
+                    href="https://drive.google.com/drive/folders/1IEL2r2RZf1UnIeYiD6p753rWaSeTAi6J"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 transition-colors"
+                  >
+                    <span>Mở thư mục Google Drive để kiểm tra</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                </div>
+              )}
+            </div>
+
+            <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setDriveModalOpen(false)}
+                className="px-4 py-2 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-200 transition-colors cursor-pointer"
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

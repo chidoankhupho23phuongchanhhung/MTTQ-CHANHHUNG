@@ -5,6 +5,8 @@ export interface LeaderItem {
   title: string;
   photoUrl: string;
   level: 'city' | 'ward';
+  driveUrl?: string;
+  driveFileId?: string;
 }
 
 export interface HistorySectionItem {
@@ -84,6 +86,25 @@ export const DEFAULT_INTRO_SETTINGS: IntroSettings = {
   introSubtext: DEFAULT_INTRO_SUBTEXT,
   historyContent: DEFAULT_HISTORY_CONTENT,
   leaders: DEFAULT_LEADERS,
+};
+
+export const normalizePhotoUrl = (url: string | undefined): string => {
+  if (!url) return '/mttq-logo.png';
+  if (url.startsWith('/uploads/') || url.startsWith('/leaders/') || url === '/mttq-logo.png' || url.startsWith('data:')) {
+    return url;
+  }
+
+  // Tự động nhận diện link Google Drive để dùng proxy an toàn 100% không bị chặn
+  const match1 = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+  const match2 = url.match(/id=([a-zA-Z0-9_-]+)/);
+  const match3 = url.match(/lh3\.googleusercontent\.com\/d\/([a-zA-Z0-9_-]+)/);
+  const fileId = match1?.[1] || match2?.[1] || match3?.[1];
+
+  if (fileId) {
+    return `/api/drive-image?id=${fileId}`;
+  }
+
+  return url;
 };
 
 export const getCachedIntroSettings = (): IntroSettings => {
