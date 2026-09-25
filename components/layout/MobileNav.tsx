@@ -7,11 +7,12 @@ import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import {
   Home, MessageSquare, Newspaper, Compass, Bot,
-  Briefcase, Calendar, LogOut, Sparkles, Info
+  Briefcase, Calendar, LogOut, Sparkles, Info,
+  LayoutDashboard
 } from 'lucide-react';
 
 export default function MobileNav() {
-  const { setCurrentRoute, viewMode, setViewMode } = useAppStore();
+  const { setCurrentRoute, viewMode, setViewMode, toggleSidebar, sidebarOpen } = useAppStore();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -20,6 +21,7 @@ export default function MobileNav() {
   const navItems = isStaff
     ? [
         { id: '/cong-lam-viec-can-bo', label: "Tổng quan", icon: Briefcase },
+        { id: 'dashboard-menu', label: "Menu số", icon: LayoutDashboard },
         { id: '/tong-dai-ai', label: "Soạn thảo AI", icon: Bot, isSpecial: true },
         { id: '/lich-su-kien', label: "Lịch họp", icon: Calendar },
         { id: 'exit', label: "Thoát", icon: LogOut }
@@ -37,6 +39,8 @@ export default function MobileNav() {
       setViewMode('citizen');
       setCurrentRoute('/');
       router.push('/');
+    } else if (id === 'dashboard-menu') {
+      toggleSidebar();
     } else {
       setCurrentRoute(id);
       router.push(id);
@@ -49,7 +53,11 @@ export default function MobileNav() {
       <div className="mx-auto bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border-t border-slate-200/80 dark:border-slate-800/80 shadow-[0_-4px_25px_rgba(0,0,0,0.08)] dark:shadow-[0_-4px_30px_rgba(0,0,0,0.5)] flex items-center justify-around px-2 py-1 h-16 pb-safe">
         {navItems.map((item) => {
           const Icon = item.icon;
-          const isActive = item.id === 'exit' ? false : (pathname === item.id);
+          const isActive = item.id === 'exit'
+            ? false
+            : item.id === 'dashboard-menu'
+              ? sidebarOpen
+              : (pathname === item.id);
 
           if (item.isSpecial) {
             return (

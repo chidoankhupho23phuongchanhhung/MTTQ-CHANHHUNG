@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAppStore } from '@/store/useAppStore';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -10,7 +10,7 @@ import {
   MessageSquare, Search, Bot, FolderKanban, Calendar,
   Mail, Compass, LayoutDashboard, Database,
   Inbox, ClipboardList, BarChart3, Settings,
-  LogOut, ChevronRight, Info
+  LogOut, ChevronRight, Info, X
 } from 'lucide-react';
 
 /* Facebook inline SVG */
@@ -101,6 +101,14 @@ export default function Sidebar() {
   const router = useRouter();
   const isStaff = viewMode === 'staff';
 
+  const [isDesktop, setIsDesktop] = useState(false);
+  useEffect(() => {
+    const updateSize = () => setIsDesktop(window.innerWidth >= 1280);
+    updateSize();
+    window.addEventListener('resize', updateSize);
+    return () => window.removeEventListener('resize', updateSize);
+  }, []);
+
   const handleNavigate = (route: string) => {
     const basePath = route.split('?')[0];
     setCurrentRoute(basePath);
@@ -126,18 +134,17 @@ export default function Sidebar() {
 
   return (
     <AnimatePresence>
-      {/* Always in DOM for staff; for citizen rendered as mobile drawer */}
       <motion.aside
         key={isStaff ? 'staff-sidebar' : 'citizen-sidebar'}
-        initial={{ x: -280, opacity: 0 }}
+        initial={false}
         animate={{
-          x: (isStaff || sidebarOpen) ? 0 : -280,
-          opacity: (isStaff || sidebarOpen) ? 1 : 0
+          x: (isStaff && isDesktop) || sidebarOpen ? 0 : -320,
+          opacity: (isStaff && isDesktop) || sidebarOpen ? 1 : 0
         }}
-        transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
         className={cn(
-          "fixed inset-y-0 left-0 z-40 flex flex-col",
-          isStaff ? "w-72 xl:translate-x-0" : "w-64",
+          "fixed inset-y-0 left-0 z-50 flex flex-col",
+          isStaff ? "w-72 xl:translate-x-0" : "w-68",
           "border-r border-white/8 shadow-2xl"
         )}
         style={{
@@ -158,16 +165,28 @@ export default function Sidebar() {
           }
         ` }} />
 
-        {/* ─── Logo Row ─── */}
-        <div className="flex items-center gap-3 px-5 pt-5 pb-4 border-b border-white/8 flex-shrink-0">
-          <img src="/mttq-logo.png" alt="MTTQ" className="w-9 h-9 object-contain flex-shrink-0" />
-          <div className="flex flex-col text-left min-w-0">
-            <span className="text-[8.5px] uppercase font-bold tracking-widest text-blue-300 leading-none">MTTQ Việt Nam</span>
-            <span className="text-[11px] font-black text-white leading-tight uppercase tracking-tight truncate">Phường Chánh Hưng</span>
-            {isStaff && (
-              <span className="text-[8px] text-emerald-400 font-bold uppercase tracking-wider mt-0.5">Cổng Cán bộ</span>
-            )}
+        {/* ─── Logo Row with Mobile Close Button ─── */}
+        <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-white/8 flex-shrink-0">
+          <div className="flex items-center gap-3 min-w-0">
+            <img src="/mttq-logo.png" alt="MTTQ" className="w-9 h-9 object-contain flex-shrink-0" />
+            <div className="flex flex-col text-left min-w-0">
+              <span className="text-[8.5px] uppercase font-bold tracking-widest text-blue-300 leading-none">MTTQ Việt Nam</span>
+              <span className="text-[11px] font-black text-white leading-tight uppercase tracking-tight truncate">Phường Chánh Hưng</span>
+              {isStaff && (
+                <span className="text-[8px] text-emerald-400 font-bold uppercase tracking-wider mt-0.5">Cổng Cán bộ</span>
+              )}
+            </div>
           </div>
+
+          {/* Close button for mobile and tablet */}
+          <button
+            type="button"
+            onClick={() => toggleSidebar(false)}
+            className="p-2 -mr-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 xl:hidden cursor-pointer active:scale-90 transition-transform"
+            title="Đóng menu"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
         {/* ─── STAFF: Officer Profile Card ─── */}
@@ -199,7 +218,7 @@ export default function Sidebar() {
         {/* ─── Navigation ─── */}
         <div className="flex-1 overflow-y-auto no-scrollbar px-3 py-2">
 
-          {/* Staff: 6 section tabs */}
+          {/* Staff: 7 section tabs */}
           <AnimatePresence mode="wait">
             {isStaff ? (
               <motion.nav
@@ -210,7 +229,7 @@ export default function Sidebar() {
                 transition={{ duration: 0.3 }}
                 className="flex flex-col gap-1"
               >
-                <span className="text-[8px] uppercase font-bold tracking-widest text-slate-400 pl-3 pb-1">Menu chính</span>
+                <span className="text-[8px] uppercase font-bold tracking-widest text-slate-400 pl-3 pb-1">Menu điều hành</span>
                 {STAFF_SECTIONS.map((section, i) => {
                   const Icon = section.icon;
                   const isActive = activeSection === section.id ||
@@ -221,46 +240,46 @@ export default function Sidebar() {
                       key={section.id}
                       initial={{ opacity: 0, x: -16 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.05, duration: 0.3 }}
+                      transition={{ delay: i * 0.04, duration: 0.25 }}
                       onClick={() => handleNavigate(section.route)}
                       className={cn(
-                        'w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-left cursor-pointer transition-all border group',
+                        'w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-left cursor-pointer transition-all border group active:scale-98',
                         isActive
                           ? 'sidebar-item-active text-white border-blue-500/20 shadow-sm'
                           : 'text-slate-300 hover:text-white hover:bg-white/6 border-transparent'
                       )}
                     >
-                      <Icon className={cn('h-4 w-4 flex-shrink-0 transition-all', isActive ? 'text-blue-400' : 'text-slate-400 group-hover:text-blue-300')} />
+                      <Icon className={cn('h-4.5 w-4.5 flex-shrink-0 transition-all', isActive ? 'text-blue-400' : 'text-slate-400 group-hover:text-blue-300')} />
                       <div className="flex flex-col text-left min-w-0 flex-1">
                         <span className={cn('text-xs font-bold truncate', isActive ? 'font-black' : '')}>{section.label}</span>
-                        <span className="text-[9px] text-slate-500 group-hover:text-slate-400 truncate">{section.desc}</span>
+                        <span className="text-[9px] text-slate-400 group-hover:text-slate-300 truncate">{section.desc}</span>
                       </div>
-                      {isActive && <ChevronRight className="h-3 w-3 text-blue-400 flex-shrink-0" />}
+                      {isActive && <ChevronRight className="h-3.5 w-3.5 text-blue-400 flex-shrink-0" />}
                     </motion.button>
                   );
                 })}
 
                 {/* ── Divider + Extra tools ── */}
                 <div className="my-2 border-t border-white/6" />
-                <span className="text-[8px] uppercase font-bold tracking-widest text-slate-400 pl-3 pb-1">Công cụ</span>
+                <span className="text-[8px] uppercase font-bold tracking-widest text-slate-400 pl-3 pb-1">Công cụ bổ trợ</span>
                 <button
                   onClick={() => handleNavigate('/tong-dai-ai')}
-                  className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-left cursor-pointer border border-transparent hover:bg-white/6 text-slate-300 hover:text-white transition-all group"
+                  className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-left cursor-pointer border border-transparent hover:bg-white/6 text-slate-300 hover:text-white transition-all group active:scale-98"
                 >
-                  <Bot className="h-4 w-4 text-slate-400 group-hover:text-blue-300" />
+                  <Bot className="h-4.5 w-4.5 text-slate-400 group-hover:text-blue-300" />
                   <div className="flex flex-col">
                     <span className="text-xs font-bold">Trợ lý Ảo AI</span>
-                    <span className="text-[9px] text-slate-500">Soạn thảo & kiểm tra</span>
+                    <span className="text-[9px] text-slate-400">Soạn thảo văn bản & công văn</span>
                   </div>
                 </button>
                 <button
                   onClick={() => handleNavigate('/quan-ly-facebook')}
-                  className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-left cursor-pointer border border-transparent hover:bg-white/6 text-slate-300 hover:text-white transition-all group"
+                  className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-left cursor-pointer border border-transparent hover:bg-white/6 text-slate-300 hover:text-white transition-all group active:scale-98"
                 >
-                  <FbIcon className="h-4 w-4 text-slate-400 group-hover:text-blue-300" />
+                  <FbIcon className="h-4.5 w-4.5 text-slate-400 group-hover:text-blue-300" />
                   <div className="flex flex-col">
                     <span className="text-xs font-bold">Kết nối Fanpage</span>
-                    <span className="text-[9px] text-slate-500">Cấu hình Facebook</span>
+                    <span className="text-[9px] text-slate-400">Cấu hình Facebook MTTQ</span>
                   </div>
                 </button>
               </motion.nav>
@@ -285,13 +304,13 @@ export default function Sidebar() {
                           key={item.id}
                           onClick={() => handleNavigate(item.id)}
                           className={cn(
-                            'w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-left cursor-pointer border transition-all',
+                            'w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-bold text-left cursor-pointer border transition-all active:scale-98',
                             isActive
                               ? 'sidebar-item-active text-white border-blue-500/20'
                               : 'text-slate-300 hover:bg-white/6 hover:text-white border-transparent'
                           )}
                         >
-                          <Icon className={cn('h-4 w-4 flex-shrink-0', isActive ? 'text-blue-400' : 'text-slate-400')} />
+                          <Icon className={cn('h-4.5 w-4.5 flex-shrink-0', isActive ? 'text-blue-400' : 'text-slate-400')} />
                           <span className="truncate">{item.label}</span>
                         </button>
                       );
@@ -313,7 +332,7 @@ export default function Sidebar() {
                 router.push('/');
                 toggleSidebar(false);
               }}
-              className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/8 text-white text-xs font-bold transition-all cursor-pointer group"
+              className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/8 text-white text-xs font-bold transition-all cursor-pointer group active:scale-95"
             >
               <div className="flex items-center gap-2.5">
                 <div className="w-6 h-6 rounded-lg bg-red-500/20 flex items-center justify-center">
@@ -331,7 +350,7 @@ export default function Sidebar() {
                 router.push('/cong-lam-viec-can-bo');
                 toggleSidebar(false);
               }}
-              className="w-full flex items-center gap-2.5 px-4 py-3 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/20 text-blue-300 text-xs font-bold transition-all cursor-pointer"
+              className="w-full flex items-center gap-2.5 px-4 py-3 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/20 text-blue-300 text-xs font-bold transition-all cursor-pointer active:scale-95"
             >
               <LayoutDashboard className="h-3.5 w-3.5" />
               Vào Cổng Cán bộ

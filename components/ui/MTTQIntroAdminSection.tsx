@@ -565,7 +565,7 @@ export default function MTTQIntroAdminSection({ className }: { className?: strin
                     {/* Left: Photo + Name + Position summary */}
                     <div className="flex items-center gap-3.5">
                       {/* Portrait Photo Container */}
-                      <div className="relative w-16 sm:w-18 h-20 sm:h-24 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 flex-shrink-0 flex items-center justify-center shadow-2xs group">
+                      <div className="relative w-18 sm:w-20 h-24 sm:h-26 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 flex-shrink-0 flex items-center justify-center shadow-2xs group">
                         {displayUrl.endsWith('.svg') || displayUrl.includes('mttq-logo') ? (
                           <img src={displayUrl} alt={leader.name} className="w-10 h-10 object-contain" />
                         ) : (
@@ -580,20 +580,30 @@ export default function MTTQIntroAdminSection({ className }: { className?: strin
                           />
                         )}
 
-                        {/* Quick Camera Hover Button */}
+                        {/* Quick Camera Hover Button (Desktop) */}
                         <button
                           type="button"
                           onClick={() => handleTriggerUpload(leader.id)}
                           title="Tải ảnh mới từ thiết bị"
-                          className="absolute inset-0 bg-black/60 text-white opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-[10px] font-bold cursor-pointer"
+                          className="hidden sm:flex absolute inset-0 bg-black/60 text-white opacity-0 group-hover:opacity-100 transition-opacity flex-col items-center justify-center text-[10px] font-bold cursor-pointer"
                         >
                           <Camera className="w-4 h-4 mb-0.5" />
                           <span>Đổi ảnh</span>
                         </button>
+
+                        {/* Mobile Camera Badge Button */}
+                        <button
+                          type="button"
+                          onClick={() => handleTriggerUpload(leader.id)}
+                          title="Đổi ảnh chân dung"
+                          className="sm:hidden absolute bottom-1 right-1 w-6.5 h-6.5 rounded-full bg-blue-600 text-white shadow-md flex items-center justify-center cursor-pointer active:scale-85 transition-transform"
+                        >
+                          <Camera className="w-3.5 h-3.5" />
+                        </button>
                       </div>
 
                       {/* Info preview */}
-                      <div className="min-w-0">
+                      <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-semibold">
                             {leader.salutation}
@@ -627,14 +637,14 @@ export default function MTTQIntroAdminSection({ className }: { className?: strin
                       </div>
                     </div>
 
-                    {/* Right: Action Buttons */}
-                    <div className="flex items-center gap-2 self-end sm:self-center flex-wrap">
+                    {/* Right: Action Buttons (Responsive 2-col on mobile, flex on desktop) */}
+                    <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 w-full sm:w-auto mt-1 sm:mt-0">
                       {/* Upload photo button */}
                       <button
                         type="button"
                         onClick={() => handleTriggerUpload(leader.id)}
                         disabled={isUploading}
-                        className="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 hover:bg-blue-100 transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                        className="px-3 py-2 rounded-xl text-xs sm:text-sm font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 hover:bg-blue-100 transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 active:scale-95"
                       >
                         {isUploading ? (
                           <div className="w-3.5 h-3.5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
@@ -648,7 +658,7 @@ export default function MTTQIntroAdminSection({ className }: { className?: strin
                       <button
                         type="button"
                         onClick={() => handleOpenDriveBrowser(leader.id)}
-                        className="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-900 hover:bg-indigo-100 transition-colors flex items-center gap-1.5 cursor-pointer"
+                        className="px-3 py-2 rounded-xl text-xs sm:text-sm font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-900 hover:bg-indigo-100 transition-colors flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
                         title="Chọn ảnh từ kho ảnh Google Drive"
                       >
                         <FolderOpen className="w-4 h-4" />
@@ -659,7 +669,7 @@ export default function MTTQIntroAdminSection({ className }: { className?: strin
                       <button
                         type="button"
                         onClick={() => setEditingLeaderId(isEditing ? null : leader.id)}
-                        className="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 transition-colors flex items-center gap-1 cursor-pointer"
+                        className="px-3 py-2 rounded-xl text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 transition-colors flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
                       >
                         <span>{isEditing ? 'Đóng' : 'Sửa chữ'}</span>
                         {isEditing ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -669,10 +679,11 @@ export default function MTTQIntroAdminSection({ className }: { className?: strin
                       <button
                         type="button"
                         onClick={() => handleDeleteLeader(leader.id, leader.name)}
-                        className="p-2 rounded-xl text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors cursor-pointer"
+                        className="px-3 py-2 rounded-xl text-xs sm:text-sm font-bold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 hover:bg-red-100 transition-colors flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
                         title="Xóa nhân sự này"
                       >
                         <Trash2 className="w-4 h-4" />
+                        <span>Xóa</span>
                       </button>
                     </div>
                   </div>

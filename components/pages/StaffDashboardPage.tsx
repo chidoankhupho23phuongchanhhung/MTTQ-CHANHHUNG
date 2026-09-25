@@ -21,7 +21,8 @@ import {
   Sparkles, FileText, AlertTriangle, ArrowRight, UserCheck, Bot,
   Award, CornerDownRight, Check, Eye, Briefcase,
   Database, Inbox, BarChart3, Settings, Search, Bell,
-  Upload, Download, RefreshCw, Globe, Lock, Save
+  Upload, Download, RefreshCw, Globe, Lock, Save,
+  LayoutDashboard, Info
 } from 'lucide-react';
 import { formatDate, cn } from '@/lib/utils';
 import { StaffWorkItem, FeedbackItem } from '@/lib/types';
@@ -29,19 +30,59 @@ import FanpageSection from '../ui/FanpageSection';
 import PhongTraoSection from '../ui/PhongTraoSection';
 import MTTQIntroAdminSection from '../ui/MTTQIntroAdminSection';
 
+/* ── Staff Mobile Tab Bar (Lướt ngang linh hoạt trên điện thoại) ── */
+const STAFF_NAV_TABS = [
+  { id: 'tong-quan', label: 'Tổng quan', icon: LayoutDashboard },
+  { id: 'quan-ly-gioi-thieu', label: 'Quản lý Giới thiệu', icon: Info },
+  { id: 'quan-ly-so', label: 'Quản lý số', icon: Database },
+  { id: 'giai-quyet', label: 'Giải quyết', icon: Inbox },
+  { id: 'van-thu', label: 'Văn thư', icon: ClipboardList },
+  { id: 'bao-cao', label: 'Báo cáo', icon: BarChart3 },
+  { id: 'tuy-chinh', label: 'Tuỳ chỉnh', icon: Settings },
+];
+
+function StaffMobileTabBar({ activeTab, onSelectTab }: { activeTab: string; onSelectTab: (tabId: string) => void }) {
+  return (
+    <div className="xl:hidden -mx-4 sm:-mx-6 -mt-3 mb-5 px-4 sm:px-6 py-2.5 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/70 dark:border-slate-800/70 sticky top-16 z-20 flex items-center gap-2 overflow-x-auto no-scrollbar shadow-2xs">
+      {STAFF_NAV_TABS.map((tab) => {
+        const Icon = tab.icon;
+        const isActive = activeTab === tab.id;
+        return (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={() => onSelectTab(tab.id)}
+            className={cn(
+              "flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer border flex-shrink-0 active:scale-95",
+              isActive
+                ? "bg-blue-600 text-white border-blue-600 shadow-sm shadow-blue-600/30"
+                : "bg-slate-50 dark:bg-slate-800/70 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/60"
+            )}
+          >
+            <Icon className={cn("w-4 h-4 flex-shrink-0", isActive ? "text-white" : "text-slate-500")} />
+            <span>{tab.label}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 /* ── Tab-section sub-page renderers ── */
-function TabQuanLyGioiThieu() {
+function TabQuanLyGioiThieu({ activeTab, onSelectTab }: { activeTab: string; onSelectTab: (id: string) => void }) {
   return (
     <PageContainer>
+      <StaffMobileTabBar activeTab={activeTab} onSelectTab={onSelectTab} />
       <SectionTitle title="Quản lý Giới thiệu MTTQ" subtitle="Chỉnh sửa nội dung, khẩu hiệu, danh sách Ban Thường trực và hình ảnh chân dung" />
       <MTTQIntroAdminSection className="mb-6" />
     </PageContainer>
   );
 }
 
-function TabQuanLySo() {
+function TabQuanLySo({ activeTab, onSelectTab }: { activeTab: string; onSelectTab: (id: string) => void }) {
   return (
     <PageContainer>
+      <StaffMobileTabBar activeTab={activeTab} onSelectTab={onSelectTab} />
       <SectionTitle title="Quản lý số" subtitle="Quản lý dữ liệu số hoá, kết nối Fanpage, đồng bộ thông tin" />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <StatCard title="Bài đăng Fanpage" value="184" change="+12%" trend="up" description="tháng này" icon={<Globe className="h-4 w-4 text-blue-500" />} />
@@ -77,13 +118,17 @@ function TabGiaiQuyet({
   updateFeedbackStatus, 
   addNotification, 
   tasks, 
-  handleToggleTaskStatus 
+  handleToggleTaskStatus,
+  activeTab,
+  onSelectTab
 }: { 
   feedbacks: FeedbackItem[]; 
   updateFeedbackStatus: (...args: any[]) => void; 
   addNotification: (...args: any[]) => void;
   tasks: StaffWorkItem[];
   handleToggleTaskStatus: (id: string) => void;
+  activeTab: string;
+  onSelectTab: (id: string) => void;
 }) {
   const [viewMode, setViewMode] = useState<'list' | 'kanban'>('list');
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -93,6 +138,7 @@ function TabGiaiQuyet({
 
   return (
     <PageContainer>
+      <StaffMobileTabBar activeTab={activeTab} onSelectTab={onSelectTab} />
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
         <SectionTitle title="Giải quyết – Tiếp nhận" subtitle="Tiếp nhận, phân loại và xử lý kiến nghị của người dân cùng công việc nội bộ" />
         
@@ -246,7 +292,7 @@ function TabGiaiQuyet({
   );
 }
 
-function TabVanThu() {
+function TabVanThu({ activeTab, onSelectTab }: { activeTab: string; onSelectTab: (id: string) => void }) {
   const docs = [
     { id: 1, title: 'Nghị quyết HĐND phường Q8 2026', date: '28/06/2026', type: 'Nghị quyết', status: 'Đã ban hành' },
     { id: 2, title: 'Kế hoạch phòng chống tệ nạn xã hội 2026', date: '20/06/2026', type: 'Kế hoạch', status: 'Dự thảo' },
@@ -256,6 +302,7 @@ function TabVanThu() {
   ];
   return (
     <PageContainer>
+      <StaffMobileTabBar activeTab={activeTab} onSelectTab={onSelectTab} />
       <SectionTitle title="Văn thư" subtitle="Quản lý hệ thống văn bản đến, văn bản đi và biểu mẫu hành chính" />
       <div className="flex flex-col gap-3">
         {docs.map(doc => (
@@ -276,13 +323,14 @@ function TabVanThu() {
   );
 }
 
-function TabBaoCao({ feedbacks, staffDonutData, barChartData, lineChartData }: { feedbacks: FeedbackItem[]; staffDonutData: any[]; barChartData: any[]; lineChartData: any[] }) {
+function TabBaoCao({ feedbacks, staffDonutData, barChartData, lineChartData, activeTab, onSelectTab }: { feedbacks: FeedbackItem[]; staffDonutData: any[]; barChartData: any[]; lineChartData: any[]; activeTab: string; onSelectTab: (id: string) => void }) {
   const newReportsCount = feedbacks.filter(f => f.status === 'Mới tiếp nhận').length;
   const processingReportsCount = feedbacks.filter(f => f.status === 'Đang xử lý').length;
   const completedReportsCount = feedbacks.filter(f => f.status === 'Hoàn tất' || f.status === 'Đã phản hồi').length;
 
   return (
     <PageContainer>
+      <StaffMobileTabBar activeTab={activeTab} onSelectTab={onSelectTab} />
       <SectionTitle title="Báo cáo tiến độ" subtitle="Thống kê hiệu suất xử lý kiến nghị, phản ánh và bản đồ mật độ địa bàn" />
       
       {/* Stat cards */}
@@ -328,9 +376,10 @@ function TabBaoCao({ feedbacks, staffDonutData, barChartData, lineChartData }: {
   );
 }
 
-function TabTuyChinh() {
+function TabTuyChinh({ activeTab, onSelectTab }: { activeTab: string; onSelectTab: (id: string) => void }) {
   return (
     <PageContainer>
+      <StaffMobileTabBar activeTab={activeTab} onSelectTab={onSelectTab} />
       <SectionTitle title="Tuỳ chỉnh" subtitle="Cấu hình hệ thống, phân quyền cán bộ và cài đặt thông báo" />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <GlassCard className="p-5 flex flex-col gap-4">
@@ -467,28 +516,38 @@ export default function StaffDashboardPage() {
     return () => window.removeEventListener('popstate', onPop);
   }, []);
 
+  const handleSelectTab = (tabId: string) => {
+    setActiveTab(tabId);
+    const newUrl = tabId === 'tong-quan' ? '/cong-lam-viec-can-bo' : `/cong-lam-viec-can-bo?tab=${tabId}`;
+    window.history.pushState({}, '', newUrl);
+  };
+
   // Route to sub-tab components
-  if (activeTab === 'quan-ly-gioi-thieu') return <TabQuanLyGioiThieu />;
-  if (activeTab === 'quan-ly-so') return <TabQuanLySo />;
+  if (activeTab === 'quan-ly-gioi-thieu') return <TabQuanLyGioiThieu activeTab={activeTab} onSelectTab={handleSelectTab} />;
+  if (activeTab === 'quan-ly-so') return <TabQuanLySo activeTab={activeTab} onSelectTab={handleSelectTab} />;
   if (activeTab === 'giai-quyet') return (
     <TabGiaiQuyet 
       feedbacks={feedbacks} 
       updateFeedbackStatus={updateFeedbackStatus} 
       addNotification={addNotification} 
-      tasks={tasks}
+      tasks={tasks} 
       handleToggleTaskStatus={handleToggleTaskStatus}
+      activeTab={activeTab}
+      onSelectTab={handleSelectTab}
     />
   );
-  if (activeTab === 'van-thu') return <TabVanThu />;
+  if (activeTab === 'van-thu') return <TabVanThu activeTab={activeTab} onSelectTab={handleSelectTab} />;
   if (activeTab === 'bao-cao') return (
     <TabBaoCao 
       feedbacks={feedbacks} 
       staffDonutData={staffDonutData} 
       barChartData={barChartData} 
       lineChartData={lineChartData} 
+      activeTab={activeTab}
+      onSelectTab={handleSelectTab}
     />
   );
-  if (activeTab === 'tuy-chinh') return <TabTuyChinh />;
+  if (activeTab === 'tuy-chinh') return <TabTuyChinh activeTab={activeTab} onSelectTab={handleSelectTab} />;
 
   // Default: Tổng quan tab (2-column neat layout)
   const urgentFeedbacks = feedbacks
@@ -497,6 +556,7 @@ export default function StaffDashboardPage() {
 
   return (
     <PageContainer>
+      <StaffMobileTabBar activeTab={activeTab} onSelectTab={handleSelectTab} />
       <SectionTitle
         title="Tổng quan điều hành"
         subtitle="Hệ thống tổng hợp chỉ đạo, tiếp nhận ý kiến phản ánh, quản lý công việc và báo cáo an sinh xã hội nội bộ"
