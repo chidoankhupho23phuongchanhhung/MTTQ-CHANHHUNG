@@ -379,14 +379,14 @@ export default function HomePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.55, delay: 0.1, ease: 'easeOut' }}
           >
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-white text-[10px] sm:text-xs font-bold uppercase tracking-wider">
-              <span className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse" />
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-white text-[9.5px] xs:text-[10.5px] sm:text-xs font-bold uppercase tracking-wider whitespace-nowrap">
+              <span className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse flex-shrink-0" />
               Cổng thông tin Mặt trận số — Phường Chánh Hưng
             </span>
 
-            <h1 className="text-3xl sm:text-4xl md:text-6xl font-black text-white leading-tight uppercase drop-shadow-2xl tracking-tight text-center">
+            <h1 className="text-2xl xs:text-3xl sm:text-4xl md:text-6xl font-black text-white leading-tight uppercase drop-shadow-2xl tracking-tight text-center">
               MẶT TRẬN SỐ<br />
-              <span className="text-yellow-300">Phường Chánh Hưng</span>
+              <span className="text-yellow-300 whitespace-nowrap inline-block">Phường Chánh Hưng</span>
             </h1>
 
             <div className="w-full max-w-full overflow-hidden flex justify-center px-1">

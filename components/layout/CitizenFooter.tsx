@@ -40,7 +40,7 @@ export default function CitizenFooter() {
             />
             <div className="flex flex-col text-left">
               <h4 className="font-black uppercase tracking-wider text-xs leading-none">Ủy ban MTTQ Việt Nam</h4>
-              <span className="text-[10px] text-yellow-400 font-bold uppercase mt-1">Phường Chánh Hưng</span>
+              <span className="text-[10px] text-yellow-400 font-bold uppercase mt-1 whitespace-nowrap">Phường Chánh Hưng</span>
             </div>
           </div>
           <p className="text-[11px] text-slate-400 leading-relaxed">

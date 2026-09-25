@@ -171,7 +171,7 @@ export default function Sidebar() {
             <img src="/mttq-logo.png" alt="MTTQ" className="w-9 h-9 object-contain flex-shrink-0" />
             <div className="flex flex-col text-left min-w-0">
               <span className="text-[8.5px] uppercase font-bold tracking-widest text-blue-300 leading-none">MTTQ Việt Nam</span>
-              <span className="text-[11px] font-black text-white leading-tight uppercase tracking-tight truncate">Phường Chánh Hưng</span>
+              <span className="text-[11px] font-black text-white leading-tight uppercase tracking-tight truncate whitespace-nowrap">Phường Chánh Hưng</span>
               {isStaff && (
                 <span className="text-[8px] text-emerald-400 font-bold uppercase tracking-wider mt-0.5">Cổng Cán bộ</span>
               )}

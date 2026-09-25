@@ -265,7 +265,7 @@ export default function MTTQIntroSection({ className }: { className?: string }) 
                             {leader.name}
                           </h4>
                           <span className={cn(
-                            "inline-block px-2 py-0.5 rounded text-[10px] font-bold border mb-2",
+                            "inline-block px-2 py-0.5 rounded text-[10px] font-bold border mb-2 whitespace-nowrap",
                             leader.level === 'city'
                               ? "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300"
                               : "bg-red-50 text-red-700 border-red-200 dark:bg-red-950/40 dark:text-red-300"
