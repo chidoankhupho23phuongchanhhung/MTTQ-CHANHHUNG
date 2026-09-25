@@ -49,9 +49,6 @@ function TabQuanLySo() {
         <StatCard title="Dữ liệu đồng bộ" value="98.2%" change="+0.4%" trend="up" description="tỉ lệ đồng bộ" icon={<RefreshCw className="h-4 w-4 text-emerald-500" />} />
       </div>
 
-      {/* Quản lý Nội dung & Hình ảnh Giới thiệu MTTQ */}
-      <MTTQIntroAdminSection className="mb-6" />
-
       {/* Hệ thống 4 Fanpage Đoàn thể */}
       <FanpageSection className="mb-6" />
 

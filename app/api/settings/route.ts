@@ -2,7 +2,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs/promises';
 import path from 'path';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 const SETTINGS_FILE = path.join(process.cwd(), 'data', 'settings.json');
+
+const NO_CACHE_HEADERS = {
+  'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+  'Pragma': 'no-cache',
+  'Expires': '0',
+};
 
 async function readSettings() {
   try {
@@ -40,10 +49,12 @@ async function writeSettings(settings: any) {
   }
 }
 
-// GET /api/settings - Fetch all saved custom URLs and backgrounds
+// GET /api/settings - Fetch all saved custom URLs and backgrounds (No-cache)
 export async function GET() {
   const settings = await readSettings();
-  return NextResponse.json(settings);
+  return NextResponse.json(settings, {
+    headers: NO_CACHE_HEADERS,
+  });
 }
 
 // POST /api/settings - Update a fanpage, phongtrao, intro, or drive setting
@@ -53,25 +64,25 @@ export async function POST(req: NextRequest) {
     const { type, id, bg, url, data } = body;
 
     if (!type) {
-      return NextResponse.json({ error: 'Missing type' }, { status: 400 });
+      return NextResponse.json({ error: 'Missing type' }, { status: 400, headers: NO_CACHE_HEADERS });
     }
 
     const current = await readSettings();
 
     if (type === 'fanpage') {
-      if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });
+      if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400, headers: NO_CACHE_HEADERS });
       current.fanpages = current.fanpages || {};
       current.fanpages[id] = current.fanpages[id] || {};
       if (bg !== undefined) current.fanpages[id].bg = bg;
       if (url !== undefined) current.fanpages[id].url = url;
     } else if (type === 'phongtrao') {
-      if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });
+      if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400, headers: NO_CACHE_HEADERS });
       current.phongtrao = current.phongtrao || {};
       if (bg !== undefined) current.phongtrao[id] = bg;
     } else if (type === 'intro') {
-      current.intro = current.intro || {};
+      // Thay thế trực tiếp toàn bộ dữ liệu intro mới nhất, không shallow-merge dữ liệu cũ
       if (data) {
-        current.intro = { ...current.intro, ...data };
+        current.intro = data;
       }
     } else if (type === 'drive') {
       current.drive = current.drive || {};
@@ -81,9 +92,9 @@ export async function POST(req: NextRequest) {
     }
 
     await writeSettings(current);
-    return NextResponse.json({ success: true, settings: current });
+    return NextResponse.json({ success: true, settings: current }, { headers: NO_CACHE_HEADERS });
   } catch (err: any) {
     console.error('Settings API POST error:', err);
-    return NextResponse.json({ error: err.message || 'Lỗi lưu cấu hình' }, { status: 500 });
+    return NextResponse.json({ error: err.message || 'Lỗi lưu cấu hình' }, { status: 500, headers: NO_CACHE_HEADERS });
   }
 }
