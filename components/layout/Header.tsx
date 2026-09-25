@@ -108,11 +108,11 @@ export default function Header() {
               alt="Logo MTTQ" 
               className="w-9 h-9 object-contain flex-shrink-0 animate-float" 
             />
-            <div className="flex flex-col text-left">
-              <h1 className="text-xs sm:text-sm font-black text-slate-800 dark:text-white uppercase leading-none tracking-tight">
+            <div className="flex flex-col text-left min-w-0">
+              <h1 className="text-xs sm:text-sm font-black text-slate-800 dark:text-white uppercase leading-none tracking-tight whitespace-nowrap">
                 {isStaff ? 'Dashboard Điều hành' : 'MẶT TRẬN SỐ'}
               </h1>
-              <span className="text-[9px] text-slate-400 font-bold uppercase mt-1">
+              <span className="text-[9px] text-slate-400 font-bold uppercase mt-1 whitespace-nowrap">
                 {isStaff ? 'Dành cho cán bộ, chuyên viên' : 'Phường Chánh Hưng'}
               </span>
             </div>

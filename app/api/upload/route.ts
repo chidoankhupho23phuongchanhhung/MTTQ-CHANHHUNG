@@ -60,6 +60,7 @@ export async function POST(req: NextRequest) {
             folderId: driveFolderId
           }),
           redirect: 'follow',
+          signal: AbortSignal.timeout(25000)
         });
 
         if (gasResponse.ok) {
@@ -76,14 +77,16 @@ export async function POST(req: NextRequest) {
       console.warn('Lưu Google Drive không thành công, đã lưu tại máy chủ:', gasErr);
     }
 
+    const preferredUrl = driveFileId ? `/api/drive-image?id=${driveFileId}` : localUrl;
+
     return NextResponse.json({
       success: true,
-      url: localUrl,
+      url: preferredUrl,
       localUrl: localUrl,
       driveUrl: driveUrl,
       driveFileId: driveFileId,
       directDriveImageUrl: directDriveImageUrl,
-      proxyUrl: driveFileId ? `/api/drive-image?id=${driveFileId}` : localUrl,
+      proxyUrl: preferredUrl,
       gasSuccess: gasSuccess,
       source: gasSuccess ? 'local-and-drive' : 'local-server'
     });

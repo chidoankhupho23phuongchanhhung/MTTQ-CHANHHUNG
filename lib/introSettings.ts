@@ -88,9 +88,13 @@ export const DEFAULT_INTRO_SETTINGS: IntroSettings = {
   leaders: DEFAULT_LEADERS,
 };
 
-export const normalizePhotoUrl = (url: string | undefined): string => {
+export const normalizePhotoUrl = (url: string | undefined, driveFileId?: string): string => {
+  // If driveFileId is provided, always prefer high-res Google Drive proxy
+  if (driveFileId) {
+    return `/api/drive-image?id=${driveFileId}`;
+  }
   if (!url) return '/mttq-logo.png';
-  if (url.startsWith('/uploads/') || url.startsWith('/leaders/') || url === '/mttq-logo.png' || url.startsWith('data:')) {
+  if (url.startsWith('data:') || url === '/mttq-logo.png') {
     return url;
   }
 

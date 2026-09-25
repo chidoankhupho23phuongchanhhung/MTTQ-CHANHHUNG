@@ -228,7 +228,7 @@ export default function MTTQIntroSection({ className }: { className?: string }) 
                 {/* GIAO DIỆN MOBILE: DẠNG CARD CHÂN DUNG (Chống nhảy chữ và tăng kích thước chữ dễ đọc) */}
                 <div className="sm:hidden space-y-3.5 mb-4">
                   {settings.leaders.map((leader) => {
-                    const displayUrl = normalizePhotoUrl(leader.photoUrl);
+                    const displayUrl = normalizePhotoUrl(leader.photoUrl, leader.driveFileId);
                     return (
                       <div
                         key={leader.id}
@@ -244,7 +244,12 @@ export default function MTTQIntroSection({ className }: { className?: string }) 
                               alt={leader.name}
                               referrerPolicy="no-referrer"
                               onError={(e) => {
-                                (e.target as HTMLImageElement).src = '/mttq-logo.png';
+                                const img = e.target as HTMLImageElement;
+                                if (leader.driveFileId && !img.src.includes(leader.driveFileId)) {
+                                  img.src = `/api/drive-image?id=${leader.driveFileId}`;
+                                } else {
+                                  img.src = '/mttq-logo.png';
+                                }
                               }}
                               className="w-full h-full object-cover object-top"
                             />
@@ -288,7 +293,7 @@ export default function MTTQIntroSection({ className }: { className?: string }) 
                     </thead>
                     <tbody className="divide-y divide-slate-200 dark:divide-slate-800 text-sm sm:text-base">
                       {settings.leaders.map((leader) => {
-                        const displayUrl = normalizePhotoUrl(leader.photoUrl);
+                        const displayUrl = normalizePhotoUrl(leader.photoUrl, leader.driveFileId);
                         return (
                           <tr key={leader.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors">
                             <td className="py-3.5 px-4 text-center align-middle border-r border-slate-200 dark:border-slate-800">
@@ -301,7 +306,12 @@ export default function MTTQIntroSection({ className }: { className?: string }) 
                                     alt={leader.name}
                                     referrerPolicy="no-referrer"
                                     onError={(e) => {
-                                      (e.target as HTMLImageElement).src = '/mttq-logo.png';
+                                      const img = e.target as HTMLImageElement;
+                                      if (leader.driveFileId && !img.src.includes(leader.driveFileId)) {
+                                        img.src = `/api/drive-image?id=${leader.driveFileId}`;
+                                      } else {
+                                        img.src = '/mttq-logo.png';
+                                      }
                                     }}
                                     className="w-full h-full object-cover object-top"
                                   />
@@ -433,9 +443,9 @@ export default function MTTQIntroSection({ className }: { className?: string }) 
                 </h3>
 
                 {/* Khẩu hiệu */}
-                <div className="p-4 rounded-2xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 mb-5 flex items-center gap-3">
+                <div className="p-3.5 sm:p-4 rounded-2xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 mb-5 flex items-center gap-2.5 sm:gap-3 overflow-hidden">
                   <Star className="w-5 h-5 text-red-600 flex-shrink-0" />
-                  <p className="text-sm sm:text-base font-bold text-red-700 dark:text-red-300 uppercase tracking-wide">
+                  <p className="text-xs sm:text-sm md:text-base font-bold text-red-700 dark:text-red-300 uppercase tracking-tight sm:tracking-wide whitespace-nowrap overflow-x-auto no-scrollbar">
                     &quot;{settings.slogan}&quot;
                   </p>
                 </div>

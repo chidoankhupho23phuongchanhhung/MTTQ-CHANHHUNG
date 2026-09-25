@@ -15,6 +15,7 @@ import {
   getPhongTraoIcon,
   getPhongTraoBg
 } from '@/lib/phongTrao';
+import { getCachedIntroSettings, DEFAULT_SLOGAN } from '@/lib/introSettings';
 
 /* ─── per-index fade-up (Fast & snappy animation) ─── */
 const fadeUpProps = (i = 0) => ({
@@ -132,6 +133,22 @@ export default function HomePage() {
   /* ─── Real-time synchronized backgrounds (Fanpages & Phong Trào) ─── */
   const [fanpageBgs, setFanpageBgs] = useState<Record<string, string>>({});
   const [phongTraoBgs, setPhongTraoBgs] = useState<Record<string, string>>({});
+  const [slogan, setSlogan] = useState(DEFAULT_SLOGAN);
+
+  useEffect(() => {
+    const cached = getCachedIntroSettings();
+    if (cached.slogan) setSlogan(cached.slogan);
+
+    const handleUpdate = (e: any) => {
+      if (e.detail?.slogan) setSlogan(e.detail.slogan);
+      else {
+        const c = getCachedIntroSettings();
+        if (c.slogan) setSlogan(c.slogan);
+      }
+    };
+    window.addEventListener('intro-settings-updated', handleUpdate);
+    return () => window.removeEventListener('intro-settings-updated', handleUpdate);
+  }, []);
 
   useEffect(() => {
     const updateAllBgs = async () => {
@@ -372,9 +389,11 @@ export default function HomePage() {
               <span className="text-yellow-300">Phường Chánh Hưng</span>
             </h1>
 
-            <p className="text-xs sm:text-sm font-bold text-yellow-300 uppercase tracking-wide border-l-2 border-yellow-400 pl-3 leading-relaxed text-left drop-shadow-sm">
-              &quot;ĐOÀN KẾT - DÂN CHỦ - ĐỔI MỚI - SÁNG TẠO - PHÁT TRIỂN&quot;
-            </p>
+            <div className="w-full max-w-full overflow-hidden flex justify-center px-1">
+              <p className="text-[10px] sm:text-xs md:text-sm font-bold text-yellow-300 uppercase tracking-tight sm:tracking-wide text-center whitespace-nowrap drop-shadow-sm px-3.5 py-1.5 rounded-full bg-black/25 backdrop-blur-xs border border-yellow-400/30">
+                &quot;{slogan}&quot;
+              </p>
+            </div>
 
           </motion.div>
         </div>

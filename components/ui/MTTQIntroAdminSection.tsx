@@ -186,6 +186,13 @@ export default function MTTQIntroAdminSection({ className }: { className?: strin
 
     setUploadingForId(leaderId);
 
+    // 1. Tạo ảnh xem trước tức thì bằng ObjectURL / Canvas để người dùng thấy ảnh ngay lập tức 0.05s
+    const instantPreviewUrl = URL.createObjectURL(file);
+    const initialLeaders = currentSettingsRef.current.leaders.map(l =>
+      l.id === leaderId ? { ...l, photoUrl: instantPreviewUrl } : l
+    );
+    updateSettingsState({ ...currentSettingsRef.current, leaders: initialLeaders });
+
     try {
       const formData = new FormData();
       formData.append('file', file);
@@ -196,8 +203,12 @@ export default function MTTQIntroAdminSection({ className }: { className?: strin
 
       if (res.ok) {
         const data = await res.json();
-        if (data.success && data.url) {
-          const finalUrl = data.url;
+        if (data.success && (data.url || data.proxyUrl || data.localUrl)) {
+          // Luôn ưu tiên dùng Drive Proxy nếu đã đồng bộ lên Drive để đảm bảo hiển thị xuyên suốt
+          const finalUrl = data.driveFileId
+            ? `/api/drive-image?id=${data.driveFileId}`
+            : (data.proxyUrl || data.url || data.localUrl || instantPreviewUrl);
+
           const current = currentSettingsRef.current;
           const updatedLeaders = current.leaders.map(l =>
             l.id === leaderId
@@ -554,7 +565,7 @@ export default function MTTQIntroAdminSection({ className }: { className?: strin
             {settings.leaders.map((leader) => {
               const isEditing = editingLeaderId === leader.id;
               const isUploading = uploadingForId === leader.id;
-              const displayUrl = normalizePhotoUrl(leader.photoUrl);
+              const displayUrl = normalizePhotoUrl(leader.photoUrl, leader.driveFileId);
 
               return (
                 <div
@@ -574,7 +585,12 @@ export default function MTTQIntroAdminSection({ className }: { className?: strin
                             alt={leader.name}
                             referrerPolicy="no-referrer"
                             onError={(e) => {
-                              (e.target as HTMLImageElement).src = '/mttq-logo.png';
+                              const img = e.target as HTMLImageElement;
+                              if (leader.driveFileId && !img.src.includes(leader.driveFileId)) {
+                                img.src = `/api/drive-image?id=${leader.driveFileId}`;
+                              } else {
+                                img.src = '/mttq-logo.png';
+                              }
                             }}
                             className="w-full h-full object-cover object-top"
                           />
