@@ -23,12 +23,18 @@ export async function POST(req: NextRequest) {
 
     const fileName = `mttq_${Date.now()}_${Math.random().toString(36).substring(2, 7)}${ext}`;
 
-    // 1. Luôn lưu bản sao nội bộ tại public/uploads/ để website hiển thị tức thì 100% không lo lỗi mạng/CORS
-    const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
-    await fs.mkdir(uploadsDir, { recursive: true });
-    const filePath = path.join(uploadsDir, fileName);
-    await fs.writeFile(filePath, buffer);
-    const localUrl = `/uploads/${fileName}`;
+    // 1. Lưu bản sao nội bộ tại public/uploads/ nếu môi trường cho phép ghi (local dev)
+    let localUrl = '';
+    try {
+      const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
+      await fs.mkdir(uploadsDir, { recursive: true });
+      const filePath = path.join(uploadsDir, fileName);
+      await fs.writeFile(filePath, buffer);
+      localUrl = `/uploads/${fileName}`;
+    } catch (fsErr) {
+      // Bỏ qua lỗi EROFS trên môi trường serverless (Vercel)
+      console.warn('Môi trường serverless không hỗ trợ ghi file cục bộ, dùng cloud storage');
+    }
 
     // 2. Đồng bộ lưu ảnh lên thư mục Google Drive của MTTQ Phường Chánh Hưng qua Google Apps Script
     let driveUrl = '';
@@ -60,7 +66,7 @@ export async function POST(req: NextRequest) {
             folderId: driveFolderId
           }),
           redirect: 'follow',
-          signal: AbortSignal.timeout(25000)
+          signal: AbortSignal.timeout(12000)
         });
 
         if (gasResponse.ok) {
@@ -74,10 +80,14 @@ export async function POST(req: NextRequest) {
         }
       }
     } catch (gasErr) {
-      console.warn('Lưu Google Drive không thành công, đã lưu tại máy chủ:', gasErr);
+      console.warn('Lưu Google Drive không thành công:', gasErr);
     }
 
-    const preferredUrl = driveFileId ? `/api/drive-image?id=${driveFileId}` : localUrl;
+    // Nếu không có driveFileId và localUrl (trên Vercel), trả về data URL nén an toàn
+    const fallbackDataUrl = `data:${file.type || 'image/jpeg'};base64,${buffer.toString('base64')}`;
+    const preferredUrl = driveFileId 
+      ? `/api/drive-image?id=${driveFileId}` 
+      : (localUrl || fallbackDataUrl);
 
     return NextResponse.json({
       success: true,

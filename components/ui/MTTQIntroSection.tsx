@@ -121,11 +121,25 @@ export default function MTTQIntroSection({ className }: { className?: string }) 
             historyContent: data.intro.historyContent || (data.intro.historySections ? data.intro.historySections.map((s: any) => s.content).join('\n\n') : prev.historyContent),
             leaders: data.intro.leaders && data.intro.leaders.length > 0 ? data.intro.leaders : prev.leaders,
           }));
+          return;
         }
       }
     } catch (e) {
-      // Fallback
+      // Fallback sang Firestore trực tiếp
     }
+
+    try {
+      const { fetchCloudSettings } = await import('@/lib/firestoreSettings');
+      const cloudData = await fetchCloudSettings();
+      if (cloudData?.intro && Object.keys(cloudData.intro).length > 0) {
+        setSettings(prev => ({
+          ...prev,
+          ...cloudData.intro,
+          historyContent: cloudData.intro.historyContent || prev.historyContent,
+          leaders: cloudData.intro.leaders && cloudData.intro.leaders.length > 0 ? cloudData.intro.leaders : prev.leaders,
+        }));
+      }
+    } catch (err) {}
   };
 
   useEffect(() => {

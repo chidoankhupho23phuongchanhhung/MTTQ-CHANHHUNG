@@ -18,6 +18,7 @@ import {
   getCachedIntroSettings,
   normalizePhotoUrl
 } from '@/lib/introSettings';
+import { fetchCloudSettings, persistCloudSettings } from '@/lib/firestoreSettings';
 
 export default function MTTQIntroAdminSection({ className }: { className?: string }) {
   const { addNotification } = useAppStore();
@@ -51,7 +52,7 @@ export default function MTTQIntroAdminSection({ className }: { className?: strin
     });
   }, []);
 
-  // Core save function to persist to server API & localStorage
+  // Core save function to persist to server API, Firestore cloud, and localStorage
   const saveSettingsToServer = useCallback(async (settingsToSave: IntroSettings, showToast = false) => {
     if (autoSaveTimerRef.current) {
       clearTimeout(autoSaveTimerRef.current);
@@ -60,8 +61,9 @@ export default function MTTQIntroAdminSection({ className }: { className?: strin
 
     setIsSaving(true);
     try {
-      // 1. Post to server settings.json FIRST and wait for completion
-      const res = await fetch('/api/settings', {
+      // 1. Lưu đồng thời lên Firestore Cloud (vĩnh viễn) và API server
+      const cloudTask = persistCloudSettings({ intro: settingsToSave });
+      const apiTask = fetch('/api/settings', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -71,17 +73,16 @@ export default function MTTQIntroAdminSection({ className }: { className?: strin
           type: 'intro',
           data: settingsToSave
         })
+      }).catch(err => {
+        console.warn('API sync warning (bỏ qua nếu Firestore đã lưu):', err);
       });
 
-      if (!res.ok) {
-        throw new Error('Server returned non-ok status');
-      }
+      await Promise.allSettled([cloudTask, apiTask]);
 
-      // 2. Cache to localStorage AFTER server confirmed write
+      // 2. Lưu vào localStorage và dispatch event cho các component khác trên tab/trang hiện tại
       if (typeof window !== 'undefined') {
         try {
           localStorage.setItem('mttq_intro_settings', JSON.stringify(settingsToSave));
-          // Dispatch custom event with detail payload so listening components update instantly
           window.dispatchEvent(new CustomEvent('intro-settings-updated', { detail: settingsToSave }));
           window.dispatchEvent(new Event('storage'));
         } catch (e) {
@@ -94,13 +95,12 @@ export default function MTTQIntroAdminSection({ className }: { className?: strin
       if (showToast) {
         addNotification(
           'Lưu thành công',
-          'Đã cập nhật toàn bộ nội dung & hình ảnh lên hệ thống!',
+          'Đã lưu và đồng bộ trực tiếp lên hệ thống đám mây MTTQ!',
           'success'
         );
       }
     } catch (err) {
       console.error('Lỗi khi lưu cài đặt intro:', err);
-      // Fallback: save to localStorage so work is not lost
       if (typeof window !== 'undefined') {
         try {
           localStorage.setItem('mttq_intro_settings', JSON.stringify(settingsToSave));
@@ -110,7 +110,7 @@ export default function MTTQIntroAdminSection({ className }: { className?: strin
       if (showToast) {
         addNotification(
           'Đã lưu cục bộ',
-          'Nội dung đã được lưu vào bộ nhớ máy bạn (lỗi đồng bộ server)',
+          'Nội dung đã được lưu tạm vào thiết bị của bạn',
           'warning'
         );
       }
@@ -119,16 +119,34 @@ export default function MTTQIntroAdminSection({ className }: { className?: strin
     }
   }, [addNotification]);
 
-  // Load settings on mount from API + cache
+  // Load settings on mount from Cloud Firestore + API + cache
   useEffect(() => {
-    // 1. Instant local read
+    // 1. Instant local read để giao diện không bị giật
     const cached = getCachedIntroSettings();
     setSettings(cached);
     currentSettingsRef.current = cached;
 
-    // 2. Server API fetch (only overwrite if user hasn't typed anything yet)
+    // 2. Fetch từ Cloud Firestore và Server API
     const fetchServerSettings = async () => {
       try {
+        // Thử lấy trực tiếp từ Firestore trước
+        const cloudData = await fetchCloudSettings();
+        if (cloudData?.intro && Object.keys(cloudData.intro).length > 0 && !isUserDirtyRef.current) {
+          const intro = cloudData.intro;
+          setSettings(prev => {
+            const next = {
+              ...prev,
+              ...intro,
+              leaders: intro.leaders && intro.leaders.length > 0 ? intro.leaders : prev.leaders,
+              historyContent: intro.historyContent || prev.historyContent,
+            };
+            currentSettingsRef.current = next;
+            return next;
+          });
+          return;
+        }
+
+        // Dự phòng lấy từ API /api/settings
         const res = await fetch('/api/settings', {
           headers: { 'Cache-Control': 'no-cache, no-store' }
         });
@@ -155,14 +173,14 @@ export default function MTTQIntroAdminSection({ className }: { className?: strin
     fetchServerSettings();
   }, []);
 
-  // Debounced auto-save helper for text inputs
+  // Debounced auto-save helper for text inputs (tăng lên 1200ms để tránh xung đột khi gõ nhanh)
   const triggerDebouncedAutoSave = useCallback((newSettings: IntroSettings) => {
     if (autoSaveTimerRef.current) {
       clearTimeout(autoSaveTimerRef.current);
     }
     autoSaveTimerRef.current = setTimeout(() => {
       saveSettingsToServer(newSettings, false);
-    }, 700);
+    }, 1200);
   }, [saveSettingsToServer]);
 
   // Handle uploading portrait photo

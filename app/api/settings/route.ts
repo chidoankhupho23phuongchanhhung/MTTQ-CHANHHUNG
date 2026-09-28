@@ -13,7 +13,28 @@ const NO_CACHE_HEADERS = {
   'Expires': '0',
 };
 
+import { fetchCloudSettings, persistCloudSettings } from '@/lib/firestoreSettings';
+
 async function readSettings() {
+  // 1. Luôn ưu tiên đọc từ Cloud Database (Firestore) để đảm bảo đồng bộ 100% trên Vercel và mọi thiết bị
+  try {
+    const cloudData = await fetchCloudSettings();
+    if (cloudData && (cloudData.intro || cloudData.fanpages || cloudData.phongtrao)) {
+      return {
+        fanpages: cloudData.fanpages || {},
+        phongtrao: cloudData.phongtrao || {},
+        intro: cloudData.intro || {},
+        drive: cloudData.drive || {
+          folderId: '1IEL2r2RZf1UnIeYiD6p753rWaSeTAi6J',
+          scriptUrl: process.env.GOOGLE_APPS_SCRIPT_URL || '',
+        },
+      };
+    }
+  } catch (cloudErr) {
+    console.warn('[Settings API] Đọc Firestore thất bại, fallback sang file cục bộ:', cloudErr);
+  }
+
+  // 2. Dự phòng: Đọc từ file cục bộ data/settings.json
   try {
     const data = await fs.readFile(SETTINGS_FILE, 'utf-8');
     const parsed = JSON.parse(data);
@@ -40,12 +61,20 @@ async function readSettings() {
 }
 
 async function writeSettings(settings: any) {
+  // 1. Ghi lên Cloud Database (Firestore) - Đảm bảo lưu vĩnh viễn trên cloud
+  try {
+    await persistCloudSettings(settings);
+  } catch (err) {
+    console.error('[Settings API] Ghi Firestore thất bại:', err);
+  }
+
+  // 2. Ghi ra file cục bộ nếu có thể (cho môi trường local dev)
   try {
     const dir = path.dirname(SETTINGS_FILE);
     await fs.mkdir(dir, { recursive: true });
     await fs.writeFile(SETTINGS_FILE, JSON.stringify(settings, null, 2), 'utf-8');
   } catch (err) {
-    console.error('Failed to write settings:', err);
+    // Bỏ qua lỗi EROFS trên môi trường serverless (Vercel)
   }
 }
 
