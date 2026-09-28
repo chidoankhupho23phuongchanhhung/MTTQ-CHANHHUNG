@@ -23,32 +23,27 @@ export interface IntroSettings {
   historyContent: string;
   leaders: LeaderItem[];
   historySections?: HistorySectionItem[];
+  heroBannerUrl?: string;
 }
 
 export const DEFAULT_LEADERS: LeaderItem[] = [
   {
     id: "loc",
     salutation: "Ông",
-    name: "Nguyễn Phước Lộc",
-    title: "Ủy viên Ban Chấp hành Trung ương Đảng, Phó Bí thư Thành ủy, Chủ tịch Ủy ban Mặt trận Tổ quốc Việt Nam Thành phố Hồ Chí Minh",
-    photoUrl: "/leaders/nguyen-phuoc-loc.png",
-    level: "city",
+    name: "Trương Công Hồ",
+    title: "Ủy viên Ban Chấp hành Trung ương Đảng, Phó Bí thư Thành ủy, Chủ tịch Ủy ban Mặt trận Tổ quốc Việt Nam  Phường Chánh Hưng",
+    photoUrl: "/api/drive-image?id=1IN9NjK-Jh8XpwLmdJcyMN-b18AeQasL_",
+    level: "ward",
+    driveFileId: "1IN9NjK-Jh8XpwLmdJcyMN-b18AeQasL_",
   },
   {
     id: "hanh",
-    salutation: "Bà",
-    name: "Trương Thị Bích Hạnh",
-    title: "Ủy viên Ban Thường vụ Thành ủy, Phó Chủ tịch Thường trực Ủy ban Mặt trận Tổ quốc Việt Nam Thành phố Hồ Chí Minh",
-    photoUrl: "/leaders/truong-thi-bich-hanh.png",
-    level: "city",
-  },
-  {
-    id: "ward-ct",
-    salutation: "Đồng chí",
-    name: "Chủ tịch Ủy ban MTTQ Phường",
-    title: "Ủy viên Ban Thường vụ Đảng ủy, Chủ tịch Ủy ban Mặt trận Tổ quốc Việt Nam Phường Chánh Hưng",
-    photoUrl: "/mttq-logo.png",
+    salutation: "Ông",
+    name: "Võ Thái Dương",
+    title: "Phó Chủ tịch Thường trực Ủy ban Mặt trận Tổ quốc Việt Nam Phường Chánh Hưng",
+    photoUrl: "/api/drive-image?id=1ngHcdx2SD8-4rv-nzuZMB56kIymVuMSj",
     level: "ward",
+    driveFileId: "1ngHcdx2SD8-4rv-nzuZMB56kIymVuMSj",
   },
   {
     id: "ward-pct",
@@ -123,6 +118,7 @@ export const getCachedIntroSettings = (): IntroSettings => {
           introSubtext: parsed.introSubtext || DEFAULT_INTRO_SUBTEXT,
           historyContent: parsed.historyContent || (parsed.historySections ? parsed.historySections.map((s: any) => s.content).join('\n\n') : DEFAULT_HISTORY_CONTENT),
           leaders: parsed.leaders && parsed.leaders.length > 0 ? parsed.leaders : DEFAULT_LEADERS,
+          heroBannerUrl: parsed.heroBannerUrl || undefined,
         };
       }
     } catch (e) {

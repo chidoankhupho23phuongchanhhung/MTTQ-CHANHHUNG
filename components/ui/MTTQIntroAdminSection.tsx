@@ -841,6 +841,107 @@ export default function MTTQIntroAdminSection({ className }: { className?: strin
             </p>
           </div>
 
+          {/* Hero Banner Image */}
+          <div className="p-4 sm:p-5 rounded-2xl border border-amber-200 dark:border-amber-900/50 bg-amber-50/50 dark:bg-amber-950/20 space-y-3">
+            <label className="block font-bold text-amber-700 dark:text-amber-300 flex items-center gap-2 text-sm sm:text-base">
+              <ImageIcon className="w-4.5 h-4.5 text-amber-600" />
+              Ảnh bìa Trang chủ (Hero Banner):
+            </label>
+
+            {/* Preview */}
+            {settings.heroBannerUrl && (
+              <div className="relative w-full h-32 sm:h-40 rounded-xl overflow-hidden border border-amber-300 dark:border-amber-800 bg-black/10">
+                <img
+                  src={settings.heroBannerUrl}
+                  alt="Ảnh bìa"
+                  className="w-full h-full object-cover"
+                  referrerPolicy="no-referrer"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=1400&auto=format&fit=crop&q=80';
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const current = currentSettingsRef.current;
+                    const next = { ...current, heroBannerUrl: undefined };
+                    updateSettingsState(next);
+                    triggerDebouncedAutoSave(next);
+                  }}
+                  className="absolute top-2 right-2 p-1.5 rounded-full bg-black/60 hover:bg-red-600 text-white text-xs transition-colors"
+                  title="Xóa ảnh bìa (quay về mặc định)"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
+
+            <div className="flex flex-col sm:flex-row gap-2">
+              {/* Upload file */}
+              <label className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border-2 border-dashed border-amber-300 dark:border-amber-700 bg-white dark:bg-slate-900 cursor-pointer hover:border-amber-500 transition-colors">
+                <Upload className="w-4 h-4 text-amber-500" />
+                <span className="text-xs font-bold text-amber-700 dark:text-amber-300">Tải ảnh bìa lên</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+
+                    // Instant preview
+                    const previewUrl = URL.createObjectURL(file);
+                    const current = currentSettingsRef.current;
+                    updateSettingsState({ ...current, heroBannerUrl: previewUrl });
+
+                    try {
+                      const formData = new FormData();
+                      formData.append('file', file);
+                      const res = await fetch('/api/upload', {
+                        method: 'POST',
+                        body: formData,
+                      });
+                      if (res.ok) {
+                        const result = await res.json();
+                        const finalUrl = result.driveFileId
+                          ? `/api/drive-image?id=${result.driveFileId}`
+                          : result.preferredUrl || result.url || previewUrl;
+                        const next = { ...currentSettingsRef.current, heroBannerUrl: finalUrl };
+                        updateSettingsState(next);
+                        await saveSettingsToServer(next, true);
+                      }
+                    } catch (err) {
+                      console.error('Lỗi tải ảnh bìa:', err);
+                    }
+                  }}
+                />
+              </label>
+
+              {/* Paste URL */}
+              <input
+                type="text"
+                placeholder="Hoặc dán link ảnh từ internet..."
+                className="flex-1 px-4 py-2.5 rounded-xl border border-amber-300 dark:border-amber-700 bg-white dark:bg-slate-900 text-xs text-slate-700 dark:text-slate-300"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    const val = (e.target as HTMLInputElement).value.trim();
+                    if (val) {
+                      const current = currentSettingsRef.current;
+                      const next = { ...current, heroBannerUrl: val };
+                      updateSettingsState(next);
+                      triggerDebouncedAutoSave(next);
+                      (e.target as HTMLInputElement).value = '';
+                    }
+                  }
+                }}
+              />
+            </div>
+
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Ảnh bìa sẽ hiển thị làm nền cho phần banner &quot;MẶT TRẬN SỐ – PHƯỜNG CHÁNH HƯNG&quot; trên Trang chủ. Nên dùng ảnh ngang (16:9), kích thước tối thiểu 1400×400px.
+            </p>
+          </div>
+
           {/* Official Intro Text */}
           <div className="p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-2">
             <label className="block font-bold text-slate-800 dark:text-white text-sm sm:text-base">

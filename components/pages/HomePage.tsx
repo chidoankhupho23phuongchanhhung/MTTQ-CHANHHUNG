@@ -134,16 +134,29 @@ export default function HomePage() {
   const [fanpageBgs, setFanpageBgs] = useState<Record<string, string>>({});
   const [phongTraoBgs, setPhongTraoBgs] = useState<Record<string, string>>({});
   const [slogan, setSlogan] = useState(DEFAULT_SLOGAN);
+  const [heroBannerUrl, setHeroBannerUrl] = useState<string>("https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=1400&auto=format&fit=crop&q=80");
 
   useEffect(() => {
     const cached = getCachedIntroSettings();
     if (cached.slogan) setSlogan(cached.slogan);
+    if (cached.heroBannerUrl) setHeroBannerUrl(cached.heroBannerUrl);
+
+    // Also fetch from server to get the latest
+    fetch('/api/settings', { headers: { 'Cache-Control': 'no-cache' } })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data?.intro?.heroBannerUrl) setHeroBannerUrl(data.intro.heroBannerUrl);
+        if (data?.intro?.slogan) setSlogan(data.intro.slogan);
+      })
+      .catch(() => {});
 
     const handleUpdate = (e: any) => {
       if (e.detail?.slogan) setSlogan(e.detail.slogan);
-      else {
+      if (e.detail?.heroBannerUrl) setHeroBannerUrl(e.detail.heroBannerUrl);
+      if (!e.detail) {
         const c = getCachedIntroSettings();
         if (c.slogan) setSlogan(c.slogan);
+        if (c.heroBannerUrl) setHeroBannerUrl(c.heroBannerUrl);
       }
     };
     window.addEventListener('intro-settings-updated', handleUpdate);
@@ -355,7 +368,7 @@ export default function HomePage() {
       ════════════════════════════════════════════ */}
       <div className="relative w-full overflow-hidden min-h-[250px] sm:min-h-[300px] md:min-h-[330px]">
         <img
-          src="https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=1400&auto=format&fit=crop&q=80"
+          src={heroBannerUrl}
           alt="Cảnh phường Chánh Hưng"
           className="absolute inset-0 w-full h-full object-cover object-center scale-105"
           style={{ filter: 'brightness(0.42) saturate(1.2)' }}
