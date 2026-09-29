@@ -66,10 +66,8 @@ export default function Header() {
   const navItems = [
     { id: '/', label: 'Trang chủ' },
     { id: '/hoat-dong-mttq', label: 'Giới thiệu' },
-    { id: '/tin-tuc', label: 'Tin tức - Sự kiện' },
-    { id: '/phan-anh', label: 'Kiến nghị' },
     { id: '/van-ban-bieu-mau', label: 'Văn bản' },
-    { id: '/khong-gian-van-hoa-hcm', label: 'Thư viện số' }
+    { id: '/khong-gian-van-hoa-hcm', label: 'Không gian văn hóa' }
   ];
 
   const handleNavigate = (id: string) => {

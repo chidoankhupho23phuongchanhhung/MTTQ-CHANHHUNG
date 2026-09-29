@@ -447,14 +447,14 @@ export default function HomePage() {
             buttonHoverColor="group-hover:border-amber-500/20 group-hover:text-amber-600 dark:group-hover:text-amber-400"
           />
 
-          {/* Card 3: Kiến nghị & Phản ánh */}
+          {/* Card 3: Hộp thư Ý Đảng - Lòng dân */}
           <FeatureCard
             index={2}
             onClick={() => handleExternal(GOOGLE_FORM_URL)}
             icon={MessageSquare}
             iconBg="bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 border-emerald-100/50 dark:border-emerald-900/25"
             hoverShadow="hover:shadow-lg hover:shadow-emerald-500/5"
-            title={<>Kiến nghị<br />& Phản ánh</>}
+            title={<>Hộp thư<br />Ý Đảng - Lòng dân</>}
             buttonLabel="Gửi phản ánh"
             buttonHoverColor="group-hover:border-emerald-500/20 group-hover:text-emerald-600 dark:group-hover:text-emerald-400"
           />
