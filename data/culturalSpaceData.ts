@@ -56,44 +56,64 @@ export const TIMELINE_NODES: TimelineNode[] = [
     details: 'Ngày 2/9/1945, trước hàng vạn đồng bào tập trung tại Quảng trường Ba Đình lịch sử, Chủ tịch Hồ Chí Minh đọc bản Tuyên ngôn Độc lập, trịnh trọng tuyên bố với quốc dân và thế giới về sự ra đời của nước Việt Nam Dân chủ Cộng hòa.'
   },
   {
-    id: 'tl-1952',
-    year: '1952',
-    title: 'Thư gửi Phụ nữ Việt Nam',
-    description: 'Bác gửi thư khen ngợi sự đóng góp của phụ nữ trong kháng chiến kiến quốc.',
-    photoUrl: '/hcm-letter-women.png',
-    category: 'di-san',
-    details: 'Nhân ngày kỷ niệm Khởi nghĩa Hai Bà Trưng và ngày Quốc tế Phụ nữ, ngày 8/3/1952 Bác Hồ gửi thư khen ngợi: "Non sông gấm vóc Việt Nam do phụ nữ ta trẻ cũng như già, ra sức dệt thêu mà thêm tốt đẹp, rực rỡ". Người khuyên phụ nữ xóa bỏ tự ti, phấn đấu bình đẳng.'
+    id: 'tl-1946',
+    year: '1946',
+    title: 'Lời kêu gọi Toàn quốc Kháng chiến',
+    description: 'Hiệu triệu toàn thể dân tộc không phân biệt tôn giáo, già trẻ, gái trai đứng lên kháng chiến cứu nước.',
+    photoUrl: '/p4.jpg',
+    category: 'doc-lap',
+    details: 'Đêm 19/12/1946, Chủ tịch Hồ Chí Minh ra Lời kêu gọi Toàn quốc kháng chiến: "Bất kỳ đàn ông, đàn bà, bất kỳ người già, người trẻ, không chia tôn giáo, đảng phái, dân tộc. Hễ là người Việt Nam thì phải đứng lên đánh thực dân Pháp để cứu Tổ quốc". Sức mạnh đại đoàn kết đã làm nên chiến thắng Điện Biên Phủ lừng lẫy năm châu.'
   },
   {
-    id: 'tl-1956',
-    year: '1956',
-    title: 'Tiếp đại biểu Phụ nữ Thủ đô',
-    description: 'Bác nói chuyện thân mật và chia quà kẹo cho các đại biểu tại Phủ Chủ tịch.',
+    id: 'tl-1951',
+    year: '1951',
+    title: 'Đại hội Thống nhất Việt Minh - Liên Việt',
+    description: 'Hợp nhất hai mặt trận, Bác đúc kết chân lý: "Đoàn kết, đoàn kết, đại đoàn kết. Thành công, thành công, đại thành công".',
     photoUrl: '/p6.png',
     category: 'di-san',
-    details: 'Ngày 26/12/1956, Bác tiếp hơn 300 đại biểu phụ nữ Hà Nội. Bác thân mật dặn ăn bánh kẹo và mang quà về cho con, chồng. Khi mọi người ùa lên chụp ảnh chung, Bác đùa vui kéo bác sĩ Trần Duy Hưng (Chủ tịch Hà Nội) lại bảo: "Ai cũng muốn đứng gần Bác cả thì không có chỗ cho \'bác gái\' đứng à? Bác gái đây!".'
+    details: 'Tháng 3/1951, Đại hội toàn quốc thống nhất Việt Minh và Hội Liên Việt thành Mặt trận Liên Việt được tổ chức trọng thể. Bác khẳng định sự thống nhất này tạo thành một khối sắt thép vô địch đưa kháng chiến đến thắng lợi hoàn toàn.'
   },
   {
-    id: 'tl-1965',
-    year: '1965',
-    title: 'Bác Hồ với phong trào "Ba Đảm Đang"',
-    description: 'Bác Hồ dự Đại hội Phụ nữ và trao tặng huy hiệu cho các gương điển hình xuất sắc.',
-    photoUrl: '/hcm-women-movement.png',
+    id: 'tl-1955',
+    year: '1955',
+    title: 'Thành lập Mặt trận Tổ quốc Việt Nam',
+    description: 'Đại hội Mặt trận Dân tộc Thống nhất quyết định thành lập MTTQ Việt Nam, suy tôn Bác làm Chủ tịch Danh dự.',
+    photoUrl: '/cab4.jpg',
     category: 'di-san',
-    details: 'Chiều 2/12/1965, Bác cùng Thủ tướng Phạm Văn Đồng đến dự Đại hội Ba Đảm Đang. Bác khen ngợi tinh thần phụ nữ miền Bắc vừa sản xuất vừa chiến đấu. Người đọc báo Thủ đô tìm ra thành tích của 7 nữ công nhân, nông dân, giáo viên xuất sắc và tặng Huy hiệu của Người ngay tại chỗ.'
+    details: 'Ngày 10/9/1955, Đại hội đại biểu Mặt trận Dân tộc Thống nhất toàn quốc họp tại Hà Nội quyết định thành lập Mặt trận Tổ quốc Việt Nam nhằm củng cố khối đại đoàn kết toàn dân tộc xây dựng miền Bắc và đấu tranh thống nhất nước nhà.'
+  },
+  {
+    id: 'tl-1960',
+    year: '1960',
+    title: 'Mặt trận DTGP Miền Nam Việt Nam',
+    description: 'Thành lập Mặt trận Dân tộc Giải phóng miền Nam, tập hợp đồng bào miền Nam anh dũng đánh giặc cứu nước.',
+    photoUrl: '/cab3.jpg',
+    category: 'di-san',
+    details: 'Ngày 20/12/1960, Mặt trận Dân tộc Giải phóng miền Nam Việt Nam ra đời. Bác Hồ luôn hướng về tiền tuyến lớn: "Miền Nam là máu của máu Việt Nam, là thịt của thịt Việt Nam. Sông có thể cạn, núi có thể mòn, song chân lý ấy không bao giờ thay đổi".'
   },
   {
     id: 'tl-1969',
     year: '1969',
-    title: 'Di sản Ngàn năm lưu giữ',
-    description: 'Chủ tịch Hồ Chí Minh qua đời, để lại Bản Di chúc thiêng liêng.',
-    photoUrl: '/p5.jpg', // Nhà sàn Bác Hồ giản dị
+    title: 'Di chúc thiêng liêng về Đại đoàn kết',
+    description: 'Chủ tịch Hồ Chí Minh để lại Bản Di chúc căn dặn gìn giữ sự đoàn kết như giữ gìn con ngươi của mắt mình.',
+    photoUrl: '/p5.jpg',
     category: 'di-san',
-    details: 'Người thanh thản ra đi lúc 9h47 ngày 2/9/1969. Di chúc của Người là một tác phẩm kết tinh tình yêu Tổ quốc, nhân dân và tư tưởng đại đoàn kết dân tộc sâu sắc, là ngọn đuốc soi đường cho các thế hệ học tập và noi theo.'
+    details: 'Người thanh thản ra đi lúc 9h47 ngày 2/9/1969. Di chúc của Người là bảo vật quốc gia vô giá, kết tinh trọn vẹn tư tưởng đại đoàn kết toàn dân tộc và đoàn kết quốc tế, soi đường cho Mặt trận Tổ quốc Việt Nam qua mọi thời đại.'
   }
 ];
 
 export const ARCHIVE_ITEMS: ArchiveItem[] = [
+  {
+    id: 'arch-sach-dai-doan-ket',
+    title: 'Sách: Hồ Chí Minh về Đại đoàn kết toàn dân tộc',
+    category: 'tac-pham',
+    year: 'Nhiều thời kỳ',
+    description: 'Tác phẩm tập hợp những lời dạy kinh điển của Bác về vai trò sống còn của Mặt trận Dân tộc Thống nhất và khối đại đoàn kết toàn dân.',
+    imageUrl: '/cab2.jpg',
+    tags: ['Đại đoàn kết', 'Mặt trận', 'Hồ Chí Minh', 'Lý luận'],
+    source: 'NXB Chính trị Quốc gia Sự thật',
+    dimensions: 'Ấn phẩm sách lý luận'
+  },
   {
     id: 'arch-tuyen-ngon',
     title: 'Bản Tuyên ngôn Độc lập',
@@ -117,11 +137,22 @@ export const ARCHIVE_ITEMS: ArchiveItem[] = [
     dimensions: 'Bản viết tay khổ nhỏ'
   },
   {
+    id: 'arch-chi-thi-18-11',
+    title: 'Chỉ thị thành lập Hội Phản đế Đồng minh 18/11/1930',
+    category: 'sac-lenh',
+    year: '1930',
+    description: 'Văn kiện khai sinh hình thức Mặt trận Dân tộc Thống nhất đầu tiên, mốc son Ngày truyền thống MTTQ Việt Nam.',
+    imageUrl: '/ho-chi-minh-1930.png',
+    tags: ['Mặt trận', '18/11/1930', 'Đại đoàn kết', 'Văn kiện Đảng'],
+    source: 'Lưu trữ Văn phòng Trung ương Đảng',
+    dimensions: 'Văn bản in thạch lưu trữ'
+  },
+  {
     id: 'arch-duong-kach-menh',
     title: 'Tác phẩm Đường Kách mệnh',
     category: 'tac-pham',
     year: '1927',
-    description: 'Tập hợp bài giảng của Nguyễn Ái Quốc tại Châu dạy các chiến sĩ cách mạng trẻ.',
+    description: 'Tập hợp bài giảng của Nguyễn Ái Quốc tại Quảng Châu dạy các chiến sĩ cách mạng trẻ.',
     imageUrl: '/duong-kach-menh.png',
     tags: ['Lý luận', 'Đường lối', 'Quảng Châu', '1927'],
     source: 'Bảo tàng Cách mạng Việt Nam',
@@ -132,8 +163,8 @@ export const ARCHIVE_ITEMS: ArchiveItem[] = [
     title: 'Lời kêu gọi Toàn quốc Kháng chiến',
     category: 'sac-lenh',
     year: '1946',
-    description: 'Mệnh lệnh thiêng liêng cổ vũ toàn dân đứng lên bảo vệ độc lập tự do chống thực dân Pháp.',
-    imageUrl: '/p4.jpg', // Chân dung biểu tượng 1946 khơi kháng chiến
+    description: 'Mệnh lệnh thiêng liêng cổ vũ toàn dân đoàn kết đứng lên bảo vệ độc lập tự do chống thực dân Pháp.',
+    imageUrl: '/p4.jpg',
     tags: ['Kháng chiến', '1946', 'Hồ Chí Minh', 'Lịch sử'],
     source: 'Lưu trữ Văn phòng Trung ương Đảng',
     dimensions: 'Văn bản viết tay gốc'
@@ -143,43 +174,21 @@ export const ARCHIVE_ITEMS: ArchiveItem[] = [
     title: 'Di chúc Chủ tịch Hồ Chí Minh',
     category: 'thu-tin',
     year: '1965-1969',
-    description: 'Những lời dặn dò cuối cùng chan chứa tình yêu thương gửi lại cho toàn Đảng, toàn dân.',
-    imageUrl: '/p5.jpg', // Nơi soạn chúc thư lịch sử
+    description: 'Những lời dặn dò cuối cùng chan chứa tình yêu thương gửi lại cho toàn Đảng, toàn dân và căn dặn về khối đại đoàn kết.',
+    imageUrl: '/p5.jpg',
     tags: ['Di cảo', 'Di chúc', 'Phụng sự', 'Tinh hoa'],
     source: 'Ban Chấp hành Trung ương Đảng',
     dimensions: 'Bút tích sửa chữa nhiều năm'
   },
   {
-    id: 'arch-thu-khai-truong',
-    title: 'Thư gửi học sinh khai trường đầu tiên',
-    category: 'thu-tin',
-    year: '1945',
-    description: 'Bức thư chứa đựng khát vọng vĩ đại gửi gắm tương lai nước nhà vào học sinh học tập.',
-    imageUrl: '/p3.jpg', // Bác Hồ với thiếu nhi
-    tags: ['Thư gửi', 'Giáo dục', 'Thế hệ trẻ', 'Khát vọng'],
-    source: 'Bộ Giáo dục và Đào tạo',
-    dimensions: 'In báo Cứu Quốc'
-  },
-  {
-    id: 'arch-bac-ho-phu-nu-thu',
-    title: 'Thư gửi Phụ nữ Việt Nam 20/10/1952',
-    category: 'thu-tin',
-    year: '1952',
-    description: 'Bức thư chúc mừng nhân ngày thành lập Hội Liên hiệp Phụ nữ Việt Nam, Bác Hồ khen ngợi sự đóng góp to lớn của phụ nữ trong kháng chiến kiến quốc.',
-    imageUrl: '/hcm-letter-women.png',
-    tags: ['Bác Hồ', 'Phụ nữ', 'Thư gửi', '1952'],
-    source: 'Bảo tàng Phụ nữ Việt Nam',
-    dimensions: 'Bản gốc lưu trữ'
-  },
-  {
-    id: 'arch-bac-ho-phu-nu-badamdang',
-    title: 'Bác Hồ với phong trào "Phụ nữ Ba Đảm Đang"',
-    category: 'sac-lenh',
-    year: '1965',
-    description: 'Phong trào thi đua yêu nước xuất sắc của phụ nữ miền Bắc được Bác Hồ gửi lời khen ngợi và cổ vũ nồng nhiệt.',
-    imageUrl: '/hcm-women-movement.png',
-    tags: ['Kháng chiến', 'Ba Đảm Đang', 'Phụ nữ', '1965'],
-    source: 'Bảo tàng Phụ nữ Việt Nam',
-    dimensions: 'Tư liệu ảnh'
+    id: 'arch-bao-cuu-quoc',
+    title: 'Báo Cứu Quốc - Cơ quan Tổng bộ Việt Minh',
+    category: 'tac-pham',
+    year: '1942',
+    description: 'Tờ báo cơ quan ngôn luận của Mặt trận Việt Minh (tiền thân Báo Đại Đoàn Kết ngày nay).',
+    imageUrl: '/cab4.jpg',
+    tags: ['Báo Cứu Quốc', 'Việt Minh', 'Đại Đoàn Kết', 'Báo chí'],
+    source: 'Báo Đại Đoàn Kết',
+    dimensions: 'Khổ báo in thạch'
   }
 ];

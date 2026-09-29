@@ -14,34 +14,106 @@ interface TimelineEvent {
   category: 'tuoi-tre' | 'cuu-nuoc' | 'doc-lap' | 'di-san';
 }
 
-// Exact historical events list as requested
+// Historical events list of Uncle Ho and the Great National Unity Bloc / MTTQ
 const timelineData: TimelineEvent[] = [
+  {
+    id: 'tl-1890',
+    year: '1890',
+    title: 'Quê hương Làng Sen',
+    description: 'Sinh ngày 19/5/1890 tại Làng Sen, Kim Liên, Nam Đàn, Nghệ An, hun đúc lòng yêu nước thương dân sâu sắc.',
+    image: '/kim-lien-village.png',
+    details: 'Thuở nhỏ Người mang tên Nguyễn Sinh Cung. Mảnh đất xứ Nghệ kiên trung và truyền thống gia đình đã sớm hình thành chí khí cứu nước cứu dân.',
+    category: 'tuoi-tre'
+  },
   {
     id: 'tl-1911',
     year: '1911',
     title: 'Hành trình tìm đường cứu nước',
-    description: 'Người thanh niên Nguyễn Tất Thành rời bến cảng Nhà Rồng trên con tàu Đô đốc Latouche-Tréville, bắt đầu cuộc hành trình vĩ đại tìm lối đi cho độc lập dân tộc.',
+    description: 'Người thanh niên Nguyễn Tất Thành rời bến cảng Nhà Rồng trên tàu Latouche-Tréville ra đi tìm đường giải phóng dân tộc.',
     image: '/p2.jpg',
-    details: 'Ngày 5/6/1911, với tên gọi Anh Ba, người thanh niên yêu nước quyết chí bôn ba muôn nơi để tìm lấy tự do chân chính và giải phóng đồng bào lầm than.',
+    details: 'Ngày 5/6/1911, với tên gọi Anh Ba, Người mở đầu hành trình bôn ba khắp 4 biển 5 châu tìm ra chân lý cách mạng và ngọn cờ đoàn kết.',
+    category: 'cuu-nuoc'
+  },
+  {
+    id: 'tl-1920',
+    year: '1920',
+    title: 'Tìm thấy Ánh sáng Cách mạng',
+    description: 'Bỏ phiếu gia nhập Quốc tế III và đồng sáng lập Đảng Cộng sản Pháp tại Đại hội Tours.',
+    image: '/dai-hoi-tours.png',
+    details: 'Mốc son chuyển biến từ chủ nghĩa yêu nước chân chính sang chủ nghĩa Mác - Lênin, gắn kết phong trào dân tộc với cách mạng vô sản thế giới.',
+    category: 'cuu-nuoc'
+  },
+  {
+    id: 'tl-1930',
+    year: '1930',
+    title: 'Hội Phản đế Đồng minh 18/11/1930',
+    description: 'Thành lập Hội Phản đế Đồng minh - hình thức tổ chức đầu tiên của Mặt trận Dân tộc Thống nhất Việt Nam.',
+    image: '/ho-chi-minh-1930.png',
+    details: 'Chỉ thị lịch sử ngày 18/11/1930 đặt nền móng cho Mặt trận Tổ quốc Việt Nam, mốc son Ngày hội Đại đoàn kết toàn dân tộc thiêng liêng hàng năm.',
     category: 'cuu-nuoc'
   },
   {
     id: 'tl-1941',
     year: '1941',
-    title: 'Trở về Tổ Quốc (Pác Bó)',
-    description: 'Sau 30 năm bôn ba hải ngoại, Lãnh tụ Nguyễn Ái Quốc trở về nước trực tiếp lãnh đạo phong trào cách mạng tại hang Pác Bó, Cao Bằng.',
+    title: 'Thành lập Mặt trận Việt Minh (Pác Bó)',
+    description: 'Sau 30 năm bôn ba, Bác trở về Pác Bó (Cao Bằng) trực tiếp lãnh đạo và thành lập Mặt trận Việt Minh.',
     image: '/pac-bo.png',
-    details: 'Người sống và làm việc cực nhọc trong hang đá hiểm trở, tự tay đặt tên cho Suối Lê-nin hiền hòa và Núi Các-Mác sừng sững kỳ vĩ.',
+    details: 'Ngày 19/5/1941, Mặt trận Việt Minh ra đời, quy tụ toàn thể đồng bào yêu nước tạo nên sức mạnh dời non lấp biển.',
     category: 'doc-lap'
   },
   {
     id: 'tl-1945',
     year: '1945',
-    title: 'Tuyên ngôn Độc lập',
-    description: 'Tại Quảng trường Ba Đình lịch sử, Chủ tịch Hồ Chí Minh đọc bản Tuyên ngôn Độc lập, khai sinh ra nước Việt Nam Dân chủ Cộng hòa.',
+    title: 'Tuyên ngôn Độc lập 2/9/1945',
+    description: 'Chủ tịch Hồ Chí Minh đọc bản Tuyên ngôn Độc lập tại Quảng trường Ba Đình, khai sinh nước Việt Nam Dân chủ Cộng hòa.',
     image: '/p1.jpg',
-    details: 'Bản tuyên ngôn hùng hồn kết tinh khát vọng ngàn năm độc lập vững bền, là mốc son chói lọi trong lịch sử thế kỷ của dân tộc Việt Nam.',
+    details: 'Đỉnh cao thắng lợi của Cách mạng Tháng Tám, minh chứng cho sức mạnh vô địch của khối Đại đoàn kết toàn dân tộc.',
     category: 'doc-lap'
+  },
+  {
+    id: 'tl-1946',
+    year: '1946',
+    title: 'Lời kêu gọi Toàn quốc Kháng chiến',
+    description: 'Bác hiệu triệu toàn dân không phân biệt già trẻ gái trai, tôn giáo đứng lên kháng chiến cứu quốc.',
+    image: '/p4.jpg',
+    details: 'Ngày 19/12/1946, Lời kêu gọi thiêng liêng trở thành ngọn cờ tập hợp mọi tầng lớp nhân dân kháng chiến trường kỳ thắng lợi.',
+    category: 'doc-lap'
+  },
+  {
+    id: 'tl-1951',
+    year: '1951',
+    title: 'Đại hội Thống nhất Việt Minh - Liên Việt',
+    description: 'Hợp nhất hai mặt trận, Bác đúc kết chân lý: "Đoàn kết, đoàn kết, đại đoàn kết. Thành công, thành công, đại thành công".',
+    image: '/p6.png',
+    details: 'Tháng 3/1951, Đại hội thành lập Mặt trận Liên Việt, củng cố khối sắt thép toàn dân đưa kháng chiến đến chiến thắng Điện Biên Phủ.',
+    category: 'di-san'
+  },
+  {
+    id: 'tl-1955',
+    year: '1955',
+    title: 'Thành lập Mặt trận Tổ quốc Việt Nam',
+    description: 'Đại hội Mặt trận Dân tộc Thống nhất quyết định thành lập MTTQ Việt Nam, suy tôn Bác làm Chủ tịch Danh dự.',
+    image: '/cab4.jpg',
+    details: 'Ngày 10/9/1955, MTTQ Việt Nam đảm đương sứ mệnh củng cố miền Bắc và đấu tranh giải phóng miền Nam, thống nhất non sông.',
+    category: 'di-san'
+  },
+  {
+    id: 'tl-1960',
+    year: '1960',
+    title: 'Mặt trận DTGP Miền Nam Việt Nam',
+    description: 'Mặt trận ra đời tại Tây Ninh, lãnh đạo đồng bào miền Nam anh dũng đánh giặc cứu nước.',
+    image: '/cab3.jpg',
+    details: 'Bác Hồ căn dặn: "Miền Nam là máu của máu Việt Nam, là thịt của thịt Việt Nam. Sông có thể cạn, núi có thể mòn, song chân lý ấy không bao giờ thay đổi".',
+    category: 'di-san'
+  },
+  {
+    id: 'tl-1969',
+    year: '1969',
+    title: 'Di chúc thiêng liêng về Đại đoàn kết',
+    description: 'Bác Hồ để lại Bản Di chúc căn dặn gìn giữ sự đoàn kết như giữ gìn con ngươi của mắt mình.',
+    image: '/p5.jpg',
+    details: 'Di chúc là bảo vật quốc gia kết tinh trọn vẹn tư tưởng đại đoàn kết toàn dân tộc và đoàn kết quốc tế, soi đường cho MTTQ Việt Nam mãi mãi.',
+    category: 'di-san'
   }
 ];
 

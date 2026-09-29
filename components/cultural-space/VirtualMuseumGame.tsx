@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import * as THREE from 'three';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Heart, Sparkles, Eye, Sun, Star, Upload, Trash2, Lock, Unlock, ShieldAlert } from 'lucide-react';
+import { X, Heart, Sparkles, Eye, Sun, Star, Upload, Trash2, Lock, Unlock, ShieldAlert, Palette, Check } from 'lucide-react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface Cabinet {
@@ -16,74 +16,143 @@ interface VirtualMuseumGameProps {
   onSwitchToBooks?: () => void;
 }
 
-// ─── Data ─────────────────────────────────────────────────────────────────────
-const DEFAULT_CABINETS: Cabinet[] = [
+export interface WallpaperPreset {
+  id: string;
+  name: string;
+  desc: string;
+  backUrl: string;
+  sideUrl: string;
+  previewBg: string;
+}
+
+export const WALLPAPER_PRESETS: WallpaperPreset[] = [
   {
-    id: 'cab-trung-tam', name: 'Tượng đồng chân dung Bác', category: 'Tượng thờ & Tư liệu',
-    description: 'Các bức tượng đồng tạc họa dung mạo Chủ tịch Hồ Chí Minh tại các thời điểm lịch sử, kèm khung hình tư liệu gốc ghi lại hành trạng cách mạng của Người.',
-    image: '/cab1.jpg',
-    defaultImage: '/cab1.jpg',
-    year: 'Thế kỷ XX', source: 'Khu Di tích Phủ Chủ tịch',
-    details: ['3 bộ tượng bán thân đúc đồng đỏ nguyên chất.', 'Kèm bản thảo gốc Tuyên ngôn Độc lập 2/9/1945.'],
-    xrayNote: 'Mật độ đồng đều, kỹ thuật đúc sáp ong truyền thống đạt độ tinh xảo cực cao.',
-    infraNote: 'Bề mặt ổn định 24°C, bảo quản dưới kính chân không kiểm soát ẩm độ.'
+    id: 'default-mttq',
+    name: 'Mặc định MTTQ & Bác Hồ',
+    desc: 'Phông nền đỏ hoa sen, cờ Tổ quốc & biểu trưng Mặt trận',
+    backUrl: '/wall-back.png',
+    sideUrl: '/wall-side.png',
+    previewBg: 'linear-gradient(135deg, #b91c1c, #d97706)'
   },
   {
-    id: 'cab-doc-bvat', name: 'Kỷ vật viết lách & Sách báo', category: 'Kỷ vật thiêng liêng',
-    description: 'Bút máy ngòi vàng Bác ký các sắc lệnh lập quốc, bản thảo báo Thanh niên viết tay — những di vật gắn liền sự nghiệp báo chí của Người.',
-    image: '/cab2.jpg',
-    defaultImage: '/cab2.jpg',
-    year: '1945 – 1969', source: 'Bảo tàng Lịch sử Quốc gia',
-    details: ['Bút máy Parker ngòi vàng khắc chữ tượng trưng ý chí cách mạng.', 'Tủ kín phun khí Nitơ khô chống phân rã xơ.'],
-    xrayNote: 'Cơ cấu bơm mực vẫn hoạt động nguyên vẹn sau hơn 70 năm.',
-    infraNote: 'Dấu ố tự nhiên theo thời gian, chứng thực nguồn gốc cổ sử.'
+    id: 'wood-classic',
+    name: 'Tường gỗ Bảo tàng Cổ điển',
+    desc: 'Tường ốp gỗ sồi phong cách bảo tàng truyền thống',
+    backUrl: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=1600&auto=format&fit=crop&q=80',
+    sideUrl: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=1600&auto=format&fit=crop&q=80',
+    previewBg: 'linear-gradient(135deg, #78350f, #451a03)'
   },
   {
-    id: 'cab-dep-cao-su', name: 'Đôi dép cao su lịch sử', category: 'Đời sống thường nhật',
-    description: 'Đôi dép chế tác thủ công từ lốp máy bay thực dân thu được năm 1947. Gắn bó theo gót chân Người trên vạn dặm hành quân.',
-    image: '/cab3.jpg',
-    defaultImage: '/cab3.jpg',
-    year: '1947', source: 'Nhà sàn Phủ Chủ tịch',
-    details: ['Cắt thủ công từ lốp lính chiến lợi phẩm.', 'Biểu tượng lối sống tối giản bậc thầy.'],
-    xrayNote: 'Các lớp xơ thép dệt liên kết dẻo 100%, bảo vệ tuyệt đối.',
-    infraNote: 'Độ ẩm sợi xơ tự nhiên cực thấp, quai gài còn nguyên độ co giãn.'
+    id: 'red-velvet',
+    name: 'Phông Hội nghị Đỏ Son',
+    desc: 'Vải gấm nhung đỏ truyền thống của các kỳ Đại hội',
+    backUrl: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=1600&auto=format&fit=crop&q=80',
+    sideUrl: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=1600&auto=format&fit=crop&q=80',
+    previewBg: 'linear-gradient(135deg, #991b1b, #450a0a)'
   },
   {
-    id: 'cab-nhat-ky', name: 'Nhật ký trong tù', category: 'Áng văn cách mạng',
-    description: '133 bài thơ chữ Hán viết trong lao tù Quảng Tây 1942–1943, thể hiện cốt cách thi nhân phi thường bất khuất của Người.',
-    image: '/cab4.jpg',
-    defaultImage: '/cab4.jpg',
-    year: '1942 – 1943', source: 'Bảo tàng Cách mạng Việt Nam',
-    details: ['Bản chép tay chữ Hán có tranh vẽ phác thảo của Bác.', 'Bảo vật Quốc Gia tối thượng của dân tộc.'],
-    xrayNote: 'Mực muội than cổ trên giấy bản, dệt gáy bằng xơ đay bền chắc.',
-    infraNote: 'Dấu mờ các nét vẽ chìm dưới trang giấy tả cảnh lao tù.'
+    id: 'digital-blue',
+    name: 'Không gian Số Hiện đại',
+    desc: 'Không gian số hóa công nghệ cao màu xanh sapphire',
+    backUrl: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1600&auto=format&fit=crop&q=80',
+    sideUrl: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1600&auto=format&fit=crop&q=80',
+    previewBg: 'linear-gradient(135deg, #1e3a8a, #0f172a)'
   }
 ];
 
+// ─── Data: 4 Tủ trưng bày chuyên đề MTTQ Việt Nam ──────────────────────────────
+const DEFAULT_CABINETS: Cabinet[] = [
+  {
+    id: 'cab-trung-tam', 
+    name: 'Tượng đồng Bác Hồ & Khối Đại đoàn kết toàn dân tộc', 
+    category: 'Biểu tượng Thiêng liêng',
+    description: 'Tượng đồng chân dung Chủ tịch Hồ Chí Minh - Người sáng lập và đặt nền móng cho Mặt trận Dân tộc Thống nhất Việt Nam, người kiến tạo khối Đại đoàn kết toàn dân tộc, cội nguồn sức mạnh bách chiến bách thắng của cách mạng Việt Nam.',
+    image: '/cab1.jpg',
+    defaultImage: '/cab1.jpg',
+    year: 'Thế kỷ XX', 
+    source: 'Khu Di tích Phủ Chủ tịch & Bảo tàng MTTQ Việt Nam',
+    details: [
+      'Tượng đồng đỏ đúc thủ công tinh xảo, thể hiện dung mạo nhân hậu của Người.',
+      'Lời căn dặn lịch sử: "Đoàn kết, đoàn kết, đại đoàn kết. Thành công, thành công, đại thành công."'
+    ],
+    xrayNote: 'Cấu trúc đồng đỏ tinh khiết, khắc họa sâu sắc khí phách lãnh tụ kính yêu.',
+    infraNote: 'Nhiệt độ bảo tồn chuẩn quốc tế 22°C - 24°C, bảo vệ hiện vật thiêng liêng.'
+  },
+  {
+    id: 'cab-doc-bvat', 
+    name: 'Bút tích Bác Hồ & Báo Cứu Quốc', 
+    category: 'Kỷ vật Báo chí Mặt trận',
+    description: 'Bản thảo bút tích của Bác gửi Đại hội Mặt trận Dân tộc Thống nhất, cùng các số Báo Cứu Quốc - Cơ quan ngôn luận của Tổng bộ Việt Minh (tiền thân Báo Đại Đoàn Kết ngày nay).',
+    image: '/cab2.jpg',
+    defaultImage: '/cab2.jpg',
+    year: '1942 – 1969', 
+    source: 'Bảo tàng Lịch sử Quốc gia & Báo Đại Đoàn Kết',
+    details: [
+      'Bút máy ngòi vàng Bác ký lời kêu gọi đồng bào cả nước đoàn kết kháng chiến kiến quốc.',
+      'Các bài báo của Bác kêu gọi củng cố Mặt trận và phát huy quyền làm chủ của nhân dân.'
+    ],
+    xrayNote: 'Mực viết và sợi giấy cổ lưu giữ nguyên vẹn các nét chữ chuẩn mực của Bác.',
+    infraNote: 'Bảo quản kín khí Nitơ khô chống oxy hóa bề mặt giấy.'
+  },
+  {
+    id: 'cab-dep-cao-su', 
+    name: 'Kỷ vật Bác tặng Nhân sĩ, Trí thức & Tôn giáo', 
+    category: 'Kỷ vật Đại đoàn kết',
+    description: 'Những kỷ vật thiêng liêng Bác trao tặng các vị nhân sĩ, trí thức yêu nước, chức sắc tôn giáo và già làng, trưởng bản tiêu biểu tham gia Ủy ban Mặt trận Tổ quốc Việt Nam.',
+    image: '/cab3.jpg',
+    defaultImage: '/cab3.jpg',
+    year: '1945 – 1969', 
+    source: 'Bảo tàng Mặt trận Tổ quốc Việt Nam',
+    details: [
+      'Huy hiệu Bác Hồ và khăn rằn Nam Bộ Bác thân tặng đồng bào và chiến sĩ miền Nam.',
+      'Những kỷ vật biểu trưng cho sự gắn kết máu thịt giữa Bác và nhân dân mọi tầng lớp, tôn giáo.'
+    ],
+    xrayNote: 'Chất liệu vải dệt và kim loại biểu trưng đạt độ bền vượt thời gian.',
+    infraNote: 'Giữ nguyên màu sợi tự nhiên và dấu tích lịch sử.'
+  },
+  {
+    id: 'cab-nhat-ky', 
+    name: 'Chỉ thị thành lập Mặt trận 18/11/1930', 
+    category: 'Văn kiện Lịch sử Lập quốc',
+    description: 'Chỉ thị thành lập Hội Phản đế Đồng minh ngày 18/11/1930 và Cương lĩnh Mặt trận Dân tộc Thống nhất qua các thời kỳ (Việt Minh 1941, Liên Việt 1951, MTTQ Việt Nam 1955).',
+    image: '/cab4.jpg',
+    defaultImage: '/cab4.jpg',
+    year: '18/11/1930', 
+    source: 'Viện Lưu trữ Lịch sử Trung ương Đảng',
+    details: [
+      'Văn kiện lịch sử khai sinh hình thức Mặt trận Dân tộc Thống nhất đầu tiên.',
+      'Mốc son 18/11/1930 trở thành Ngày hội Đại đoàn kết toàn dân tộc thiêng liêng hàng năm.'
+    ],
+    xrayNote: 'Chữ in thạch và chữ chép tay trên giấy dó cổ, còn nguyên con dấu cơ mật.',
+    infraNote: 'Văn bản bảo quản trong hòm kính cường lực chống tia cực tím.'
+  }
+];
+
+// ─── Data: 6 Bức tranh tư liệu lịch sử MTTQ & Bác Hồ ──────────────────────────
 const PAINTING_SLOTS = [
   { 
-    id: 'p1', title: 'Tuyên ngôn Độc lập', color: 0xc8860a, accent: 0x8b5e00, x: -6.2, y: 5.2, z: -9.5, w: 2.5, h: 1.85, defaultImage: '/p1.jpg',
-    description: 'Bức ảnh ghi lại thời khắc lịch sử vô song ngày 2/9/1945, tại Quảng trường Ba Đình Hà Nội, Chủ tịch Hồ Chí Minh thay mặt Chính phủ lâm thời đọc bản Tuyên ngôn Độc lập khai sinh ra nước Việt Nam Dân chủ Cộng hòa.'
+    id: 'p1', title: 'Bác Hồ bắt nhịp bài ca Kết đoàn', color: 0xc8860a, accent: 0x8b5e00, x: -6.2, y: 5.2, z: -9.5, w: 2.5, h: 1.85, defaultImage: '/p2.jpg',
+    description: 'Bức ảnh lịch sử bất hủ ghi lại khoảnh khắc Chủ tịch Hồ Chí Minh bắt nhịp bài ca "Kết đoàn" tại Đại hội Mặt trận Tổ quốc và Đại hội Đảng toàn quốc. Bài ca đã trở thành giai điệu hào hùng, hiệu triệu toàn thể đồng bào Việt Nam cùng chung sức một lòng.'
   },
   { 
-    id: 'p2', title: 'Hành trình Cứu nước', color: 0x1a3a6c, accent: 0x0f2347, x: -1.8, y: 5.35, z: -9.5, w: 2.15, h: 1.65, defaultImage: '/p2.jpg',
-    description: 'Đồng chí Nguyễn Ái Quốc phát biểu tại Đại hội đại biểu toàn quốc lần thứ XVIII của Đảng Xã hội Pháp ở Tours (tháng 12/1920). Tại đây, Người đã bỏ phiếu tán thành gia nhập Quốc tế thứ ba và tham gia thành lập Đảng Cộng sản Pháp.'
+    id: 'p2', title: 'Tuyên ngôn Độc lập 2/9/1945', color: 0x1a3a6c, accent: 0x0f2347, x: -1.8, y: 5.35, z: -9.5, w: 2.15, h: 1.65, defaultImage: '/p1.jpg',
+    description: 'Chủ tịch Hồ Chí Minh đọc bản Tuyên ngôn Độc lập tại Quảng trường Ba Đình lịch sử, khai sinh nước Việt Nam Dân chủ Cộng hòa - thành quả vĩ đại của sức mạnh đại đoàn kết toàn dân tộc dưới ngọn cờ Mặt trận Việt Minh.'
   },
   { 
-    id: 'p3', title: 'Bác Hồ với Nhân dân', color: 0x7a1c1c, accent: 0x4a0e0e, x: 2.2, y: 5.35, z: -9.5, w: 2.3, h: 1.85, defaultImage: '/p3.jpg',
-    description: 'Chủ tịch Hồ Chí Minh giản dị ngồi quan sát và chỉ đạo trận đánh Đông Khê trong chiến dịch Biên giới Thu Đông năm 1950. Hình ảnh thể hiện sự sâu sát thực tế chiến trường và tác phong quần chúng của vị lãnh tụ kính yêu.'
+    id: 'p3', title: 'Hội Phản đế Đồng minh 18/11/1930', color: 0x7a1c1c, accent: 0x4a0e0e, x: 2.2, y: 5.35, z: -9.5, w: 2.3, h: 1.85, defaultImage: '/ho-chi-minh-1930.png',
+    description: 'Ngày 18/11/1930, Ban Thường vụ Trung ương Đảng ra chỉ thị thành lập Hội Phản đế Đồng minh - hình thức tổ chức đầu tiên của Mặt trận Dân tộc Thống nhất Việt Nam. Ngày 18/11 đã trở thành Ngày truyền thống vẻ vang của Mặt trận Tổ quốc Việt Nam và Ngày hội Đại đoàn kết toàn dân tộc.'
   },
   { 
-    id: 'p4', title: 'Chiến thắng ĐBP 1954', color: 0x1a4a1a, accent: 0x0d2e0d, x: 6.2, y: 5.2, z: -9.5, w: 2.15, h: 1.65, defaultImage: '/p4.jpg',
-    description: 'Hình ảnh lịch sử ghi lại cảnh các chiến sĩ quân đội nhân dân Việt Nam phất cao lá cờ "Quyết chiến Quyết thắng" trên nóc hầm tướng De Castries, đánh dấu sự toàn thắng của Chiến dịch Điện Biên Phủ vang dội năm châu.'
+    id: 'p4', title: 'Đại hội Thống nhất Việt Minh - Liên Việt (1951)', color: 0x1a4a1a, accent: 0x0d2e0d, x: 6.2, y: 5.2, z: -9.5, w: 2.15, h: 1.65, defaultImage: '/p3.jpg',
+    description: 'Chủ tịch Hồ Chí Minh tại Đại hội toàn quốc thống nhất Việt Minh - Liên Việt tháng 3/1951. Tại đây Người khẳng định: "Đoàn kết, đoàn kết, đại đoàn kết. Thành công, thành công, đại thành công." - chân lý sáng ngời của cách mạng Việt Nam.'
   },
   { 
-    id: 'p5', title: 'Nhà sàn Phủ Chủ tịch', color: 0x3a1a5c, accent: 0x220e38, x: -9.45, y: 5.0, z: -3.5, w: 1.85, h: 2.0, rotY: Math.PI / 2, defaultImage: '/p5.jpg',
-    description: 'Nhà sàn gỗ đơn sơ của Bác Hồ trong khu di tích Phủ Chủ tịch tại Hà Nội, nơi Người đã sống và làm việc suốt 15 năm cuối đời (1954 - 1969). Ngôi nhà là biểu tượng cao đẹp của lối sống giản dị, thanh tao.'
+    id: 'p5', title: 'Bác Hồ với Đồng bào & Chiến sĩ Miền Nam', color: 0x3a1a5c, accent: 0x220e38, x: -9.45, y: 5.0, z: -3.5, w: 1.85, h: 2.0, rotY: Math.PI / 2, defaultImage: '/cab1.jpg',
+    description: 'Bác Hồ luôn khẳng định "Miền Nam là máu của máu Việt Nam, là thịt của thịt Việt Nam". Bức ảnh ghi lại tình cảm sâu nặng của Người khi đón tiếp các anh hùng, dũng sĩ diệt Mỹ và phái đoàn Mặt trận Dân tộc Giải phóng miền Nam Việt Nam.'
   },
   { 
-    id: 'p6', title: 'Bác Hồ với Phụ nữ Việt Nam', color: 0x6b2800, accent: 0x421800, x: 9.45, y: 5.0, z: -3.5, w: 1.85, h: 2.0, rotY: -Math.PI / 2, defaultImage: '/p6.png',
-    description: 'Chủ tịch Hồ Chí Minh luôn dành sự quan tâm sâu sắc và tình cảm ấm áp cho phụ nữ Việt Nam. Bức ảnh ghi lại khoảnh khắc Người gặp gỡ và trò chuyện thân mật cùng các đại biểu phụ nữ Việt Nam, tôn vinh truyền thống anh hùng, bất khuất, trung hậu, đảm đang.'
+    id: 'p6', title: 'Bác Hồ với Nhân sĩ, Trí thức & Tôn giáo', color: 0x6b2800, accent: 0x421800, x: 9.45, y: 5.0, z: -3.5, w: 1.85, h: 2.0, rotY: -Math.PI / 2, defaultImage: '/p4.jpg',
+    description: 'Chủ tịch Hồ Chí Minh luôn trân trọng, đoàn kết và phát huy mọi nguồn lực trí tuệ của các tầng lớp nhân sĩ, trí thức, đồng bào các tôn giáo và đồng bào các dân tộc thiểu số trong Mặt trận Tổ quốc, tạo nên khối đại đoàn kết toàn dân vững chắc.'
   },
 ];
 
@@ -118,14 +187,94 @@ export default function VirtualMuseumGame({ onSwitchToBooks, onOpenChat }: Virtu
   const [adminError, setAdminError] = useState(false);
   const [showWallPanel, setShowWallPanel] = useState(false);
 
+  // Wallpaper state
+  const [wallBackUrl, setWallBackUrl] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('mttq_3d_wall_back') || '/wall-back.png';
+    }
+    return '/wall-back.png';
+  });
+  const [wallSideUrl, setWallSideUrl] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('mttq_3d_wall_side') || '/wall-side.png';
+    }
+    return '/wall-side.png';
+  });
+  const [showBgModal, setShowBgModal] = useState(false);
+  const [customBgInput, setCustomBgInput] = useState('');
+
   // Refs
   const cabUploadRef = useRef<HTMLInputElement>(null);
   const wallUploadRef = useRef<HTMLInputElement>(null);
+  const bgUploadRef = useRef<HTMLInputElement>(null);
   const pendingUploadCabId = useRef<string | null>(null);
   const pendingUploadPaintId = useRef<string | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const paintingMeshesRef = useRef<Record<string, THREE.Mesh>>({});
   const paintingTexturesRef = useRef<Record<string, THREE.Texture | null>>({});
+
+  const backWallPlaneRef = useRef<THREE.Mesh | null>(null);
+  const leftWallPlaneRef = useRef<THREE.Mesh | null>(null);
+  const rightWallPlaneRef = useRef<THREE.Mesh | null>(null);
+  const textureLoaderRef = useRef<THREE.TextureLoader | null>(null);
+  const wallBackUrlRef = useRef(wallBackUrl);
+  const wallSideUrlRef = useRef(wallSideUrl);
+  wallBackUrlRef.current = wallBackUrl;
+  wallSideUrlRef.current = wallSideUrl;
+
+  // ── Change 3D wallpaper handler ─────────────────────────────────────────────
+  const changeWallpaper = useCallback((backUrl: string, sideUrl?: string) => {
+    const targetSide = sideUrl || backUrl;
+    setWallBackUrl(backUrl);
+    setWallSideUrl(targetSide);
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('mttq_3d_wall_back', backUrl);
+        localStorage.setItem('mttq_3d_wall_side', targetSide);
+      } catch {}
+    }
+
+    if (textureLoaderRef.current) {
+      textureLoaderRef.current.load(backUrl, (tex) => {
+        tex.colorSpace = THREE.SRGBColorSpace;
+        if (backWallPlaneRef.current) {
+          const mat = backWallPlaneRef.current.material as THREE.MeshStandardMaterial;
+          if (mat.map && mat.map !== tex) mat.map.dispose();
+          mat.map = tex;
+          mat.needsUpdate = true;
+        }
+      });
+
+      textureLoaderRef.current.load(targetSide, (tex) => {
+        tex.colorSpace = THREE.SRGBColorSpace;
+        if (leftWallPlaneRef.current) {
+          const mat = leftWallPlaneRef.current.material as THREE.MeshStandardMaterial;
+          if (mat.map && mat.map !== tex) mat.map.dispose();
+          mat.map = tex;
+          mat.needsUpdate = true;
+        }
+        if (rightWallPlaneRef.current) {
+          const mat = rightWallPlaneRef.current.material as THREE.MeshStandardMaterial;
+          if (mat.map && mat.map !== tex) mat.map.dispose();
+          mat.map = tex;
+          mat.needsUpdate = true;
+        }
+      });
+    }
+  }, []);
+
+  const onBgFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const url = ev.target?.result as string;
+      changeWallpaper(url, url);
+      setShowBgModal(false);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
 
   // ── Tribute ────────────────────────────────────────────────────────────────
   const saveTribute = useCallback((u: Record<string, number>) => {
@@ -348,11 +497,12 @@ export default function VirtualMuseumGame({ onSwitchToBooks, onOpenChat }: Virtu
     // ═══ WALLS — plastered with subtle texture ════════════════════════════════
     const textureLoader = new THREE.TextureLoader();
     textureLoader.setCrossOrigin('anonymous');
+    textureLoaderRef.current = textureLoader;
 
-    // Load wall textures
-    const wallBackTex = textureLoader.load('/wall-back.png');
+    // Load wall textures from active state
+    const wallBackTex = textureLoader.load(wallBackUrlRef.current);
     wallBackTex.colorSpace = THREE.SRGBColorSpace;
-    const wallSideTex = textureLoader.load('/wall-side.png');
+    const wallSideTex = textureLoader.load(wallSideUrlRef.current);
     wallSideTex.colorSpace = THREE.SRGBColorSpace;
 
     const wallMat = new THREE.MeshStandardMaterial({ color: 0x2e3450, roughness: 0.88, metalness: 0.0 });
@@ -373,6 +523,7 @@ export default function VirtualMuseumGame({ onSwitchToBooks, onOpenChat }: Virtu
     backWallPlane.position.set(0, 6.165, -9.79);
     backWallPlane.receiveShadow = true;
     scene.add(backWallPlane);
+    backWallPlaneRef.current = backWallPlane;
 
     // Left wall plane (rotation ensures correct orientation of text)
     const leftWallPlane = new THREE.Mesh(new THREE.PlaneGeometry(22.0, 7.7), wallSideMat);
@@ -380,6 +531,7 @@ export default function VirtualMuseumGame({ onSwitchToBooks, onOpenChat }: Virtu
     leftWallPlane.rotation.y = Math.PI / 2;
     leftWallPlane.receiveShadow = true;
     scene.add(leftWallPlane);
+    leftWallPlaneRef.current = leftWallPlane;
 
     // Right wall plane (rotation ensures correct orientation of text)
     const rightWallPlane = new THREE.Mesh(new THREE.PlaneGeometry(22.0, 7.7), wallSideMat);
@@ -387,6 +539,7 @@ export default function VirtualMuseumGame({ onSwitchToBooks, onOpenChat }: Virtu
     rightWallPlane.rotation.y = -Math.PI / 2;
     rightWallPlane.receiveShadow = true;
     scene.add(rightWallPlane);
+    rightWallPlaneRef.current = rightWallPlane;
 
     // Ceiling — lighter so light bounces back down
     const ceilMat = new THREE.MeshStandardMaterial({ color: 0x252b40, roughness: 0.9 });
@@ -825,10 +978,24 @@ export default function VirtualMuseumGame({ onSwitchToBooks, onOpenChat }: Virtu
       {/* Hidden inputs */}
       <input ref={cabUploadRef}  type="file" accept="image/*" className="hidden" onChange={onCabFileChange} />
       <input ref={wallUploadRef} type="file" accept="image/*" className="hidden" onChange={onWallFileChange} />
+      <input ref={bgUploadRef}   type="file" accept="image/*" className="hidden" onChange={onBgFileChange} />
 
       {/* ── CANVAS ── */}
       <div className="relative w-full flex-1 min-h-0">
         <canvas ref={canvasRef} className="w-full h-full block outline-none touch-none" style={{ touchAction: 'none' }} />
+
+        {/* Change Background Button */}
+        <div className="absolute top-4 left-4 z-20">
+          <button
+            onClick={() => setShowBgModal(true)}
+            className="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-bold px-3 py-1.5 rounded-xl border border-yellow-700/50 bg-black/60 hover:bg-yellow-950/50 text-yellow-300 hover:text-yellow-200 backdrop-blur-md shadow-lg transition-all duration-200 cursor-pointer active:scale-95"
+            title="Đổi màu nền & ảnh tường không gian 3D"
+          >
+            <Palette className="w-3.5 h-3.5 text-yellow-400" />
+            <span className="hidden sm:inline">Đổi nền không gian 3D</span>
+            <span className="sm:hidden">Đổi nền</span>
+          </button>
+        </div>
 
         {/* Navigation Tip */}
         <div className="absolute bottom-4 left-4 pointer-events-none z-10 hidden sm:block">
@@ -1157,6 +1324,124 @@ export default function VirtualMuseumGame({ onSwitchToBooks, onOpenChat }: Virtu
             </div>
           );
         })()}
+      </AnimatePresence>
+
+      {/* ═══ WALLPAPER SELECTOR MODAL ═════════════════════════════════════════ */}
+      <AnimatePresence>
+        {showBgModal && (
+          <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+            <motion.div
+              initial={{ scale: 0.94, opacity: 0, y: 10 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.94, opacity: 0, y: 10 }}
+              transition={{ type: 'spring', stiffness: 350, damping: 28 }}
+              className="bg-[#0e1220]/95 border border-yellow-800/40 rounded-2xl w-full max-w-lg shadow-2xl p-5 overflow-hidden flex flex-col gap-4 text-white"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between pb-3 border-b border-yellow-800/20">
+                <div className="flex items-center gap-2">
+                  <Palette className="w-4 h-4 text-yellow-400" />
+                  <h3 className="text-sm font-extrabold text-yellow-100 uppercase tracking-wider">
+                    Đổi nền không gian trưng bày 3D
+                  </h3>
+                </div>
+                <button
+                  onClick={() => setShowBgModal(false)}
+                  className="p-1.5 text-gray-400 hover:text-white rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Presets */}
+              <div className="space-y-2">
+                <label className="text-[10px] font-mono text-yellow-600/90 uppercase tracking-wider">
+                  Chủ đề phông nền có sẵn
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  {WALLPAPER_PRESETS.map((preset) => {
+                    const isSelected = wallBackUrl === preset.backUrl;
+                    return (
+                      <button
+                        key={preset.id}
+                        onClick={() => {
+                          changeWallpaper(preset.backUrl, preset.sideUrl);
+                          setShowBgModal(false);
+                        }}
+                        className={`flex items-center gap-3 p-2.5 rounded-xl border text-left transition-all duration-200 cursor-pointer ${
+                          isSelected
+                            ? 'bg-yellow-500/15 border-yellow-500 text-yellow-200 shadow-[0_0_15px_rgba(245,158,11,0.25)]'
+                            : 'bg-black/40 border-white/10 hover:border-yellow-700/50 hover:bg-white/5 text-gray-300'
+                        }`}
+                      >
+                        <div
+                          className="w-10 h-10 rounded-lg shrink-0 border border-white/20 shadow-inner flex items-center justify-center"
+                          style={{ background: preset.previewBg }}
+                        >
+                          {isSelected && <Check className="w-4 h-4 text-white drop-shadow" />}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="text-xs font-bold truncate text-white">{preset.name}</div>
+                          <div className="text-[10px] text-gray-400 truncate">{preset.desc}</div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Custom Image Upload & URL */}
+              <div className="pt-2 border-t border-yellow-800/20 space-y-3">
+                <label className="text-[10px] font-mono text-yellow-600/90 uppercase tracking-wider block">
+                  Tải ảnh nền tùy biến của bạn
+                </label>
+                
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => bgUploadRef.current?.click()}
+                    className="flex-1 flex items-center justify-center gap-2 py-2 px-3 bg-yellow-500/20 hover:bg-yellow-500/30 border border-yellow-500/40 rounded-xl text-yellow-300 text-xs font-bold transition-all cursor-pointer"
+                  >
+                    <Upload className="w-3.5 h-3.5" />
+                    Tải ảnh từ máy tính (PNG/JPG)
+                  </button>
+                  <button
+                    onClick={() => {
+                      changeWallpaper('/wall-back.png', '/wall-side.png');
+                      setShowBgModal(false);
+                    }}
+                    className="py-2 px-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-gray-300 text-xs font-semibold transition-all cursor-pointer"
+                    title="Khôi phục nền MTTQ mặc định"
+                  >
+                    Khôi phục gốc
+                  </button>
+                </div>
+
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Hoặc dán đường link ảnh (URL)..."
+                    value={customBgInput}
+                    onChange={(e) => setCustomBgInput(e.target.value)}
+                    className="flex-1 bg-black/50 border border-white/10 rounded-xl px-3 py-1.5 text-xs text-white placeholder-gray-500 outline-none focus:border-yellow-500/50"
+                  />
+                  <button
+                    onClick={() => {
+                      if (customBgInput.trim()) {
+                        changeWallpaper(customBgInput.trim(), customBgInput.trim());
+                        setCustomBgInput('');
+                        setShowBgModal(false);
+                      }
+                    }}
+                    disabled={!customBgInput.trim()}
+                    className="px-3 py-1.5 bg-yellow-600 hover:bg-yellow-500 disabled:opacity-40 text-black font-bold text-xs rounded-xl transition-all cursor-pointer disabled:cursor-not-allowed"
+                  >
+                    Áp dụng
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
       </AnimatePresence>
     </div>
   );

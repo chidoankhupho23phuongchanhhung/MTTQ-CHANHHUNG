@@ -31,7 +31,7 @@ export default function ExhibitionLayout() {
   const [activeTab, setActiveTab] = useState<'hanh-trinh' | 'tuong-tac'>('tuong-tac');
   
   // Custom interactive viewport states
-  const [centerViewMode, setCenterViewMode] = useState<'3d' | 'books' | 'plaquet'>('3d');
+  const [centerViewMode, setCenterViewMode] = useState<'3d' | 'books' | 'timeline' | 'plaquet'>('3d');
   const [isChatOpen, setIsChatOpen] = useState(false);
   
   // Interactive detail states
@@ -48,7 +48,7 @@ export default function ExhibitionLayout() {
   // AI Virtual Curator chat states
   const [chatInput, setChatInput] = useState('');
   const [chatMessages, setChatMessages] = useState<Array<{ sender: 'user' | 'curator', text: string }>>([
-    { sender: 'curator', text: 'Xin chào quý khách! Tôi là Hướng dẫn viên ảo phụ trách Không gian Văn hóa Hồ Chí Minh. Quý khách có câu hỏi nào về cuộc đời cứu nước hoặc tác phẩm di văn của Chủ tịch Hồ Chí Minh không?' }
+    { sender: 'curator', text: 'Xin chào quý khách! Tôi là Hướng dẫn viên ảo Không gian Văn hóa Hồ Chí Minh - Ủy ban MTTQ Việt Nam Phường Chánh Hưng. Quý khách có câu hỏi nào về cuộc đời, sự nghiệp của Bác Hồ và lịch sử Mặt trận Dân tộc Thống nhất, khối Đại đoàn kết toàn dân tộc không?' }
   ]);
   const [isChatLoading, setIsChatLoading] = useState(false);
 
@@ -102,16 +102,20 @@ export default function ExhibitionLayout() {
       } else {
         // Fallback intelligent responses based on keyword queries in context
         setTimeout(() => {
-          let response = 'Cảm ơn quý khách đã quan tâm. Chủ tịch Hồ Chí Minh là hiện thân của những giá trị văn hóa cao đẹp nhất. Quý khách có thể khám phá thêm tại các khu vực Bản đồ di sản và Thư viện tài liệu bên trái và bên phải.';
+          let response = 'Cảm ơn quý khách đã quan tâm. Chủ tịch Hồ Chí Minh là hiện thân của tinh thần Đại đoàn kết toàn dân tộc. Quý khách có thể khám phá thêm tại các khu vực Mẫu vật 3D, Tủ sách & Di vật và Biên niên sử.';
           const lower = userMsg.toLowerCase();
-          if (lower.includes('nhà rồng') || lower.includes('nha rong') || lower.includes('1911')) {
-            response = 'Cảng Nhà Rồng là nơi Nguyễn Tất Thành xuống tàu Amiral Latouche-Tréville ra đi tìm đường cứu nước ngày 5/6/1911. Đây là bước ngoặt thay đổi vận mệnh lịch sử Việt Nam.';
+          if (lower.includes('mặt trận') || lower.includes('mat tran') || lower.includes('18/11') || lower.includes('đại đoàn kết')) {
+            response = 'Mặt trận Dân tộc Thống nhất Việt Nam (nay là MTTQ Việt Nam) được thành lập ngày 18/11/1930 theo sáng kiến của Lãnh tụ Nguyễn Ái Quốc. Bác khẳng định: "Đoàn kết, đoàn kết, đại đoàn kết. Thành công, thành công, đại thành công" - cội nguồn sức mạnh bách chiến bách thắng của dân tộc ta.';
+          } else if (lower.includes('cứu quốc') || lower.includes('báo')) {
+            response = 'Báo Cứu Quốc là cơ quan ngôn luận của Tổng bộ Việt Minh xuất bản từ năm 1942, tiền thân trực tiếp của Báo Đại Đoàn Kết ngày nay. Tờ báo đã hoàn thành xuất sắc sứ mệnh lịch sử hiệu triệu toàn dân vùng lên khởi nghĩa Tháng Tám năm 1945.';
+          } else if (lower.includes('nhà rồng') || lower.includes('nha rong') || lower.includes('1911')) {
+            response = 'Cảng Nhà Rồng là nơi Nguyễn Tất Thành xuống tàu Amiral Latouche-Tréville ra đi tìm đường cứu nước ngày 5/6/1911. Đây là bước ngoặt vĩ đại thay đổi vận mệnh lịch sử dân tộc Việt Nam.';
           } else if (lower.includes('pác bó') || lower.includes('pac bo') || lower.includes('1941')) {
-            response = 'Đầu năm 1941, sau 30 năm bôn ba, Chủ tịch Hồ Chí Minh trở về Pác Bó (Cao Bằng) trực tiếp chỉ đạo cuộc kháng chiến giành độc lập, đặt tên suối Lê-nin và núi Các-Mác.';
+            response = 'Đầu năm 1941, sau 30 năm bôn ba, Chủ tịch Hồ Chí Minh trở về Pác Bó (Cao Bằng) trực tiếp chỉ đạo cuộc kháng chiến giành độc lập, đặt tên suối Lê-nin, núi Các-Mác và thành lập Mặt trận Việt Minh ngày 19/5/1941.';
           } else if (lower.includes('tuyên ngôn') || lower.includes('độc lập') || lower.includes('1945')) {
-            response = 'Ngày 2/9/1945 tại Quảng trường Ba Đình lịch sử, Người thay mặt Chính phủ lâm thời đọc bản Tuyên ngôn Độc lập vĩ đại khai sinh nước Việt Nam Dân chủ Cộng hòa.';
+            response = 'Ngày 2/9/1945 tại Quảng trường Ba Đình lịch sử, Bác Hồ đọc bản Tuyên ngôn Độc lập vĩ đại khai sinh nước Việt Nam Dân chủ Cộng hòa, đỉnh cao sức mạnh đại đoàn kết toàn dân tộc.';
           } else if (lower.includes('nhật ký trong tù') || lower.includes('nhật ký')) {
-            response = 'Tập thơ Nhật ký trong tù của Người bao gồm 133 bài thơ bằng chữ Hán viết tại Trung Quốc năm 1942-1943. Đây là bức họa chân dung tự họa tinh thần dũng cảm, lạc quan của vị lãnh tụ yêu nước.';
+            response = 'Tập thơ Nhật ký trong tù gồm 133 bài thơ bằng chữ Hán sáng tác tại Quảng Tây năm 1942-1943. Đây là bảo vật quốc gia thể hiện ý chí gang thép và niềm tin tất thắng của vị Lãnh tụ yêu nước.';
           }
           setChatMessages(prev => [...prev, { sender: 'curator', text: response }]);
         }, 1000);
@@ -191,30 +195,40 @@ export default function ExhibitionLayout() {
         <div className="flex-1 min-h-0 h-full">
           <section className="flex flex-col h-full w-full gap-4">
             {/* Sub-tab selection indicator to switch view in central core */}
-            <div className="flex bg-slate-950/90 p-1.5 rounded-full border border-white/10 shrink-0 font-bold tracking-wider max-w-md w-full mx-auto shadow-inner">
+            <div className="flex bg-slate-950/90 p-1.5 rounded-full border border-white/10 shrink-0 font-bold tracking-wider max-w-xl w-full mx-auto shadow-inner">
               <button 
                 onClick={() => setCenterViewMode('3d')}
-                className={`flex-1 py-2 rounded-full text-[10px] uppercase font-bold tracking-[0.1em] transition-all duration-300 cursor-pointer ${
+                className={`flex-1 py-2 rounded-full text-[10px] uppercase font-bold tracking-[0.08em] transition-all duration-300 cursor-pointer ${
                   centerViewMode === '3d' 
                     ? 'bg-amber-500 text-slate-950 font-extrabold shadow-[0_0_15px_rgba(245,158,11,0.6)]' 
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
-                MẪU VẬT DI SẢN
+                MẪU VẬT 3D
               </button>
               <button 
                 onClick={() => setCenterViewMode('books')}
-                className={`flex-1 py-2 rounded-full text-[10px] uppercase font-bold tracking-[0.1em] transition-all duration-300 cursor-pointer ${
+                className={`flex-1 py-2 rounded-full text-[10px] uppercase font-bold tracking-[0.08em] transition-all duration-300 cursor-pointer ${
                   centerViewMode === 'books' 
                     ? 'bg-amber-500 text-slate-950 font-extrabold shadow-[0_0_15px_rgba(245,158,11,0.6)]' 
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
-                TỦ SÁCH DI SẢN
+                TỦ SÁCH & DI VẬT
+              </button>
+              <button 
+                onClick={() => setCenterViewMode('timeline')}
+                className={`flex-1 py-2 rounded-full text-[10px] uppercase font-bold tracking-[0.08em] transition-all duration-300 cursor-pointer ${
+                  centerViewMode === 'timeline' 
+                    ? 'bg-amber-500 text-slate-950 font-extrabold shadow-[0_0_15px_rgba(245,158,11,0.6)]' 
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                BIÊN NIÊN SỬ
               </button>
               <button 
                 onClick={() => setCenterViewMode('plaquet')}
-                className={`flex-1 py-2 rounded-full text-[10px] uppercase font-bold tracking-[0.1em] transition-all duration-300 cursor-pointer ${
+                className={`flex-1 py-2 rounded-full text-[10px] uppercase font-bold tracking-[0.08em] transition-all duration-300 cursor-pointer ${
                   centerViewMode === 'plaquet' 
                     ? 'bg-amber-500 text-slate-950 font-extrabold shadow-[0_0_15px_rgba(245,158,11,0.6)]' 
                     : 'text-slate-400 hover:text-white'
@@ -237,6 +251,7 @@ export default function ExhibitionLayout() {
                   >
                     <VirtualMuseumGame 
                       onOpenChat={handleOpenChat}
+                      onSwitchToBooks={handleSwitchToBooks}
                     />
                   </motion.div>
                 ) : centerViewMode === 'books' ? (
@@ -251,6 +266,20 @@ export default function ExhibitionLayout() {
                     <ArchiveGrid 
                       onItemSelect={(item) => setSelectedArchiveItem(item)}
                       selectedItemId={selectedArchiveItem?.id}
+                    />
+                  </motion.div>
+                ) : centerViewMode === 'timeline' ? (
+                  <motion.div
+                    key="timeline"
+                    initial={{ opacity: 0, scale: 0.98 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.98 }}
+                    transition={{ duration: 0.2 }}
+                    className="w-full h-full bg-slate-950/40 backdrop-blur-md rounded-2xl border border-white/10 p-4 sm:p-6 flex flex-col"
+                  >
+                    <TimelineZone 
+                      onNodeSelect={(node) => setSelectedNode(node)}
+                      selectedNodeId={selectedNode?.id}
                     />
                   </motion.div>
                 ) : (

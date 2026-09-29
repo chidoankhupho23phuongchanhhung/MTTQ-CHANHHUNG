@@ -15,13 +15,53 @@ interface Artifact {
   source?: string;
 }
 
-// Complete rich digitized historical artifacts database
+// Complete rich digitized historical artifacts and MTTQ books database
 const artifactsData: Artifact[] = [
   {
+    id: 'art-sach-dai-doan-ket',
+    name: 'Sách: Hồ Chí Minh về Đại đoàn kết toàn dân tộc',
+    category: 'Sách & Văn kiện',
+    description: 'Công trình tập hợp các bài nói, bài viết kinh điển của Chủ tịch Hồ Chí Minh khẳng định chân lý bất hủ: "Đoàn kết, đoàn kết, đại đoàn kết. Thành công, thành công, đại thành công" - kim chỉ nam hành động của Mặt trận Tổ quốc Việt Nam qua mọi thời kỳ.',
+    imgUrl: '/cab2.jpg',
+    year: 'Nhiều thời kỳ',
+    dimensions: 'NXB Chính trị Quốc gia Sự thật',
+    source: 'Ủy ban Trung ương MTTQ Việt Nam'
+  },
+  {
+    id: 'art-bao-cuu-quoc',
+    name: 'Báo Cứu Quốc (Cơ quan Tổng bộ Việt Minh)',
+    category: 'Báo chí Mặt trận',
+    description: 'Cơ quan ngôn luận và hiệu triệu của Tổng bộ Việt Minh xuất bản từ năm 1942 (tiền thân trực tiếp của Báo Đại Đoàn Kết ngày nay). Tờ báo là ngọn cờ tập hợp các tầng lớp nhân dân nổi dậy giành chính quyền trong Cách mạng Tháng Tám 1945.',
+    imgUrl: '/cab4.jpg',
+    year: '1942',
+    dimensions: 'Khổ in thạch cơ mật chiến khu',
+    source: 'Báo Đại Đoàn Kết & Bảo tàng Lịch sử'
+  },
+  {
+    id: 'art-chi-thi-18-11-1930',
+    name: 'Chỉ thị thành lập Hội Phản đế Đồng minh 18/11/1930',
+    category: 'Sách & Văn kiện',
+    description: 'Chỉ thị lịch sử thành lập Hội Phản đế Đồng minh - hình thức tổ chức đầu tiên của Mặt trận Dân tộc Thống nhất Việt Nam. Ngày 18/11/1930 đã trở thành Ngày truyền thống Mặt trận Tổ quốc Việt Nam và Ngày hội Đại đoàn kết toàn dân tộc thiêng liêng hàng năm.',
+    imgUrl: '/ho-chi-minh-1930.png',
+    year: '18/11/1930',
+    dimensions: 'Văn kiện Đảng lưu trữ',
+    source: 'Cục Lưu trữ Văn phòng Trung ương Đảng'
+  },
+  {
+    id: 'art-khan-ran-bac-tang',
+    name: 'Kỷ vật Bác tặng Nhân sĩ, Trí thức & Miền Nam',
+    category: 'Kỷ vật Mặt trận',
+    description: 'Những kỷ vật thiêng liêng gồm khăn rằn Nam Bộ và Huy hiệu Bác Hồ gửi tặng đồng bào miền Nam và các vị nhân sĩ trí thức, chức sắc tôn giáo tiêu biểu trong Ủy ban Mặt trận Dân tộc Giải phóng miền Nam Việt Nam.',
+    imgUrl: '/cab3.jpg',
+    year: '1960 - 1969',
+    dimensions: 'Hiện vật lưu giữ nguyên bản',
+    source: 'Bảo tàng Mặt trận Tổ quốc Việt Nam'
+  },
+  {
     id: 'art-dep-cao-su',
-    name: 'Đôi dép cao su lịch sử',
-    category: 'Kỷ vật sinh hoạt',
-    description: 'Đôi dép cao su huyền thoại được chế tạo thủ công từ chiếc lốp máy bay quân sự từ chiến dịch Thu Đông 1947 quyết tử, đồng hành bền bỉ bên Bác qua vạn dặm đồi núi chiến khu kháng chiến đến cả những chuyến đi hữu nghị đối ngoại quốc tế.',
+    name: 'Đôi dép cao su lịch sử của Bác Hồ',
+    category: 'Kỷ vật thiêng liêng',
+    description: 'Đôi dép cao su huyền thoại được chế tạo từ chiếc lốp máy bay quân sự năm 1947, đồng hành bên Bác từ chiến khu Việt Bắc kháng chiến, về thăm các kỳ Đại hội Mặt trận cho đến các chuyến công tác thăm đồng bào khắp mọi miền đất nước.',
     imgUrl: '/dep-cao-su.png',
     year: '1947',
     dimensions: 'Kích cỡ chân của Bác, chế tác thủ công',
@@ -29,53 +69,53 @@ const artifactsData: Artifact[] = [
   },
   {
     id: 'art-may-chu',
-    name: 'Chiếc máy chữ Hermes bẻ đôi',
-    category: 'Công cụ làm việc',
-    description: 'Chiếc máy chữ hiệu Hermes cầm tay gọn gàng lịch sử được Bác giữ bên mình tự đánh máy trực tiếp các chỉ thị lí luận tối quan trọng của Đảng và Nhà nước Việt Nam tại chiến khu căn cứ địa cũng như khi ở nhà sàn.',
+    name: 'Chiếc máy chữ Hermes di động của Bác',
+    category: 'Kỷ vật thiêng liêng',
+    description: 'Chiếc máy chữ xách tay hiệu Hermes được Bác giữ bên mình tại chiến khu và nhà sàn để trực tiếp soạn thảo các Lời kêu gọi đoàn kết, sắc lệnh và thư gửi đồng bào các giới, nhân sĩ tôn giáo trong Mặt trận.',
     imgUrl: '/may-chu.png',
     year: 'Thế kỷ XX',
     dimensions: 'Trọng lượng cầm tay di động',
-    source: 'Nhà sàn Phủ Chủ tịch'
-  },
-  {
-    id: 'art-uoc-nguyen',
-    name: 'Tập thơ Nhật ký trong tù',
-    category: 'Văn kiện tầm cỡ',
-    description: 'Tác phẩm văn học cách mạng lỗi lạc gồm 133 bài thơ viết bằng chữ Hán giản dị trong thời gian Người bị giam giữ bất hợp pháp tại các nhà tù tỉnh Quảng Tây, Trung Quốc.',
-    imgUrl: '/nhat-ky-trong-tu.png',
-    year: '1942 - 1943',
-    dimensions: 'Bút ký gốc chữ Hán sắc sảo',
-    source: 'Bảo tàng Lịch sử Quốc gia'
+    source: 'Khu Di tích Phủ Chủ tịch'
   },
   {
     id: 'art-tuyen-ngon-doc-lap',
-    name: 'Bản thảo Tuyên ngôn Độc lập',
-    category: 'Văn kiện tầm cỡ',
-    description: 'Bản văn kiện pháp lý mang giá trị lập quốc thiêng liêng tuyệt đỉnh khai sinh ra nền độc lập hòa bình cho nhân dân nước Việt Nam Dân chủ Cộng hòa.',
+    name: 'Bản thảo Tuyên ngôn Độc lập (2/9/1945)',
+    category: 'Sách & Văn kiện',
+    description: 'Bản văn kiện pháp lý mang giá trị lập quốc thiêng liêng khai sinh nước Việt Nam Dân chủ Cộng hòa, đỉnh cao thắng lợi của sức mạnh khối Đại đoàn kết toàn dân tộc dưới ngọn cờ Mặt trận Việt Minh.',
     imgUrl: '/p1.jpg',
     year: '1945',
     dimensions: 'Văn bản in thô có dấu ấn bút tích sửa đổi',
     source: 'Cục Lưu trữ Văn phòng Trung ương Đảng'
   },
   {
-    id: 'art-bac-ho-phu-nu-thu',
-    name: 'Thư gửi Phụ nữ Việt Nam 20/10/1952',
-    category: 'Bác Hồ với Phụ nữ',
-    description: 'Bức thư chúc mừng nhân ngày thành lập Hội Liên hiệp Phụ nữ Việt Nam, Bác Hồ khen ngợi sự đóng góp to lớn của phụ nữ trong kháng chiến kiến quốc, kêu gọi thi đua sản xuất và tiết kiệm.',
-    imgUrl: '/hcm-letter-women.png',
-    year: '1952',
-    dimensions: 'Bản gốc lưu trữ',
-    source: 'Bảo tàng Phụ nữ Việt Nam'
+    id: 'art-uoc-nguyen',
+    name: 'Tập thơ Nhật ký trong tù',
+    category: 'Sách & Văn kiện',
+    description: 'Bảo vật Quốc gia gồm 133 bài thơ chữ Hán sáng tác trong ngục tù Quảng Tây (1942-1943), thể hiện tinh thần gang thép, ý chí độc lập tự do và niềm tin tất thắng của vị Lãnh tụ vĩ đại.',
+    imgUrl: '/nhat-ky-trong-tu.png',
+    year: '1942 - 1943',
+    dimensions: 'Bút ký gốc chữ Hán',
+    source: 'Bảo tàng Lịch sử Quốc gia'
   },
   {
-    id: 'art-bac-ho-phu-nu-badamdang',
-    name: 'Bác Hồ với phong trào "Phụ nữ Ba Đảm Đang"',
-    category: 'Bác Hồ với Phụ nữ',
-    description: 'Phong trào thi đua yêu nước xuất sắc của phụ nữ miền Bắc ("Đảm nhiệm sản xuất, Đảm nhiệm gia đình, Đảm nhiệm chiến đấu") được Bác Hồ nhiệt liệt khen ngợi và cổ vũ nồng nhiệt.',
-    imgUrl: '/hcm-women-movement.png',
-    year: '1965',
-    dimensions: 'Tư liệu ảnh',
-    source: 'Bảo tàng Phụ nữ Việt Nam'
+    id: 'art-dai-hoi-mttq-1955',
+    name: 'Văn kiện Đại hội Mặt trận Tổ quốc VN lần thứ I',
+    category: 'Sách & Văn kiện',
+    description: 'Tài liệu Đại hội Mặt trận Dân tộc Thống nhất toàn quốc họp tháng 9/1955 tại Hà Nội, quyết định thành lập Mặt trận Tổ quốc Việt Nam, suy tôn Chủ tịch Hồ Chí Minh làm Chủ tịch Danh dự.',
+    imgUrl: '/p4.jpg',
+    year: '1955',
+    dimensions: 'Tài liệu đại hội lưu trữ',
+    source: 'Bảo tàng MTTQ Việt Nam'
+  },
+  {
+    id: 'art-di-chuc-doan-ket',
+    name: 'Di chúc Bác Hồ về khối Đại đoàn kết',
+    category: 'Kỷ vật Mặt trận',
+    description: 'Bản thảo Di chúc thiêng liêng kết tinh tư tưởng đại đoàn kết của Bác: "Đoàn kết là một truyền thống cực kỳ quý báu của Đảng và của dân ta... Phải giữ gìn sự đoàn kết nhất trí của Đảng như giữ gìn con ngươi của mắt mình".',
+    imgUrl: '/p5.jpg',
+    year: '1965 - 1969',
+    dimensions: 'Bút tích sửa đổi qua nhiều năm',
+    source: 'Ban Chấp hành Trung ương Đảng'
   }
 ];
 
@@ -90,7 +130,7 @@ export default function ArchiveGrid({ onItemSelect, selectedItemId }: ArchiveGri
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   // Categories extraction
-  const categories = ['Tất cả', 'Văn kiện tầm cỡ', 'Công cụ làm việc', 'Kỷ vật sinh hoạt', 'Bác Hồ với Phụ nữ'];
+  const categories = ['Tất cả', 'Sách & Văn kiện', 'Kỷ vật Mặt trận', 'Báo chí Mặt trận', 'Kỷ vật thiêng liêng'];
 
   const filteredArtifacts = artifactsData.filter((art) => {
     const matchesCat = selectedCategoryFilter === 'Tất cả' || art.category === selectedCategoryFilter;
@@ -116,7 +156,7 @@ export default function ArchiveGrid({ onItemSelect, selectedItemId }: ArchiveGri
           THƯ VIỆN DI SẢN KỸ THUẬT SỐ
         </h3>
         <p className="text-[11px] text-slate-400 font-sans mb-3 leading-relaxed">
-          Nghiên cứu cận cảnh các kỷ vật lịch sử, bảo vật quốc gia thiêng liêng của Chủ tịch Hồ Chí Minh qua lăng kính 3D số hóa.
+          Nghiên cứu các tác phẩm kinh điển, báo chí Mặt trận và kỷ vật thiêng liêng về Chủ tịch Hồ Chí Minh cùng khối Đại đoàn kết toàn dân tộc.
         </p>
 
         {/* Dynamic Interactive Input search */}
