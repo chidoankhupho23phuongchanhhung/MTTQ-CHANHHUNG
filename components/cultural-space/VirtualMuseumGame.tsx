@@ -776,35 +776,282 @@ export default function VirtualMuseumGame({ onSwitchToBooks, onOpenChat }: Virtu
     const starGlow = new THREE.PointLight(0xffd700, 4, 3, 2);
     starGlow.position.set(0, ctrCapH + 2.05, -1.8); scene.add(starGlow);
 
-    // ═══ PORTALS ═══════════════════════════════════════════════════════════════
-    const mkPortal = (x:number,z:number,id:string,glowHex:number) => {
-      const g = new THREE.Group();
-      const portalStoneMat = new THREE.MeshStandardMaterial({ color:0x0d1120, roughness:0.6, metalness:0.15 });
-      // Arch frame sides
-      const side = new THREE.Mesh(new THREE.BoxGeometry(0.55,4.0,0.55), portalStoneMat);
-      side.castShadow = true;
-      [-0.7, 0.7].forEach(ox => {
-        const s = side.clone(); s.position.set(ox, 2.0, 0); g.add(s);
+    // ═══ 3D AI ROBOT CURATOR ═════════════════════════════════════════════════
+    let robotFloatingGroup: THREE.Group | null = null;
+    let robotRightArm: THREE.Group | null = null;
+    let robotAntennaLight: THREE.PointLight | null = null;
+
+    const mkRobot = (x: number, z: number, id: string) => {
+      const root = new THREE.Group();
+      root.position.set(x, 0, z);
+
+      // ── 1. Futuristic Hologram Plinth (Floor Base) ──
+      const basePedMat = new THREE.MeshStandardMaterial({
+        color: 0x111827,
+        roughness: 0.35,
+        metalness: 0.7
       });
-      // Top bar
-      const top = new THREE.Mesh(new THREE.BoxGeometry(1.95,0.45,0.55), portalStoneMat);
-      top.position.set(0, 4.22, 0); g.add(top);
-      // Gold trim on top
-      const topGold = new THREE.Mesh(new THREE.BoxGeometry(2.0,0.1,0.6), pedGoldMat);
-      topGold.position.set(0, 4.5, 0); g.add(topGold);
-      // Glowing inner panel
-      const panel = new THREE.Mesh(new THREE.BoxGeometry(1.05,3.6,0.2),
-        new THREE.MeshStandardMaterial({ color:glowHex, emissive:new THREE.Color(glowHex), emissiveIntensity:0.55, roughness:0.1, transparent:true, opacity:0.88 }));
-      panel.position.set(0, 1.9, 0.22); panel.userData={id,type:'portal'}; g.add(panel); interactive.push(panel);
-      // Body collider
-      const body = new THREE.Mesh(new THREE.BoxGeometry(1.35,3.9,0.5), new THREE.MeshStandardMaterial({transparent:true,opacity:0}));
-      body.position.set(0, 2.0, 0); body.userData={id,type:'portal'}; g.add(body); interactive.push(body);
-      // Glow light
-      const gl = new THREE.PointLight(glowHex, 2.5, 5, 2);
-      gl.position.set(0, 2.2, 0.8); g.add(gl);
-      g.position.set(x,0,z); scene.add(g);
+      const baseMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 1.0, 0.2, 32), basePedMat);
+      baseMesh.position.y = 0.1;
+      baseMesh.receiveShadow = true;
+      root.add(baseMesh);
+
+      // Gold trim ring on base
+      const baseTrimMat = new THREE.MeshStandardMaterial({
+        color: 0xffb703,
+        roughness: 0.2,
+        metalness: 0.85
+      });
+      const baseTrim = new THREE.Mesh(new THREE.CylinderGeometry(0.92, 0.92, 0.04, 32), baseTrimMat);
+      baseTrim.position.y = 0.2;
+      root.add(baseTrim);
+
+      // Glowing hologram energy ring
+      const ringMat = new THREE.MeshStandardMaterial({
+        color: 0x00e5ff,
+        emissive: new THREE.Color(0x00e5ff),
+        emissiveIntensity: 1.6,
+        roughness: 0.1
+      });
+      const energyRing = new THREE.Mesh(new THREE.TorusGeometry(0.72, 0.025, 16, 48), ringMat);
+      energyRing.rotation.x = Math.PI / 2;
+      energyRing.position.y = 0.22;
+      root.add(energyRing);
+
+      // Upward projector light from plinth
+      const projectorLight = new THREE.PointLight(0x00e5ff, 2.5, 4.5, 1.8);
+      projectorLight.position.set(0, 0.35, 0);
+      root.add(projectorLight);
+
+      // ── 2. Floating Robot Body Group ──
+      const bot = new THREE.Group();
+      bot.position.y = 1.35; // Hover height
+      root.add(bot);
+      robotFloatingGroup = bot;
+
+      // Materials
+      const whiteChassisMat = new THREE.MeshStandardMaterial({
+        color: 0xf8fafc,
+        roughness: 0.15,
+        metalness: 0.25
+      });
+      const darkPlateMat = new THREE.MeshStandardMaterial({
+        color: 0x0f172a,
+        roughness: 0.2,
+        metalness: 0.8
+      });
+      const goldTrimMat = new THREE.MeshStandardMaterial({
+        color: 0xf59e0b,
+        roughness: 0.2,
+        metalness: 0.85
+      });
+      const cyanGlowMat = new THREE.MeshStandardMaterial({
+        color: 0x00f0ff,
+        emissive: new THREE.Color(0x00f0ff),
+        emissiveIntensity: 2.2,
+        roughness: 0.1
+      });
+
+      // ── Torso / Body ──
+      const torsoGeo = new THREE.CylinderGeometry(0.38, 0.28, 0.75, 24);
+      const torso = new THREE.Mesh(torsoGeo, whiteChassisMat);
+      torso.position.y = 0.38;
+      torso.castShadow = true;
+      bot.add(torso);
+
+      // Chest plate (darker inset curved front)
+      const chestPlate = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.39, 0.3, 0.45, 18, 1, false, -Math.PI / 3, (2 * Math.PI) / 3),
+        darkPlateMat
+      );
+      chestPlate.position.set(0, 0.42, 0.02);
+      bot.add(chestPlate);
+
+      // Glowing heart core / MTTQ lotus star emblem
+      const coreMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.05, 24), cyanGlowMat);
+      coreMesh.rotation.x = Math.PI / 2;
+      coreMesh.position.set(0, 0.44, 0.37);
+      bot.add(coreMesh);
+
+      // Little gold star in center of core
+      const coreStar = new THREE.Mesh(new THREE.OctahedronGeometry(0.045, 1), goldTrimMat);
+      coreStar.position.set(0, 0.44, 0.41);
+      bot.add(coreStar);
+
+      // Lower thruster cone (hover propulsion)
+      const thrusterGeo = new THREE.ConeGeometry(0.24, 0.25, 20);
+      const thruster = new THREE.Mesh(thrusterGeo, darkPlateMat);
+      thruster.rotation.x = Math.PI;
+      thruster.position.y = -0.05;
+      bot.add(thruster);
+
+      // Glowing thruster plume
+      const thrusterFlame = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.22, 16), cyanGlowMat);
+      thrusterFlame.rotation.x = Math.PI;
+      thrusterFlame.position.y = -0.12;
+      bot.add(thrusterFlame);
+
+      // ── Head ──
+      const headGroup = new THREE.Group();
+      headGroup.position.set(0, 0.95, 0);
+      bot.add(headGroup);
+
+      // Neck joint ring
+      const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.08, 16), darkPlateMat);
+      neck.position.y = -0.12;
+      headGroup.add(neck);
+
+      // Cute spherical head
+      const headMesh = new THREE.Mesh(new THREE.SphereGeometry(0.36, 28, 24), whiteChassisMat);
+      headMesh.scale.set(1.15, 0.95, 1.05);
+      headMesh.castShadow = true;
+      headGroup.add(headMesh);
+
+      // Curved Visor / Face Screen (Black glossy glass)
+      const visorGeo = new THREE.SphereGeometry(0.31, 24, 20);
+      const visorMat = new THREE.MeshStandardMaterial({
+        color: 0x050b14,
+        roughness: 0.05,
+        metalness: 0.95
+      });
+      const visor = new THREE.Mesh(visorGeo, visorMat);
+      visor.scale.set(1.08, 0.72, 0.6);
+      visor.position.set(0, 0.02, 0.18);
+      headGroup.add(visor);
+
+      // Cute Digital Expressive Glowing Eyes
+      const eyeMat = new THREE.MeshStandardMaterial({
+        color: 0x00f5ff,
+        emissive: new THREE.Color(0x00f5ff),
+        emissiveIntensity: 2.8,
+        roughness: 0.1
+      });
+
+      // Left eye
+      const eyeGeo = new THREE.CylinderGeometry(0.045, 0.045, 0.11, 16);
+      const leftEye = new THREE.Mesh(eyeGeo, eyeMat);
+      leftEye.rotation.z = Math.PI / 2;
+      leftEye.position.set(-0.11, 0.04, 0.44);
+      headGroup.add(leftEye);
+
+      // Right eye
+      const rightEye = new THREE.Mesh(eyeGeo, eyeMat);
+      rightEye.rotation.z = Math.PI / 2;
+      rightEye.position.set(0.11, 0.04, 0.44);
+      headGroup.add(rightEye);
+
+      // Cute smiling mouth curve
+      const mouthMesh = new THREE.Mesh(new THREE.TorusGeometry(0.055, 0.012, 8, 16, Math.PI), eyeMat);
+      mouthMesh.rotation.z = Math.PI;
+      mouthMesh.position.set(0, -0.06, 0.44);
+      headGroup.add(mouthMesh);
+
+      // Ear headphone pods
+      [-0.43, 0.43].forEach(ox => {
+        const ear = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.08, 16), darkPlateMat);
+        ear.rotation.z = Math.PI / 2;
+        ear.position.set(ox, 0.03, 0);
+        headGroup.add(ear);
+
+        const earRing = new THREE.Mesh(new THREE.TorusGeometry(0.075, 0.015, 8, 16), cyanGlowMat);
+        earRing.rotation.y = Math.PI / 2;
+        earRing.position.set(ox * 1.05, 0.03, 0);
+        headGroup.add(earRing);
+      });
+
+      // Antenna on top
+      const antennaPole = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.022, 0.22, 12), darkPlateMat);
+      antennaPole.position.y = 0.42;
+      headGroup.add(antennaPole);
+
+      const antennaTip = new THREE.Mesh(new THREE.SphereGeometry(0.055, 16, 16), cyanGlowMat);
+      antennaTip.position.y = 0.54;
+      headGroup.add(antennaTip);
+
+      const antLight = new THREE.PointLight(0x00f0ff, 1.8, 3.5, 2);
+      antLight.position.set(0, 0.54, 0);
+      headGroup.add(antLight);
+      robotAntennaLight = antLight;
+
+      // ── Arms ──
+      // Left Arm (Resting nicely by side)
+      const armGeo = new THREE.CylinderGeometry(0.07, 0.07, 0.42, 12);
+      const leftArm = new THREE.Mesh(armGeo, whiteChassisMat);
+      leftArm.position.set(-0.46, 0.32, 0);
+      leftArm.rotation.z = 0.22;
+      bot.add(leftArm);
+
+      // Right Arm (Friendly waving greeting pose!)
+      const rightArmGroup = new THREE.Group();
+      rightArmGroup.position.set(0.46, 0.46, 0);
+      bot.add(rightArmGroup);
+
+      const rightArm = new THREE.Mesh(armGeo, whiteChassisMat);
+      rightArm.position.set(0.12, 0.16, 0.1);
+      rightArm.rotation.z = -1.1;
+      rightArm.rotation.x = 0.4;
+      rightArmGroup.add(rightArm);
+
+      // Right hand mitten / palm waving
+      const handMesh = new THREE.Mesh(new THREE.SphereGeometry(0.08, 16, 16), darkPlateMat);
+      handMesh.position.set(0.24, 0.32, 0.18);
+      rightArmGroup.add(handMesh);
+      robotRightArm = rightArmGroup;
+
+      // ── 3. Floating Holographic Badge Label Above Robot ──
+      const canvasLabel = document.createElement('canvas');
+      canvasLabel.width = 512;
+      canvasLabel.height = 160;
+      const ctx = canvasLabel.getContext('2d');
+      if (ctx) {
+        ctx.fillStyle = 'rgba(11, 15, 25, 0.85)';
+        ctx.strokeStyle = '#00e5ff';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        if (typeof ctx.roundRect === 'function') {
+          ctx.roundRect(16, 16, 480, 128, 28);
+        } else {
+          ctx.rect(16, 16, 480, 128);
+        }
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.font = 'bold 36px sans-serif';
+        ctx.fillStyle = '#38bdf8';
+        ctx.textAlign = 'center';
+        ctx.fillText('🤖 HƯỚNG DẪN VIÊN AI', 256, 68);
+
+        ctx.font = 'bold 22px sans-serif';
+        ctx.fillStyle = '#fef08a';
+        ctx.fillText('● Chạm để hỏi đáp lịch sử ●', 256, 112);
+      }
+
+      const labelTex = new THREE.CanvasTexture(canvasLabel);
+      labelTex.colorSpace = THREE.SRGBColorSpace;
+      const labelMat = new THREE.SpriteMaterial({ map: labelTex, transparent: true, opacity: 0.95 });
+      const labelSprite = new THREE.Sprite(labelMat);
+      labelSprite.position.set(0, 1.85, 0);
+      labelSprite.scale.set(1.9, 0.6, 1);
+      headGroup.add(labelSprite);
+
+      // ── 4. Interactive Collider ──
+      const collider = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.7, 0.7, 2.3, 16),
+        new THREE.MeshStandardMaterial({ transparent: true, opacity: 0 })
+      );
+      collider.position.set(0, 0.7, 0);
+      collider.userData = { id, type: 'portal' };
+      bot.add(collider);
+      interactive.push(collider);
+
+      [torso, headMesh, visor, collider].forEach(m => {
+        m.userData = { id, type: 'portal' };
+      });
+
+      scene.add(root);
     };
-    mkPortal( 2.5,  1.8, 'portal-chat',  0x00c87a);
+
+    mkRobot(2.5, 1.8, 'portal-chat');
 
     // ═══ INTERACTION & DRAG ROTATION ═════════════════════════════════════════════
     const raycaster = new THREE.Raycaster();
@@ -922,6 +1169,19 @@ export default function VirtualMuseumGame({ onSwitchToBooks, onOpenChat }: Virtu
       starGlow.position.y = starMesh.position.y;
       // Subtle breathing on hero spot
       heroSpot.intensity = 52 + Math.sin(t * 0.4) * 3;
+
+      // Robot animations: gentle hovering, scanning turn, and waving right arm!
+      if (robotFloatingGroup) {
+        robotFloatingGroup.position.y = 1.35 + Math.sin(t * 2.2) * 0.055;
+        robotFloatingGroup.rotation.y = Math.sin(t * 0.8) * 0.16;
+      }
+      if (robotRightArm) {
+        robotRightArm.rotation.z = Math.sin(t * 4.5) * 0.14;
+      }
+      if (robotAntennaLight) {
+        robotAntennaLight.intensity = 1.6 + Math.sin(t * 5.0) * 0.5;
+      }
+
       renderer.render(scene, camera);
     };
     animate();
@@ -969,7 +1229,7 @@ export default function VirtualMuseumGame({ onSwitchToBooks, onOpenChat }: Virtu
 
   const hoveredPainting = PAINTING_SLOTS.find(p => p.id === hoveredId);
   const hoveredCabinet  = DEFAULT_CABINETS.find(c => c.id === hoveredId);
-  const portalLabel: Record<string,string> = { 'portal-chat':'Hướng dẫn viên AI' };
+  const portalLabel: Record<string,string> = { 'portal-chat':'🤖 Robot Hướng dẫn viên AI' };
 
   // ═════════════════════════════════════════════════════════════════════════════
   return (
@@ -1089,12 +1349,12 @@ export default function VirtualMuseumGame({ onSwitchToBooks, onOpenChat }: Virtu
               className="absolute bottom-12 left-1/2 -translate-x-1/2 pointer-events-none z-20"
             >
               <div className="bg-black/70 backdrop-blur-md border border-yellow-700/35 rounded-xl px-4 py-2 shadow-xl flex items-center gap-2.5">
-                <div className={`w-1.5 h-1.5 rounded-full ${hoveredCabinet?'bg-yellow-400':hoveredPainting?'bg-blue-400':'bg-emerald-400'}`} />
+                <div className={`w-1.5 h-1.5 rounded-full ${hoveredCabinet?'bg-yellow-400':hoveredPainting?'bg-blue-400':'bg-cyan-400 shadow-[0_0_8px_#00f0ff]'}`} />
                 <span className="text-[11px] font-semibold text-white/90">
                   {hoveredCabinet?.name ?? hoveredPainting?.title ?? portalLabel[hoveredId] ?? ''}
                 </span>
-                <span className="text-[9px] text-white/35 font-mono">
-                  {hoveredCabinet ? '● click' : hoveredPainting ? '● tranh' : '● mở'}
+                <span className="text-[9px] text-cyan-300/80 font-mono">
+                  {hoveredCabinet ? '● click' : hoveredPainting ? '● tranh' : '● hỏi đáp AI'}
                 </span>
               </div>
             </motion.div>

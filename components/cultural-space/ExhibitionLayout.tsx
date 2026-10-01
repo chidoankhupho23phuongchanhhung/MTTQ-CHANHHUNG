@@ -428,81 +428,83 @@ export default function ExhibitionLayout() {
         </div>
       </main>
 
-      {/* Streamlined Floating AI Curator chatbot in the bottom corner (Non-blocking / Compact layout) */}
-      <div className="fixed bottom-16 right-6 z-40 flex flex-col items-end">
-        <AnimatePresence>
-          {isChatOpen && (
+      {/* AI Curator chatbot modal (Opened directly by clicking the 3D Robot) */}
+      <AnimatePresence>
+        {isChatOpen && (
+          <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
             <motion.div 
               initial={{ opacity: 0, y: 15, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 15, scale: 0.95 }}
-              className="bg-slate-900/95 backdrop-blur-2xl border border-amber-500/30 rounded-2xl w-80 md:w-96 h-[340px] shadow-[0_10px_40px_rgba(0,0,0,0.8)] p-4 flex flex-col justify-between mb-3"
+              className="bg-slate-900/95 backdrop-blur-2xl border border-amber-500/40 rounded-2xl w-[320px] sm:w-[380px] h-[380px] shadow-[0_15px_50px_rgba(0,0,0,0.85)] p-4 flex flex-col justify-between"
             >
-              <div className="flex items-center justify-between border-b border-white/10 pb-2 mb-2">
-                <div className="flex items-center gap-1.5">
-                  <MessageSquare className="w-4 h-4 text-amber-400" />
-                  <h4 className="text-xs font-bold text-amber-400 uppercase tracking-wide">
-                    HỌC GIẢ DI SẢN — AI Curator
-                  </h4>
+              <div className="flex items-center justify-between border-b border-white/10 pb-2.5 mb-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-lg bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 text-sm">
+                    🤖
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-amber-400 uppercase tracking-wide">
+                      ROBOT HƯỚNG DẪN VIÊN AI
+                    </h4>
+                    <span className="text-[9px] text-slate-400">Không gian Văn hóa Hồ Chí Minh</span>
+                  </div>
                 </div>
                 <button 
                   onClick={() => setIsChatOpen(false)}
-                  className="text-slate-400 hover:text-white p-1 hover:bg-white/5 rounded-full cursor-pointer"
+                  className="text-slate-400 hover:text-white p-1.5 hover:bg-white/10 rounded-lg cursor-pointer transition-colors"
+                  title="Đóng hội thoại"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
-              <div className="flex-1 overflow-y-auto space-y-2 pr-1 custom-scrollbar text-[10px] mb-2">
+              <div className="flex-1 overflow-y-auto space-y-2 pr-1 custom-scrollbar text-[11px] mb-2">
                 {chatMessages.map((msg, index) => (
                   <div 
                     key={index} 
-                    className={`rounded-lg p-2 border ${
+                    className={`rounded-xl p-2.5 border ${
                       msg.sender === 'user' 
-                        ? 'bg-amber-500/10 border-amber-500/10 text-right ml-8 rounded-tr-none' 
-                        : 'bg-white/5 border-white/5 text-left mr-8 rounded-tl-none'
+                        ? 'bg-amber-500/15 border-amber-500/25 text-right ml-8 rounded-tr-none' 
+                        : 'bg-white/5 border-white/10 text-left mr-8 rounded-tl-none'
                     }`}
                   >
                     <p className="leading-relaxed whitespace-pre-line text-slate-100">{msg.text}</p>
-                    <span className="text-[7px] text-slate-500 font-mono block mt-1">
-                      {msg.sender === 'user' ? 'Quý khách' : 'Hướng dẫn viên ảo'}
+                    <span className="text-[8px] text-slate-500 font-mono block mt-1">
+                      {msg.sender === 'user' ? 'Quý khách' : '🤖 Robot AI'}
                     </span>
                   </div>
                 ))}
                 {isChatLoading && (
-                  <div className="text-[10px] text-slate-400 italic">AI đang soạn câu trả lời...</div>
+                  <div className="text-[10px] text-amber-400/80 italic flex items-center gap-1.5 py-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
+                    <span>Robot đang soạn câu trả lời...</span>
+                  </div>
                 )}
               </div>
 
               {/* Question input form */}
-              <form onSubmit={handleSendChat} className="flex gap-2 bg-slate-950/85 p-1 rounded-xl border border-white/10">
+              <form onSubmit={handleSendChat} className="flex gap-2 bg-slate-950/90 p-1.5 rounded-xl border border-white/10">
                 <input
                   type="text"
                   required
-                  placeholder="Hỏi về bảo vật, lịch sử..."
+                  placeholder="Hỏi Robot về bảo vật, lịch sử..."
                   value={chatInput}
                   onChange={(e) => setChatInput(e.target.value)}
-                  className="flex-1 bg-transparent px-2 text-[10px] text-white outline-none placeholder-slate-500 min-w-0"
+                  className="flex-1 bg-transparent px-2 text-xs text-white outline-none placeholder-slate-500 min-w-0"
                 />
                 <button 
                   type="submit" 
-                  className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-3 py-1 rounded-lg text-[10px] flex items-center shrink-0 cursor-pointer"
+                  className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-3 py-1.5 rounded-lg text-xs flex items-center shrink-0 cursor-pointer transition-all active:scale-95"
                 >
+                  <Send className="w-3.5 h-3.5 mr-1" />
                   Gửi
                 </button>
               </form>
             </motion.div>
-          )}
-        </AnimatePresence>
-
-        <button 
-          onClick={() => setIsChatOpen(!isChatOpen)}
-          className="w-12 h-12 rounded-full bg-amber-500 hover:bg-amber-400 text-slate-950 flex items-center justify-center shadow-[0_4px_20px_rgba(245,158,11,0.4)] transition-all active:scale-95 cursor-pointer hover:scale-105"
-          title="Hỏi trợ lý ảo"
-        >
-          <MessageSquare className="w-5 h-5" />
-        </button>
-      </div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* Floating Detailed Viewer Overlay (Portal Modal for Node selections or Archives) */}
       <AnimatePresence>

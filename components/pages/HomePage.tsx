@@ -502,24 +502,25 @@ export default function HomePage() {
                       >
                         <img
                           src={bg} alt={item.label}
-                          className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                          style={{ filter: "brightness(0.35)" }}
+                          className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                         />
-                        <div className={cn("absolute inset-0 bg-gradient-to-t pointer-events-none", item.accent)} />
+                        {/* Subtle gradient to ensure background is bright and clear while text remains crisp */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-black/10 pointer-events-none" />
+                        <div className={cn("absolute inset-0 bg-gradient-to-t pointer-events-none opacity-60", item.accent)} />
                         
                         {/* Top: Icon + Badge tag */}
                         <div className="relative z-10 flex items-center justify-between w-full">
-                          <div className="p-1.5 bg-white/20 backdrop-blur-sm rounded-lg w-fit shadow-xs">
+                          <div className="p-1.5 bg-black/40 backdrop-blur-md rounded-lg w-fit shadow-xs border border-white/20">
                             <Icon className="h-4 w-4 text-white" />
                           </div>
-                          <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-white/15 backdrop-blur-sm text-white/90 border border-white/20">
+                          <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-black/40 backdrop-blur-md text-white/95 border border-white/25">
                             {item.tag}
                           </span>
                         </div>
 
                         {/* Bottom: Official full title */}
                         <div className="relative z-10 mt-3">
-                          <span className="text-xs sm:text-[13px] font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] leading-snug line-clamp-3">
+                          <span className="text-xs sm:text-[13px] font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.95)] leading-snug line-clamp-3">
                             {item.label}
                           </span>
                         </div>

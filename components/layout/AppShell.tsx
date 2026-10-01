@@ -126,7 +126,7 @@ export default function AppShell({ children }: AppShellProps) {
         </div>
       </div>
 
-      {!isStaff && <FloatingAIAssistant />}
+      {!isStaff && pathname !== '/khong-gian-van-hoa-hcm' && <FloatingAIAssistant />}
       <MobileNav />
       <Toast />
     </div>

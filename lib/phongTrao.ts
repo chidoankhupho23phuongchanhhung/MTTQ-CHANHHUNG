@@ -21,7 +21,7 @@ export const DEFAULT_PHONG_TRAO: PhongTraoItem[] = [
     tag: 'Phong trào 01',
     desc: 'Xây dựng thế trận an ninh nhân dân vững chắc, giữ vững trật tự an toàn xã hội trên địa bàn',
     iconName: 'Shield',
-    accent: 'from-slate-800/90 via-slate-900/85 to-slate-950/95',
+    accent: 'from-slate-950/75 via-slate-900/20 to-transparent',
     defaultBg: 'https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?w=800&auto=format&fit=crop&q=80',
     route: '/hoat-dong-mttq',
     presets: [
@@ -38,7 +38,7 @@ export const DEFAULT_PHONG_TRAO: PhongTraoItem[] = [
     tag: 'Phong trào 02',
     desc: 'Chỉnh trang đô thị xanh - sạch - đẹp, tạo mảng xanh môi trường sống văn minh, thân thiện',
     iconName: 'Flower2',
-    accent: 'from-pink-800/90 via-rose-900/85 to-rose-950/95',
+    accent: 'from-rose-950/75 via-rose-900/20 to-transparent',
     defaultBg: 'https://images.unsplash.com/photo-1490750967868-88df5691cc52?w=800&auto=format&fit=crop&q=80',
     route: '/hoat-dong-mttq',
     presets: [
@@ -55,7 +55,7 @@ export const DEFAULT_PHONG_TRAO: PhongTraoItem[] = [
     tag: 'Phong trào 03',
     desc: 'Đồng hành, hỗ trợ tái hòa nhập cộng đồng, tạo việc làm và xây dựng cuộc sống mới ấm no',
     iconName: 'FileText',
-    accent: 'from-violet-800/90 via-purple-900/85 to-purple-950/95',
+    accent: 'from-purple-950/75 via-purple-900/20 to-transparent',
     defaultBg: 'https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=800&auto=format&fit=crop&q=80',
     route: '/an-sinh-xa-hoi',
     presets: [

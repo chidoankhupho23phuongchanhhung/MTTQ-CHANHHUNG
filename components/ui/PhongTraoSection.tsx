@@ -352,10 +352,10 @@ export default function PhongTraoSection({ className }: PhongTraoSectionProps) {
                 <img
                   src={currentBg}
                   alt={item.label}
-                  className="w-full h-full object-cover group-hover/thumb:scale-105 transition-transform"
+                  className="w-full h-full object-cover group-hover/thumb:scale-105 transition-transform duration-300"
                 />
-                <div className={cn("absolute inset-0 bg-gradient-to-t pointer-events-none", item.accent)} />
-                <div className="absolute inset-0 bg-black/20 pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent pointer-events-none" />
+                <div className={cn("absolute inset-0 bg-gradient-to-t pointer-events-none opacity-40", item.accent)} />
                 <div className="absolute bottom-1.5 left-2 right-2 flex items-center justify-between text-white drop-shadow">
                   <span className="text-[10px] font-extrabold uppercase line-clamp-1">
                     {item.shortLabel}
