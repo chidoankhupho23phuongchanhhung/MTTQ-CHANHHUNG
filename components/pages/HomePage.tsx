@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 import {
   MessageSquare, Bot, Compass, BookOpen,
   Shield, Flower2, FileText,
-  Users, ArrowRight, Globe, Search, Sparkles, X, ChevronRight, ExternalLink
+  Users, ArrowRight, Globe
 } from 'lucide-react';
 import {
   DEFAULT_PHONG_TRAO,
@@ -100,44 +100,9 @@ const FANPAGES: FanpageConfig[] = [
   }
 ];
 
-interface SearchableItem {
-  id: string;
-  title: string;
-  desc: string;
-  category: string;
-  route?: string;
-  url?: string;
-}
-
-const SEARCHABLE_ITEMS: SearchableItem[] = [
-  { id: 'vh-hcm', title: 'Không gian Văn hóa Hồ Chí Minh', desc: 'Tham quan bảo tàng 3D, triển lãm kỷ vật và hình ảnh Bác Hồ', category: 'Văn hóa 3D', route: '/khong-gian-van-hoa-hcm' },
-  { id: 'ai-bot', title: 'Trợ lý AI Mặt trận số', desc: 'Hỏi đáp thủ tục hành chính, tư vấn chính sách, soạn thảo công văn', category: 'Trợ lý AI', route: '/tong-dai-ai' },
-  { id: 'tai-lieu', title: 'Tài liệu Sinh hoạt & Tuyên truyền', desc: 'Văn bản, biểu mẫu, nghị quyết sinh hoạt chi bộ và tổ dân phố', category: 'Tài liệu số', url: DRIVE_FOLDER_URL },
-  { id: 'phan-anh-form', title: 'Hộp thư Ý Đảng - Lòng dân', desc: 'Gửi kiến nghị, đóng góp ý kiến xây dựng chính quyền địa phương', category: 'Phản ánh', url: GOOGLE_FORM_URL },
-  { id: 'dich-vu-cong', title: 'Dịch vụ công trực tuyến', desc: 'Cổng dịch vụ công quốc gia, giải quyết thủ tục mức độ 3, 4', category: 'Dịch vụ công', url: DICH_VU_CONG_URL },
-  { id: 'mttq-tphcm', title: 'Mặt trận số Thành phố Hồ Chí Minh', desc: 'Cổng thông tin Mặt trận Tổ quốc Việt Nam TP. Hồ Chí Minh', category: 'Cổng liên thông', url: MAT_TRAN_SO_TPHCM_URL },
-  { id: 'ban-do', title: 'Bản đồ số Phường Chánh Hưng', desc: 'Định vị địa giới hành chính, cơ quan, trụ sở khu phố phường', category: 'Bản đồ', url: 'https://www.google.com/maps/place/Ph%C6%B0%E1%BB%9Dng+Ch%C3%A1nh+H%C6%B0ng,+Qu%E1%BA%ADn+8,+Th%C3%A0nh+ph%E1%BB%91+H%E1%BB%93+Ch%C3%AD+Minh' },
-  { id: 'pt-toan-dan', title: 'Toàn dân đoàn kết xây dựng nông thôn mới, đô thị văn minh', desc: 'Cuộc vận động toàn dân đoàn kết, nâng cao chất lượng đời sống', category: 'Phong trào', route: '/phong-trao/toan-dan-doan-ket' },
-  { id: 'pt-vi-nguoi-ngheo', title: 'Vì người nghèo - Không để ai bị bỏ lại phía sau', desc: 'Chăm lo gia đình chính sách, hộ khó khăn, xây nhà tình thương', category: 'Phong trào', route: '/phong-trao/vi-nguoi-ngheo' },
-  { id: 'pt-sang-tao', title: 'Đoàn kết sáng tạo, nâng cao năng suất chất lượng', desc: 'Sáng kiến cải tiến số hóa quy trình và ứng dụng công nghệ', category: 'Phong trào', route: '/phong-trao/doan-ket-sang-tao' },
-  { id: 'fp-mttq', title: 'Fanpage MTTQ Việt Nam Phường Chánh Hưng', desc: 'Kênh truyền thông chính thức Mặt trận Tổ quốc phường', category: 'Đoàn thể', url: 'https://www.facebook.com/profile.php?id=61580661372890' },
-  { id: 'fp-congdoan', title: 'Fanpage Công Đoàn Phường Chánh Hưng', desc: 'Kênh thông tin tổ chức Công Đoàn Phường Chánh Hưng', category: 'Đoàn thể', url: 'https://www.facebook.com/search/top?q=C%C3%B4ng%20%C4%90o%C3%A0n%20Ph%C6%B0%E1%BB%9Dng%20Ch%C3%A1nh%20H%C6%B0ng' },
-  { id: 'fp-doan', title: 'Fanpage Đoàn TNCS Hồ Chí Minh Phường Chánh Hưng', desc: 'Kênh thông tin phong trào thanh niên xung kích Chánh Hưng', category: 'Đoàn thể', url: 'https://www.facebook.com/search/top?q=%C4%90o%C3%A0n%20Thanh%20Ni%C3%AAn%20Ph%C6%B0%E1%BB%9Dng%20Ch%C3%A1nh%20H%C6%B0ng' },
-  { id: 'fp-phunu', title: 'Fanpage Hội Liên hiệp Phụ nữ Phường Chánh Hưng', desc: 'Kênh thông tin phong trào phụ nữ và bình đẳng giới', category: 'Đoàn thể', url: 'https://www.facebook.com/search/top?q=H%E1%BB%99i%20Li%C3%AAn%20hi%E1%BB%87p%20Ph%E1%BB%A5%20n%E1%BB%AF%20Ph%C6%B0%E1%BB%9Dng%20Ch%C3%A1nh%20H%C6%B0ng' },
-  { id: 'tt-cu-tru', title: 'Thủ tục Cư trú: Đăng ký thường trú / tạm trú / lưu trú', desc: 'Quy trình giải quyết và chuẩn bị hồ sơ trên Cổng DVC', category: 'Thủ tục DVC', url: DICH_VU_CONG_URL },
-  { id: 'tt-ho-tich', title: 'Thủ tục Hộ tịch: Đăng ký khai sinh, kết hôn, trích lục', desc: 'Quy trình tiếp nhận và xử lý hồ sơ hộ tịch điện tử', category: 'Thủ tục DVC', url: DICH_VU_CONG_URL },
-  { id: 'tt-chung-thuc', title: 'Chứng thực bản sao điện tử từ bản chính', desc: 'Quy trình chứng thực hồ sơ điện tử liên thông', category: 'Thủ tục DVC', url: DICH_VU_CONG_URL },
-  { id: 'phan-anh-page', title: 'Gửi phản ánh - Kiến nghị nhân dân', desc: 'Cổng phản ánh và theo dõi kết quả giải quyết kiến nghị', category: 'Phản ánh', route: '/phan-anh' },
-  { id: 'tra-cuu', title: 'Tra cứu tiến độ giải quyết phản ánh', desc: 'Kiểm tra mã hồ sơ phản ánh và câu trả lời từ MTTQ', category: 'Tra cứu', route: '/tra-cuu-phan-anh' },
-  { id: 'lich-sk', title: 'Lịch sự kiện & Họp khu phố', desc: 'Lịch sinh hoạt cộng đồng, tiếp xúc cử tri và ngày hội đại đoàn kết', category: 'Lịch hoạt động', route: '/lich-su-kien' },
-];
-
 export default function HomePage() {
   const { setCurrentRoute, setViewMode } = useAppStore();
   const [phongTraoOpen, setPhongTraoOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchFocused, setSearchFocused] = useState(false);
-  const searchContainerRef = useRef<HTMLDivElement>(null);
 
   const handleNav = (route: string) => {
     setCurrentRoute(route);
@@ -150,44 +115,6 @@ export default function HomePage() {
   };
 
   const handleExternal = (url: string) => window.open(url, '_blank', 'noopener,noreferrer');
-
-  const handleItemSelect = (item: SearchableItem) => {
-    setSearchFocused(false);
-    setSearchQuery('');
-    if (item.route) {
-      handleNav(item.route);
-    } else if (item.url) {
-      handleExternal(item.url);
-    }
-  };
-
-  const filteredSearchItems = searchQuery.trim()
-    ? SEARCHABLE_ITEMS.filter(item =>
-        item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.desc.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.category.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    : [];
-
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (searchContainerRef.current && !searchContainerRef.current.contains(e.target as Node)) {
-        setSearchFocused(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const SUGGESTION_CHIPS = [
-    { label: 'Trợ lý AI', icon: '✨', action: () => handleNav('/tong-dai-ai') },
-    { label: 'Không gian VH HCM', icon: '🏛️', action: () => handleNav('/khong-gian-van-hoa-hcm') },
-    { label: 'Dịch vụ công', icon: '📋', action: () => handleExternal(DICH_VU_CONG_URL) },
-    { label: 'Gửi phản ánh', icon: '💬', action: () => handleExternal(GOOGLE_FORM_URL) },
-    { label: 'Tài liệu số', icon: '📂', action: () => handleExternal(DRIVE_FOLDER_URL) },
-    { label: 'Bản đồ số', icon: '🗺️', action: () => handleExternal('https://www.google.com/maps/place/Ph%C6%B0%E1%BB%9Dng+Ch%C3%A1nh+H%C6%B0ng,+Qu%E1%BA%ADn+8,+Th%C3%A0nh+ph%E1%BB%91+H%E1%BB%93+Ch%C3%AD+Minh') },
-    { label: 'Phong trào thi đua', icon: '🏆', action: () => setPhongTraoOpen(prev => !prev) },
-  ];
 
   const getFanpageUrl = (id: string, defaultUrl: string) => {
     if (typeof window !== 'undefined') {
@@ -479,153 +406,6 @@ export default function HomePage() {
               <p className="text-[10px] sm:text-xs md:text-sm font-bold text-yellow-300 uppercase tracking-tight sm:tracking-wide text-center whitespace-nowrap drop-shadow-sm px-3.5 py-1.5 rounded-full bg-black/25 backdrop-blur-xs border border-yellow-400/30">
                 &quot;{slogan}&quot;
               </p>
-            </div>
-
-            {/* ════════════════════════════════════════════
-                GOOGLE MATERIAL DESIGN 3 PILL SEARCH BAR
-            ════════════════════════════════════════════ */}
-            <div ref={searchContainerRef} className="w-full max-w-2xl mx-auto px-1 sm:px-2 mt-3 sm:mt-5 relative z-30">
-              <div className={cn(
-                "relative flex items-center gap-2.5 sm:gap-3 w-full rounded-full transition-all duration-200",
-                "bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border",
-                searchFocused
-                  ? "border-blue-500 shadow-[0_8px_32px_rgba(59,130,246,0.25)] ring-4 ring-blue-500/20"
-                  : "border-white/40 shadow-[0_6px_25px_rgba(0,0,0,0.18)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.25)]"
-              )}>
-                {/* Search Icon */}
-                <div className="pl-4 sm:pl-5 flex items-center justify-center flex-shrink-0">
-                  <Search className="h-4.5 w-4.5 sm:h-5 sm:w-5 text-blue-600 dark:text-blue-400" />
-                </div>
-
-                {/* Input */}
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onFocus={() => setSearchFocused(true)}
-                  placeholder="Tìm dịch vụ công, thủ tục, tài liệu, phản ánh..."
-                  className="w-full py-3 sm:py-3.5 bg-transparent text-xs sm:text-sm font-semibold text-slate-800 dark:text-white placeholder:text-slate-400 focus:outline-none"
-                />
-
-                {/* Clear & Ask AI Buttons */}
-                <div className="pr-2 sm:pr-2.5 flex items-center gap-1.5 flex-shrink-0">
-                  {searchQuery && (
-                    <button
-                      type="button"
-                      onClick={() => setSearchQuery('')}
-                      className="p-1 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
-                      title="Xoá tìm kiếm"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  )}
-
-                  <button
-                    type="button"
-                    onClick={() => handleNav('/tong-dai-ai')}
-                    className="flex items-center gap-1 px-3 sm:px-3.5 py-1.5 rounded-full bg-gradient-to-r from-blue-600 via-indigo-600 to-amber-500 text-white text-[11px] font-bold shadow-sm hover:shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer select-none"
-                    title="Trợ lý AI Mặt trận"
-                  >
-                    <Sparkles className="h-3.5 w-3.5" />
-                    <span className="hidden xs:inline">Hỏi AI</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Autocomplete Results Panel */}
-              <AnimatePresence>
-                {searchFocused && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -8, scale: 0.98 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: -8, scale: 0.98 }}
-                    transition={{ duration: 0.15 }}
-                    className="absolute left-1 right-1 sm:left-2 sm:right-2 mt-2 bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-3xl border border-slate-200/80 dark:border-slate-800/80 shadow-2xl p-2 z-50 max-h-80 overflow-y-auto no-scrollbar text-left"
-                  >
-                    {filteredSearchItems.length > 0 ? (
-                      <div className="flex flex-col gap-1">
-                        <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 dark:border-slate-800 flex justify-between">
-                          <span>Kết quả phù hợp ({filteredSearchItems.length})</span>
-                          <span>Bấm để truy cập</span>
-                        </div>
-                        {filteredSearchItems.map((item) => (
-                          <div
-                            key={item.id}
-                            onClick={() => handleItemSelect(item)}
-                            className="flex items-start justify-between gap-3 p-2.5 rounded-2xl hover:bg-blue-50/80 dark:hover:bg-blue-950/30 transition-all cursor-pointer group"
-                          >
-                            <div className="flex flex-col min-w-0">
-                              <div className="flex items-center gap-2">
-                                <span className="text-xs sm:text-[13px] font-bold text-slate-800 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 truncate">
-                                  {item.title}
-                                </span>
-                                <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 flex-shrink-0">
-                                  {item.category}
-                                </span>
-                              </div>
-                              <span className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5">
-                                {item.desc}
-                              </span>
-                            </div>
-                            <div className="p-1 rounded-full text-slate-400 group-hover:text-blue-600 group-hover:translate-x-0.5 transition-all flex-shrink-0 mt-0.5">
-                              {item.url ? <ExternalLink className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : searchQuery.trim() ? (
-                      <div className="p-4 text-center">
-                        <p className="text-xs text-slate-500 dark:text-slate-400">
-                          Không tìm thấy kết quả cho &quot;{searchQuery}&quot;
-                        </p>
-                        <button
-                          type="button"
-                          onClick={() => handleNav('/tong-dai-ai')}
-                          className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-600 text-white text-xs font-bold shadow-sm"
-                        >
-                          <Sparkles className="h-3 w-3" />
-                          Hỏi Trợ lý AI về vấn đề này
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="flex flex-col gap-1 p-1">
-                        <div className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                          Gợi ý truy cập nhanh
-                        </div>
-                        {SEARCHABLE_ITEMS.slice(0, 5).map((item) => (
-                          <div
-                            key={item.id}
-                            onClick={() => handleItemSelect(item)}
-                            className="flex items-center justify-between p-2 rounded-xl hover:bg-slate-100/70 dark:hover:bg-slate-800/60 cursor-pointer"
-                          >
-                            <span className="text-xs font-medium text-slate-700 dark:text-slate-300 truncate">
-                              {item.title}
-                            </span>
-                            <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-400">
-                              {item.category}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              {/* Google Material 3 Suggestion Chips */}
-              <div className="flex items-center justify-center flex-wrap gap-1.5 sm:gap-2 mt-3 sm:mt-3.5">
-                {SUGGESTION_CHIPS.map((chip) => (
-                  <button
-                    key={chip.label}
-                    type="button"
-                    onClick={chip.action}
-                    className="inline-flex items-center gap-1 px-2.5 sm:px-3 py-1 rounded-full bg-black/30 hover:bg-black/40 text-white backdrop-blur-md border border-white/20 hover:border-white/40 text-[10.5px] sm:text-[11.5px] font-semibold transition-all shadow-xs active:scale-95 cursor-pointer whitespace-nowrap"
-                  >
-                    <span>{chip.icon}</span>
-                    <span>{chip.label}</span>
-                  </button>
-                ))}
-              </div>
             </div>
 
           </motion.div>
