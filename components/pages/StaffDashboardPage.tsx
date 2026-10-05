@@ -22,18 +22,20 @@ import {
   Award, CornerDownRight, Check, Eye, Briefcase,
   Database, Inbox, BarChart3, Settings, Search, Bell,
   Upload, Download, RefreshCw, Globe, Lock, Save,
-  LayoutDashboard, Info
+  LayoutDashboard, Info, Landmark
 } from 'lucide-react';
 import { formatDate, cn } from '@/lib/utils';
 import { StaffWorkItem, FeedbackItem } from '@/lib/types';
 import FanpageSection from '../ui/FanpageSection';
 import PhongTraoSection from '../ui/PhongTraoSection';
 import MTTQIntroAdminSection from '../ui/MTTQIntroAdminSection';
+import KhongGianTrungBayAdminSection from '../ui/KhongGianTrungBayAdminSection';
 
 /* ── Staff Mobile Tab Bar (Lướt ngang linh hoạt trên điện thoại) ── */
 const STAFF_NAV_TABS = [
   { id: 'tong-quan', label: 'Tổng quan', icon: LayoutDashboard },
   { id: 'quan-ly-gioi-thieu', label: 'Quản lý Giới thiệu', icon: Info },
+  { id: 'khong-gian-trung-bay', label: 'Không gian trưng bày & Hiện vật', icon: Landmark },
   { id: 'quan-ly-so', label: 'Quản lý số', icon: Database },
   { id: 'giai-quyet', label: 'Giải quyết', icon: Inbox },
   { id: 'van-thu', label: 'Văn thư', icon: ClipboardList },
@@ -75,6 +77,19 @@ function TabQuanLyGioiThieu({ activeTab, onSelectTab }: { activeTab: string; onS
       <StaffMobileTabBar activeTab={activeTab} onSelectTab={onSelectTab} />
       <SectionTitle title="Quản lý Giới thiệu MTTQ" subtitle="Chỉnh sửa nội dung, khẩu hiệu, danh sách Ban Thường trực và hình ảnh chân dung" />
       <MTTQIntroAdminSection className="mb-6" />
+    </PageContainer>
+  );
+}
+
+function TabKhongGianTrungBay({ activeTab, onSelectTab }: { activeTab: string; onSelectTab: (id: string) => void }) {
+  return (
+    <PageContainer>
+      <StaffMobileTabBar activeTab={activeTab} onSelectTab={onSelectTab} />
+      <SectionTitle 
+        title="Không gian trưng bày & Hiện vật" 
+        subtitle="Tùy biến phông nền không gian 3D, bổ sung và biên tập các hiện vật lịch sử phục vụ nhân dân" 
+      />
+      <KhongGianTrungBayAdminSection className="mb-6" />
     </PageContainer>
   );
 }
@@ -524,6 +539,7 @@ export default function StaffDashboardPage() {
 
   // Route to sub-tab components
   if (activeTab === 'quan-ly-gioi-thieu') return <TabQuanLyGioiThieu activeTab={activeTab} onSelectTab={handleSelectTab} />;
+  if (activeTab === 'khong-gian-trung-bay') return <TabKhongGianTrungBay activeTab={activeTab} onSelectTab={handleSelectTab} />;
   if (activeTab === 'quan-ly-so') return <TabQuanLySo activeTab={activeTab} onSelectTab={handleSelectTab} />;
   if (activeTab === 'giai-quyet') return (
     <TabGiaiQuyet 

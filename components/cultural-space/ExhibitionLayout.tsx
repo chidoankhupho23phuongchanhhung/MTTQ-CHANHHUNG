@@ -102,7 +102,7 @@ export default function ExhibitionLayout() {
       } else {
         // Fallback intelligent responses based on keyword queries in context
         setTimeout(() => {
-          let response = 'Cảm ơn quý khách đã quan tâm. Chủ tịch Hồ Chí Minh là hiện thân của tinh thần Đại đoàn kết toàn dân tộc. Quý khách có thể khám phá thêm tại các khu vực Mẫu vật 3D, Tủ sách & Di vật và Biên niên sử.';
+          let response = 'Cảm ơn quý khách đã quan tâm. Chủ tịch Hồ Chí Minh là hiện thân của tinh thần Đại đoàn kết toàn dân tộc. Quý khách có thể khám phá thêm tại các khu vực Không gian trưng bày 3D, Tủ sách & Di vật và Biên niên sử.';
           const lower = userMsg.toLowerCase();
           if (lower.includes('mặt trận') || lower.includes('mat tran') || lower.includes('18/11') || lower.includes('đại đoàn kết')) {
             response = 'Mặt trận Dân tộc Thống nhất Việt Nam (nay là MTTQ Việt Nam) được thành lập ngày 18/11/1930 theo sáng kiến của Lãnh tụ Nguyễn Ái Quốc. Bác khẳng định: "Đoàn kết, đoàn kết, đại đoàn kết. Thành công, thành công, đại thành công" - cội nguồn sức mạnh bách chiến bách thắng của dân tộc ta.';
@@ -204,7 +204,7 @@ export default function ExhibitionLayout() {
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
-                MẪU VẬT 3D
+                KHÔNG GIAN TRƯNG BÀY 3D
               </button>
               <button 
                 onClick={() => setCenterViewMode('books')}

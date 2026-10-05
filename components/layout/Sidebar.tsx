@@ -10,7 +10,7 @@ import {
   MessageSquare, Search, Bot, FolderKanban, Calendar,
   Mail, Compass, LayoutDashboard, Database,
   Inbox, ClipboardList, BarChart3, Settings,
-  LogOut, ChevronRight, Info, X
+  LogOut, ChevronRight, Info, X, Landmark
 } from 'lucide-react';
 
 /* Facebook inline SVG */
@@ -35,6 +35,13 @@ const STAFF_SECTIONS = [
     icon: Info,
     route: '/cong-lam-viec-can-bo?tab=quan-ly-gioi-thieu',
     desc: 'Nội dung, ảnh & nhân sự'
+  },
+  {
+    id: 'khong-gian-trung-bay',
+    label: 'Không gian trưng bày',
+    icon: Landmark,
+    route: '/cong-lam-viec-can-bo?tab=khong-gian-trung-bay',
+    desc: 'Hiện vật & Không gian 3D'
   },
   {
     id: 'quan-ly-so',

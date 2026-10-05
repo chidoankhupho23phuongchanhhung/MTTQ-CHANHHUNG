@@ -2,7 +2,8 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import * as THREE from 'three';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Heart, Sparkles, Eye, Sun, Star, Upload, Trash2, Lock, Unlock, ShieldAlert, Palette, Check, Plus } from 'lucide-react';
+import { X, Heart, Sparkles, Eye, Sun, Star, Upload, Trash2, Lock, Unlock, ShieldAlert, Palette, Check, Plus, Settings } from 'lucide-react';
+import { useAppStore } from '@/store/useAppStore';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface Cabinet {
@@ -160,6 +161,8 @@ const ADMIN_PASSWORD = 'admin2026';
 
 // ─── Component ────────────────────────────────────────────────────────────────
 export default function VirtualMuseumGame({ onSwitchToBooks, onOpenChat }: VirtualMuseumGameProps) {
+  const viewMode = useAppStore(s => s.viewMode);
+  const isStaff = viewMode === 'staff';
   const [cabinets, setCabinets] = useState<Cabinet[]>(() => {
     if (typeof window !== 'undefined') {
       try {
@@ -324,6 +327,28 @@ export default function VirtualMuseumGame({ onSwitchToBooks, onOpenChat }: Virtu
       .catch(() => {});
   }, [changeWallpaper]);
 
+  // Listen for real-time updates from Admin Dashboard
+  useEffect(() => {
+    const handleCabinetsUpdated = (e: Event) => {
+      const customEvent = e as CustomEvent<Cabinet[]>;
+      if (Array.isArray(customEvent.detail) && customEvent.detail.length > 0) {
+        setCabinets(customEvent.detail);
+      }
+    };
+    const handleCulturalSpaceUpdated = (e: Event) => {
+      const customEvent = e as CustomEvent<{ wallBackUrl?: string; wallSideUrl?: string }>;
+      if (customEvent.detail?.wallBackUrl) {
+        changeWallpaper(customEvent.detail.wallBackUrl, customEvent.detail.wallSideUrl);
+      }
+    };
+    window.addEventListener('cabinets-updated', handleCabinetsUpdated);
+    window.addEventListener('cultural-space-updated', handleCulturalSpaceUpdated);
+    return () => {
+      window.removeEventListener('cabinets-updated', handleCabinetsUpdated);
+      window.removeEventListener('cultural-space-updated', handleCulturalSpaceUpdated);
+    };
+  }, [changeWallpaper]);
+
   const onBgFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -435,7 +460,7 @@ export default function VirtualMuseumGame({ onSwitchToBooks, onOpenChat }: Virtu
     const newCab: Cabinet = {
       id: `cab-custom-${Date.now()}`,
       name: newExName.trim(),
-      category: newExCategory.trim() || 'Mẫu vật trưng bày',
+      category: newExCategory.trim() || 'Hiện vật trưng bày',
       description: newExDesc.trim() || 'Hiện vật trưng bày lưu giữ tại Không gian Văn hóa Hồ Chí Minh - MTTQ Phường Chánh Hưng.',
       image: newExImage || '/cab1.jpg',
       defaultImage: newExImage || '/cab1.jpg',
@@ -475,7 +500,7 @@ export default function VirtualMuseumGame({ onSwitchToBooks, onOpenChat }: Virtu
   };
 
   const handleDeleteCustomCabinet = (id: string) => {
-    if (typeof window !== 'undefined' && !window.confirm('Bạn có chắc chắn muốn xoá mẫu vật trưng bày này?')) return;
+    if (typeof window !== 'undefined' && !window.confirm('Bạn có chắc chắn muốn xoá hiện vật trưng bày này?')) return;
     const updated = cabinets.filter(c => c.id !== id);
     setCabinets(updated);
     setSelectedCabinet(null);
@@ -1477,7 +1502,7 @@ export default function VirtualMuseumGame({ onSwitchToBooks, onOpenChat }: Virtu
       <div className="relative w-full flex-1 min-h-0">
         <canvas ref={canvasRef} className="w-full h-full block outline-none touch-none" style={{ touchAction: 'none' }} />
 
-        {/* Change Background & Add Exhibit Buttons */}
+        {/* Exhibition Space Actions Toolbar */}
         <div className="absolute top-4 left-4 z-20 flex items-center gap-2">
           <button
             onClick={() => setShowBgModal(true)}
@@ -1489,15 +1514,17 @@ export default function VirtualMuseumGame({ onSwitchToBooks, onOpenChat }: Virtu
             <span className="sm:hidden">Nền 3D</span>
           </button>
 
-          <button
-            onClick={() => setShowAddExhibitModal(true)}
-            className="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-bold px-3 py-1.5 rounded-xl border border-yellow-500/50 bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-300 hover:text-yellow-100 backdrop-blur-md shadow-lg transition-all duration-200 cursor-pointer active:scale-95"
-            title="Thêm hiện vật, mẫu vật trưng bày mới vào không gian 3D"
-          >
-            <Plus className="w-3.5 h-3.5 text-yellow-400" />
-            <span className="hidden sm:inline">Thêm mẫu vật</span>
-            <span className="sm:hidden">+ Mẫu vật</span>
-          </button>
+          {isStaff && (
+            <a
+              href="/cong-lam-viec-can-bo?tab=khong-gian-trung-bay"
+              className="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-bold px-3 py-1.5 rounded-xl border border-yellow-500/50 bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-300 hover:text-yellow-100 backdrop-blur-md shadow-lg transition-all duration-200 cursor-pointer active:scale-95"
+              title="Chuyển đến Bảng điều khiển cán bộ để quản lý Không gian trưng bày & Hiện vật"
+            >
+              <Settings className="w-3.5 h-3.5 text-yellow-400" />
+              <span className="hidden sm:inline">Quản lý Hiện vật (Admin)</span>
+              <span className="sm:hidden">Quản trị</span>
+            </a>
+          )}
         </div>
 
         {/* Navigation Tip */}
@@ -1749,11 +1776,11 @@ export default function VirtualMuseumGame({ onSwitchToBooks, onOpenChat }: Virtu
                       className="flex-1 py-2 rounded-xl bg-red-950/50 border border-red-800/35 hover:bg-red-900/60 hover:border-red-700/50 text-red-400 font-bold text-[11px] flex items-center justify-center gap-1.5 duration-200 cursor-pointer"
                     ><Heart className={`w-3.5 h-3.5 ${activeTributeId===cab.id?'fill-red-500':''}`} /> Tri ân ({tributeCounts[cab.id]||0})</button>
 
-                    {cab.id.startsWith('cab-custom-') && (
+                    {isStaff && cab.id.startsWith('cab-custom-') && (
                       <button
                         onClick={() => handleDeleteCustomCabinet(cab.id)}
                         className="py-2 px-3 rounded-xl bg-red-900/40 hover:bg-red-900/70 border border-red-700/50 text-red-300 font-bold text-[11px] flex items-center justify-center gap-1.5 duration-200 cursor-pointer"
-                        title="Xoá mẫu vật này"
+                        title="Xoá hiện vật này"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                         <span className="hidden sm:inline">Xoá</span>
@@ -1975,7 +2002,7 @@ export default function VirtualMuseumGame({ onSwitchToBooks, onOpenChat }: Virtu
                 <div className="flex items-center gap-2">
                   <Plus className="w-4 h-4 text-yellow-400" />
                   <h3 className="text-sm font-extrabold text-yellow-100 uppercase tracking-wider">
-                    Thêm mẫu vật trưng bày mới
+                    Thêm hiện vật trưng bày mới
                   </h3>
                 </div>
                 <button
@@ -1990,7 +2017,7 @@ export default function VirtualMuseumGame({ onSwitchToBooks, onOpenChat }: Virtu
               <form onSubmit={handleCreateExhibit} className="space-y-3.5 text-xs">
                 <div>
                   <label className="text-[10px] font-mono text-yellow-600/90 uppercase tracking-wider block mb-1">
-                    Tên mẫu vật / Kỷ vật *
+                    Tên hiện vật / Kỷ vật *
                   </label>
                   <input
                     type="text"
@@ -2050,7 +2077,7 @@ export default function VirtualMuseumGame({ onSwitchToBooks, onOpenChat }: Virtu
                 {/* Image upload */}
                 <div>
                   <label className="text-[10px] font-mono text-yellow-600/90 uppercase tracking-wider block mb-1">
-                    Hình ảnh mẫu vật
+                    Hình ảnh hiện vật
                   </label>
                   <div className="flex items-center gap-3">
                     {newExImage ? (
@@ -2096,7 +2123,7 @@ export default function VirtualMuseumGame({ onSwitchToBooks, onOpenChat }: Virtu
                     rows={2}
                     value={newExDesc}
                     onChange={(e) => setNewExDesc(e.target.value)}
-                    placeholder="Giới thiệu khái quát ý nghĩa của mẫu vật..."
+                    placeholder="Giới thiệu khái quát ý nghĩa của hiện vật..."
                     className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-white placeholder-gray-500 outline-none focus:border-yellow-500/60 resize-none"
                   />
                 </div>
