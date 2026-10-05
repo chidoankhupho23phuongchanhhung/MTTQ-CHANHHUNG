@@ -214,8 +214,8 @@ export default function HomePage() {
     if (cached.slogan) setSlogan(cached.slogan);
     if (cached.heroBannerUrl) setHeroBannerUrl(cached.heroBannerUrl);
 
-    // Also fetch from server to get the latest
-    fetch('/api/settings', { headers: { 'Cache-Control': 'no-cache' } })
+    // Also fetch from server to get the latest (bypass mobile browser disk cache)
+    fetch(`/api/settings?_t=${Date.now()}`, { cache: 'no-store' })
       .then(r => r.ok ? r.json() : null)
       .then(data => {
         if (data?.intro?.heroBannerUrl) setHeroBannerUrl(data.intro.heroBannerUrl);
@@ -257,7 +257,7 @@ export default function HomePage() {
 
       // 2. Server settings sync (persists across devices & restarts)
       try {
-        const res = await fetch('/api/settings');
+        const res = await fetch(`/api/settings?_t=${Date.now()}`, { cache: 'no-store' });
         if (res.ok) {
           const data = await res.json();
           if (data.fanpages) {

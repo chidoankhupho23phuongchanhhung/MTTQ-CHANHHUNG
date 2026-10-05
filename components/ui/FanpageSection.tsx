@@ -284,7 +284,7 @@ export default function FanpageSection({ className }: { className?: string }) {
 
       // 2. Server settings sync
       try {
-        const res = await fetch('/api/settings');
+        const res = await fetch(`/api/settings?_t=${Date.now()}`, { cache: 'no-store' });
         if (res.ok) {
           const data = await res.json();
           if (data.fanpages) {

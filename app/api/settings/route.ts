@@ -19,11 +19,13 @@ async function readSettings() {
   // 1. Luôn ưu tiên đọc từ Cloud Database (Firestore) để đảm bảo đồng bộ 100% trên Vercel và mọi thiết bị
   try {
     const cloudData = await fetchCloudSettings();
-    if (cloudData && (cloudData.intro || cloudData.fanpages || cloudData.phongtrao)) {
+    if (cloudData && (cloudData.intro || cloudData.fanpages || cloudData.phongtrao || cloudData.culturalSpace || cloudData.cabinets)) {
       return {
         fanpages: cloudData.fanpages || {},
         phongtrao: cloudData.phongtrao || {},
         intro: cloudData.intro || {},
+        culturalSpace: cloudData.culturalSpace || { wallBackUrl: '/wall-back.png', wallSideUrl: '/wall-side.png' },
+        cabinets: cloudData.cabinets || [],
         drive: cloudData.drive || {
           folderId: '1IEL2r2RZf1UnIeYiD6p753rWaSeTAi6J',
           scriptUrl: process.env.GOOGLE_APPS_SCRIPT_URL || '',
@@ -42,6 +44,8 @@ async function readSettings() {
       fanpages: parsed.fanpages || {},
       phongtrao: parsed.phongtrao || {},
       intro: parsed.intro || {},
+      culturalSpace: parsed.culturalSpace || { wallBackUrl: '/wall-back.png', wallSideUrl: '/wall-side.png' },
+      cabinets: parsed.cabinets || [],
       drive: parsed.drive || {
         folderId: '1IEL2r2RZf1UnIeYiD6p753rWaSeTAi6J',
         scriptUrl: process.env.GOOGLE_APPS_SCRIPT_URL || '',
@@ -52,6 +56,8 @@ async function readSettings() {
       fanpages: {},
       phongtrao: {},
       intro: {},
+      culturalSpace: { wallBackUrl: '/wall-back.png', wallSideUrl: '/wall-side.png' },
+      cabinets: [],
       drive: {
         folderId: '1IEL2r2RZf1UnIeYiD6p753rWaSeTAi6J',
         scriptUrl: process.env.GOOGLE_APPS_SCRIPT_URL || '',
@@ -118,6 +124,10 @@ export async function POST(req: NextRequest) {
       if (data) {
         current.drive = { ...current.drive, ...data };
       }
+    } else if (type === 'culturalSpace') {
+      current.culturalSpace = { ...current.culturalSpace, ...data };
+    } else if (type === 'cabinets') {
+      current.cabinets = data;
     }
 
     await writeSettings(current);

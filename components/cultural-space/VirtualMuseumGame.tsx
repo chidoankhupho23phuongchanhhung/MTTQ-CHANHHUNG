@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import * as THREE from 'three';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Heart, Sparkles, Eye, Sun, Star, Upload, Trash2, Lock, Unlock, ShieldAlert, Palette, Check } from 'lucide-react';
+import { X, Heart, Sparkles, Eye, Sun, Star, Upload, Trash2, Lock, Unlock, ShieldAlert, Palette, Check, Plus } from 'lucide-react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface Cabinet {
@@ -160,8 +160,30 @@ const ADMIN_PASSWORD = 'admin2026';
 
 // ─── Component ────────────────────────────────────────────────────────────────
 export default function VirtualMuseumGame({ onSwitchToBooks, onOpenChat }: VirtualMuseumGameProps) {
-  const [cabinets, setCabinets] = useState<Cabinet[]>(DEFAULT_CABINETS);
+  const [cabinets, setCabinets] = useState<Cabinet[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('mttq_cabinets_v2');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+      } catch {}
+    }
+    return DEFAULT_CABINETS;
+  });
   const [paintingImages, setPaintingImages] = useState<Record<string, string | null>>({});
+
+  // Add Exhibit Modal State
+  const [showAddExhibitModal, setShowAddExhibitModal] = useState(false);
+  const [newExName, setNewExName] = useState('');
+  const [newExCategory, setNewExCategory] = useState('Kỷ vật thiêng liêng');
+  const [newExYear, setNewExYear] = useState('');
+  const [newExSource, setNewExSource] = useState('Ủy ban MTTQ Việt Nam Phường Chánh Hưng');
+  const [newExDesc, setNewExDesc] = useState('');
+  const [newExDetails, setNewExDetails] = useState('');
+  const [newExImage, setNewExImage] = useState('');
+  const newExUploadRef = useRef<HTMLInputElement>(null);
 
   const onSwitchToBooksRef = useRef(onSwitchToBooks);
   const onOpenChatRef = useRef(onOpenChat);
@@ -221,6 +243,15 @@ export default function VirtualMuseumGame({ onSwitchToBooks, onOpenChat }: Virtu
   const wallSideUrlRef = useRef(wallSideUrl);
   wallBackUrlRef.current = wallBackUrl;
   wallSideUrlRef.current = wallSideUrl;
+  const cabinetsRef = useRef(cabinets);
+  cabinetsRef.current = cabinets;
+  const rebuildExhibitsRef = useRef<((cabs: Cabinet[]) => void) | null>(null);
+
+  useEffect(() => {
+    if (rebuildExhibitsRef.current) {
+      rebuildExhibitsRef.current(cabinets);
+    }
+  }, [cabinets]);
 
   // ── Change 3D wallpaper handler ─────────────────────────────────────────────
   const changeWallpaper = useCallback((backUrl: string, sideUrl?: string) => {
@@ -233,6 +264,16 @@ export default function VirtualMuseumGame({ onSwitchToBooks, onOpenChat }: Virtu
         localStorage.setItem('mttq_3d_wall_side', targetSide);
       } catch {}
     }
+
+    // Sync to Cloud API so mobile gets the exact same wallpaper
+    fetch('/api/settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'culturalSpace',
+        data: { wallBackUrl: backUrl, wallSideUrl: targetSide },
+      }),
+    }).catch(() => {});
 
     if (textureLoaderRef.current) {
       textureLoaderRef.current.load(backUrl, (tex) => {
@@ -262,6 +303,26 @@ export default function VirtualMuseumGame({ onSwitchToBooks, onOpenChat }: Virtu
       });
     }
   }, []);
+
+  // Fetch 3D cultural space settings from server API (ensuring mobile sync)
+  useEffect(() => {
+    fetch(`/api/settings?_t=${Date.now()}`, { cache: 'no-store' })
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (data) {
+          if (data.culturalSpace?.wallBackUrl) {
+            changeWallpaper(data.culturalSpace.wallBackUrl, data.culturalSpace.wallSideUrl);
+          }
+          if (Array.isArray(data.cabinets) && data.cabinets.length > 0) {
+            setCabinets(data.cabinets);
+            try {
+              localStorage.setItem('mttq_cabinets_v2', JSON.stringify(data.cabinets));
+            } catch {}
+          }
+        }
+      })
+      .catch(() => {});
+  }, [changeWallpaper]);
 
   const onBgFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -352,6 +413,87 @@ export default function VirtualMuseumGame({ onSwitchToBooks, onOpenChat }: Virtu
     if (!def) return;
     setCabinets(p => p.map(c => c.id === id ? { ...c, image: def.defaultImage } : c));
     setSelectedCabinet(p => p?.id === id ? { ...p, image: def.defaultImage } : p);
+  };
+
+  // ── Create & Delete Custom Exhibit ───────────────────────────────────────
+  const onNewExFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const url = ev.target?.result as string;
+      setNewExImage(url);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
+  const handleCreateExhibit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newExName.trim()) return;
+
+    const newCab: Cabinet = {
+      id: `cab-custom-${Date.now()}`,
+      name: newExName.trim(),
+      category: newExCategory.trim() || 'Mẫu vật trưng bày',
+      description: newExDesc.trim() || 'Hiện vật trưng bày lưu giữ tại Không gian Văn hóa Hồ Chí Minh - MTTQ Phường Chánh Hưng.',
+      image: newExImage || '/cab1.jpg',
+      defaultImage: newExImage || '/cab1.jpg',
+      year: newExYear.trim() || 'Hiện đại',
+      source: newExSource.trim() || 'Ủy ban MTTQ Việt Nam Phường Chánh Hưng',
+      details: newExDetails
+        ? newExDetails.split('\n').filter(Boolean)
+        : ['Hiện vật số hoá phục vụ nhân dân tham quan học tập.', 'Biểu trưng của tinh thần đại đoàn kết toàn dân tộc.'],
+      xrayNote: 'Hiện vật số hoá bảo quản theo tiêu chuẩn quốc gia.',
+      infraNote: 'Bảo quản kỹ thuật số.'
+    };
+
+    const updated = [...cabinets, newCab];
+    setCabinets(updated);
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('mttq_cabinets_v2', JSON.stringify(updated));
+      } catch {}
+    }
+
+    // Persist to server API
+    fetch('/api/settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'cabinets',
+        data: updated,
+      }),
+    }).catch(() => {});
+
+    setNewExName('');
+    setNewExDesc('');
+    setNewExYear('');
+    setNewExDetails('');
+    setNewExImage('');
+    setShowAddExhibitModal(false);
+  };
+
+  const handleDeleteCustomCabinet = (id: string) => {
+    if (typeof window !== 'undefined' && !window.confirm('Bạn có chắc chắn muốn xoá mẫu vật trưng bày này?')) return;
+    const updated = cabinets.filter(c => c.id !== id);
+    setCabinets(updated);
+    setSelectedCabinet(null);
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('mttq_cabinets_v2', JSON.stringify(updated));
+      } catch {}
+    }
+
+    // Persist to server API
+    fetch('/api/settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'cabinets',
+        data: updated,
+      }),
+    }).catch(() => {});
   };
 
   const runScan = useCallback((l: 'optical' | 'infra' | 'xray') => {
@@ -518,24 +660,24 @@ export default function VirtualMuseumGame({ onSwitchToBooks, onOpenChat }: Virtu
     const wallBackMat = new THREE.MeshStandardMaterial({ map: wallBackTex, roughness: 0.85, metalness: 0.05 });
     const wallSideMat = new THREE.MeshStandardMaterial({ map: wallSideTex, roughness: 0.85, metalness: 0.05 });
 
-    // Back wall plane (fits exactly between wainscoting cap at y=2.3 and crown molding at y=10.03)
-    const backWallPlane = new THREE.Mesh(new THREE.PlaneGeometry(19.6, 7.7), wallBackMat);
-    backWallPlane.position.set(0, 6.165, -9.79);
+    // Back wall plane (seamless spanning across the full width without column gaps)
+    const backWallPlane = new THREE.Mesh(new THREE.PlaneGeometry(20.4, 7.7), wallBackMat);
+    backWallPlane.position.set(0, 6.165, -9.82);
     backWallPlane.receiveShadow = true;
     scene.add(backWallPlane);
     backWallPlaneRef.current = backWallPlane;
 
-    // Left wall plane (rotation ensures correct orientation of text)
+    // Left wall plane (seamless spanning across the side wall)
     const leftWallPlane = new THREE.Mesh(new THREE.PlaneGeometry(22.0, 7.7), wallSideMat);
-    leftWallPlane.position.set(-9.79, 6.165, -1.0);
+    leftWallPlane.position.set(-9.82, 6.165, -1.0);
     leftWallPlane.rotation.y = Math.PI / 2;
     leftWallPlane.receiveShadow = true;
     scene.add(leftWallPlane);
     leftWallPlaneRef.current = leftWallPlane;
 
-    // Right wall plane (rotation ensures correct orientation of text)
+    // Right wall plane (seamless spanning across the side wall)
     const rightWallPlane = new THREE.Mesh(new THREE.PlaneGeometry(22.0, 7.7), wallSideMat);
-    rightWallPlane.position.set(9.79, 6.165, -1.0);
+    rightWallPlane.position.set(9.82, 6.165, -1.0);
     rightWallPlane.rotation.y = -Math.PI / 2;
     rightWallPlane.receiveShadow = true;
     scene.add(rightWallPlane);
@@ -563,33 +705,7 @@ export default function VirtualMuseumGame({ onSwitchToBooks, onOpenChat }: Virtu
     mkPanel(0.22, 0.18, 22.4, -9.92, 10.12, -1, crownMat);
     mkPanel(0.22, 0.18, 22.4, 9.92, 10.12, -1, crownMat);
 
-    // ── Architectural columns — fluted marble ──
-    const colMat = new THREE.MeshStandardMaterial({ color: 0x1c2236, roughness: 0.5, metalness: 0.12 });
-    const colCapMat = new THREE.MeshStandardMaterial({ color: 0x96793a, roughness: 0.28, metalness: 0.72 });
-    const colPositions = [[-10, -8.5], [-10, 3.5], [10, -8.5], [10, 3.5]];
-    colPositions.forEach(([cx, cz]) => {
-      // Shaft — octagonal for that classical feel
-      const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.35, 9.4, 8), colMat);
-      shaft.position.set(cx, 4.8, cz); shaft.castShadow = true; scene.add(shaft);
-      // Capital top
-      const cap = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.35, 0.9), colCapMat);
-      cap.position.set(cx, 10.15, cz); scene.add(cap);
-      // Base
-      const base = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.3, 0.85), colCapMat);
-      base.position.set(cx, 0.15, cz); scene.add(base);
-      // Subtle column glow uplight
-      const pl = new THREE.PointLight(0xffd080, 1.2, 5, 2);
-      pl.position.set(cx, 0.8, cz); scene.add(pl);
-    });
-
-    // ── Decorative wall sconces between paintings ──
-    const sconceMat = new THREE.MeshStandardMaterial({ color: 0xd4a030, roughness: 0.22, metalness: 0.9, emissive: 0xffd060, emissiveIntensity: 0.35 });
-    [-12, -6, 0, 6, 12].forEach(sx => {
-      const s = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.35, 0.25), sconceMat);
-      s.position.set(sx, 7.5, -9.7); scene.add(s);
-      const pl = new THREE.PointLight(0xffd080, 2.5, 3.5, 2);
-      pl.position.set(sx, 7.2, -9.2); scene.add(pl);
-    });
+    // NOTE: Cột đá và đèn tường ngăn cách đã được gỡ bỏ theo yêu cầu để hình ảnh tường liền mạch 100%
 
     // ── Center aisle carpet ──
     const carpetMat = new THREE.MeshStandardMaterial({ color: 0x1a0e04, roughness: 0.95 });
@@ -639,7 +755,6 @@ export default function VirtualMuseumGame({ onSwitchToBooks, onOpenChat }: Virtu
       g.add(face); interactive.push(face);
       paintingMeshesRef.current[p.id] = face;
 
-
       // Brass name plate below
       const plateMat = new THREE.MeshStandardMaterial({ color: 0xc8980e, roughness: 0.18, metalness: 0.92, emissive: 0xd4a020, emissiveIntensity: 0.08 });
       const plate = new THREE.Mesh(new THREE.BoxGeometry(p.w * 0.62, 0.16, 0.1), plateMat);
@@ -669,11 +784,106 @@ export default function VirtualMuseumGame({ onSwitchToBooks, onOpenChat }: Virtu
       }
     });
 
+    // ═══ BỆ ĐỠ TRANH TRƯNG BÀY & HIỆN VẬT DƯỚI TRANH ═════════════════════════
+    const standWoodMat = new THREE.MeshStandardMaterial({ color: 0x141824, roughness: 0.45, metalness: 0.15 });
+    const standGoldMat = new THREE.MeshStandardMaterial({ color: 0xc8982a, roughness: 0.22, metalness: 0.85 });
+    const standVelvetMat = new THREE.MeshStandardMaterial({ color: 0x7a1414, roughness: 0.9, metalness: 0.05 });
+    const standGlassMat = new THREE.MeshPhysicalMaterial({
+      color: 0xffffff, transparent: true, opacity: 0.35, roughness: 0.05, transmission: 0.9, thickness: 0.5
+    });
+
+    const createPaintingStand = (p: typeof PAINTING_SLOTS[number]) => {
+      const g = new THREE.Group();
+      const standW = p.w * 0.92;
+      const standH = 2.3;
+      const standD = 0.85;
+
+      // Base slab
+      const base = new THREE.Mesh(new THREE.BoxGeometry(standW + 0.2, 0.14, standD + 0.15), standWoodMat);
+      base.position.y = 0.07;
+      base.castShadow = true; base.receiveShadow = true;
+      g.add(base);
+
+      // Gold bottom trim
+      const goldTrim1 = new THREE.Mesh(new THREE.BoxGeometry(standW + 0.16, 0.05, standD + 0.12), standGoldMat);
+      goldTrim1.position.y = 0.165;
+      g.add(goldTrim1);
+
+      // Main column / pedestal body
+      const body = new THREE.Mesh(new THREE.BoxGeometry(standW, standH - 0.45, standD), standWoodMat);
+      body.position.y = (standH - 0.45) / 2 + 0.19;
+      body.castShadow = true; body.receiveShadow = true;
+      g.add(body);
+
+      // Fluted decorative grooves on pedestal front
+      const grooveMat = new THREE.MeshStandardMaterial({ color: 0x0c0f18, roughness: 0.6 });
+      const numGrooves = 4;
+      for (let i = 0; i < numGrooves; i++) {
+        const gx = -standW / 2 + (standW / (numGrooves + 1)) * (i + 1);
+        const groove = new THREE.Mesh(new THREE.BoxGeometry(0.04, standH - 0.65, 0.03), grooveMat);
+        groove.position.set(gx, (standH - 0.45) / 2 + 0.19, standD / 2 + 0.01);
+        g.add(groove);
+      }
+
+      // Gold top molding
+      const goldTrim2 = new THREE.Mesh(new THREE.BoxGeometry(standW + 0.14, 0.06, standD + 0.12), standGoldMat);
+      goldTrim2.position.y = standH - 0.23;
+      g.add(goldTrim2);
+
+      // Top velvet display cushion table
+      const topTable = new THREE.Mesh(new THREE.BoxGeometry(standW + 0.1, 0.12, standD + 0.08), standWoodMat);
+      topTable.position.y = standH - 0.14;
+      g.add(topTable);
+
+      const cushion = new THREE.Mesh(new THREE.BoxGeometry(standW * 0.85, 0.04, standD * 0.75), standVelvetMat);
+      cushion.position.y = standH - 0.06;
+      g.add(cushion);
+
+      // Glass vitrine display box on top of the pedestal
+      const vitrineH = 0.65;
+      const vitrineW = standW * 0.78;
+      const vitrineD = standD * 0.68;
+      const vitrine = new THREE.Mesh(new THREE.BoxGeometry(vitrineW, vitrineH, vitrineD), standGlassMat);
+      vitrine.position.y = standH + vitrineH / 2 - 0.04;
+      g.add(vitrine);
+
+      // Brass name plate on the stand
+      const brassPlate = new THREE.Mesh(new THREE.BoxGeometry(standW * 0.55, 0.14, 0.04), standGoldMat);
+      brassPlate.position.set(0, standH - 0.45, standD / 2 + 0.02);
+      g.add(brassPlate);
+
+      // Soft warm spotlight on the display stand
+      const standLight = new THREE.PointLight(0xffe2a0, 1.2, 3.5, 2);
+      standLight.position.set(0, standH + 0.8, 0.2);
+      g.add(standLight);
+
+      // Interactive link to painting / exhibit
+      body.userData = { id: p.id, type: 'painting', title: p.title };
+      interactive.push(body);
+
+      // Position the stand against wall directly below painting
+      if (p.rotY) {
+        g.rotation.y = p.rotY;
+        const offset = p.rotY > 0 ? 0.35 : -0.35;
+        g.position.set(p.x - offset, 0, p.z);
+      } else {
+        g.position.set(p.x, 0, p.z + 0.35);
+      }
+
+      scene.add(g);
+    };
+
+    // Tạo bệ đỡ dưới toàn bộ tranh
+    PAINTING_SLOTS.forEach(p => createPaintingStand(p));
+
     // ═══ PEDESTALS — classical museum style ══════════════════════════════════
     const pedStoneMat = new THREE.MeshStandardMaterial({ color: 0x151c28, roughness: 0.55, metalness: 0.08 });
     const pedGoldMat  = new THREE.MeshStandardMaterial({ color: 0xb8882a, roughness: 0.25, metalness: 0.82 });
 
-    const mkPedestal = (x: number, z: number, id: string, scale = 1) => {
+    const exhibitsGroup = new THREE.Group();
+    scene.add(exhibitsGroup);
+
+    const mkPedestal = (x: number, z: number, id: string, scale = 1, parent: THREE.Group = exhibitsGroup) => {
       const g = new THREE.Group();
       // Wide base slab
       const baseSlab = new THREE.Mesh(new THREE.BoxGeometry(1.7*scale,0.15,1.7*scale), pedStoneMat);
@@ -695,22 +905,15 @@ export default function VirtualMuseumGame({ onSwitchToBooks, onOpenChat }: Virtu
       const capGold = new THREE.Mesh(new THREE.BoxGeometry(1.6*scale,0.05,1.6*scale), pedGoldMat);
       capGold.position.y = 2.025*scale; g.add(capGold);
 
-      g.position.set(x, 0, z); scene.add(g);
+      g.position.set(x, 0, z); parent.add(g);
       return 2.075 * scale;
     };
 
-    const ped1H = mkPedestal(-4.8, -1.5, 'cab-doc-bvat');
-    const ped2H = mkPedestal( 4.8, -1.5, 'cab-dep-cao-su');
-    const ped3H = mkPedestal(-2.3,  1.8, 'cab-nhat-ky');
-    const ctrCapH = mkPedestal(0, -1.8, 'cab-trung-tam', 1.4);
-
     // Function to create a 2D image board representing the exhibit on top of its pedestal
-    const createExhibitBoard = (x: number, z: number, capY: number, id: string, scale = 1) => {
-      const cab = cabinets.find(c => c.id === id) || DEFAULT_CABINETS.find(c => c.id === id);
-      if (!cab) return;
-
+    const createExhibitBoard = (x: number, z: number, capY: number, cab: Cabinet, scale = 1, rotY = 0, parent: THREE.Group = exhibitsGroup) => {
       const boardGroup = new THREE.Group();
       boardGroup.position.set(x, capY, z);
+      boardGroup.rotation.y = rotY;
 
       // Gold frame for the board
       const frameW = 1.05 * scale;
@@ -722,7 +925,7 @@ export default function VirtualMuseumGame({ onSwitchToBooks, onOpenChat }: Virtu
       frameMesh.position.y = frameH / 2;
       frameMesh.castShadow = true;
       frameMesh.receiveShadow = true;
-      frameMesh.userData = { id, type: 'exhibit' };
+      frameMesh.userData = { id: cab.id, type: 'exhibit' };
       boardGroup.add(frameMesh);
       interactive.push(frameMesh);
 
@@ -743,29 +946,58 @@ export default function VirtualMuseumGame({ onSwitchToBooks, onOpenChat }: Virtu
         posterMesh.position.z = frameD / 2 + 0.005;
         posterMesh.castShadow = true;
         posterMesh.receiveShadow = true;
-        posterMesh.userData = { id, type: 'exhibit' };
+        posterMesh.userData = { id: cab.id, type: 'exhibit' };
         boardGroup.add(posterMesh);
         interactive.push(posterMesh);
       });
 
-      // Rotation angles to face the viewer/camera
-      if (id === 'cab-doc-bvat') {
-        boardGroup.rotation.y = Math.PI / 4.2;
-      } else if (id === 'cab-dep-cao-su') {
-        boardGroup.rotation.y = -Math.PI / 4.2;
-      } else if (id === 'cab-nhat-ky') {
-        boardGroup.rotation.y = Math.PI / 5.5;
-      } else {
-        boardGroup.rotation.y = 0;
-      }
-
-      scene.add(boardGroup);
+      parent.add(boardGroup);
     };
 
-    createExhibitBoard(-4.8, -1.5, ped1H, 'cab-doc-bvat');
-    createExhibitBoard( 4.8, -1.5, ped2H, 'cab-dep-cao-su');
-    createExhibitBoard(-2.3,  1.8, ped3H, 'cab-nhat-ky');
-    createExhibitBoard(0, -1.8, ctrCapH, 'cab-trung-tam', 1.4);
+    // Vị trí các bệ đỡ trưng bày hiện vật (bao gồm các bệ đỡ dự phòng khi người dùng thêm hiện vật mới)
+    const EXHIBIT_PRESET_POSITIONS: Record<string, { x: number; z: number; scale: number; rotY: number }> = {
+      'cab-trung-tam':  { x:  0,   z: -1.8, scale: 1.4, rotY: 0 },
+      'cab-doc-bvat':   { x: -4.8, z: -1.5, scale: 1.0, rotY: Math.PI / 4.2 },
+      'cab-dep-cao-su': { x:  4.8, z: -1.5, scale: 1.0, rotY: -Math.PI / 4.2 },
+      'cab-nhat-ky':    { x: -2.3, z:  1.8, scale: 1.0, rotY: Math.PI / 5.5 },
+    };
+
+    const EXTRA_SLOTS = [
+      { x:  2.3, z:  1.8, scale: 1.0, rotY: -Math.PI / 5.5 },
+      { x: -4.8, z:  4.5, scale: 1.0, rotY: Math.PI / 4.0 },
+      { x:  4.8, z:  4.5, scale: 1.0, rotY: -Math.PI / 4.0 },
+      { x:  0,   z:  4.5, scale: 1.1, rotY: 0 },
+      { x: -6.8, z:  1.5, scale: 1.0, rotY: Math.PI / 3.0 },
+      { x:  6.8, z:  1.5, scale: 1.0, rotY: -Math.PI / 3.0 },
+    ];
+
+    let ctrCapH = 2.075 * 1.4;
+
+    const rebuildExhibits = (cabsList: Cabinet[]) => {
+      while (exhibitsGroup.children.length > 0) {
+        const obj = exhibitsGroup.children[0];
+        exhibitsGroup.remove(obj);
+        if (obj instanceof THREE.Mesh && obj.geometry) {
+          obj.geometry.dispose();
+        }
+      }
+      interactive = interactive.filter(o => o.userData?.type !== 'exhibit');
+
+      let extraIdx = 0;
+      cabsList.forEach((cab) => {
+        let cfg = EXHIBIT_PRESET_POSITIONS[cab.id];
+        if (!cfg) {
+          cfg = EXTRA_SLOTS[extraIdx % EXTRA_SLOTS.length];
+          extraIdx++;
+        }
+        const pedH = mkPedestal(cfg.x, cfg.z, cab.id, cfg.scale, exhibitsGroup);
+        if (cab.id === 'cab-trung-tam') ctrCapH = pedH;
+        createExhibitBoard(cfg.x, cfg.z, pedH, cab, cfg.scale, cfg.rotY, exhibitsGroup);
+      });
+    };
+
+    rebuildExhibitsRef.current = rebuildExhibits;
+    rebuildExhibits(cabinetsRef.current);
 
     // Star
     const starGeo = new THREE.OctahedronGeometry(0.18, 1);
@@ -1078,7 +1310,7 @@ export default function VirtualMuseumGame({ onSwitchToBooks, onOpenChat }: Virtu
         if (id==='portal-books' && onSwitchToBooksRef.current) onSwitchToBooksRef.current();
         else if (id==='portal-chat' && onOpenChatRef.current) onOpenChatRef.current();
       } else if (type==='exhibit') {
-        const cab = DEFAULT_CABINETS.find(c=>c.id===id);
+        const cab = cabinetsRef.current.find(c=>c.id===id) || DEFAULT_CABINETS.find(c=>c.id===id);
         if (cab) setSelectedCabinet(prev => prev?.id===id ? prev : { ...cab });
       } else if (type==='painting') {
         const paint = PAINTING_SLOTS.find(p=>p.id===id);
@@ -1228,7 +1460,7 @@ export default function VirtualMuseumGame({ onSwitchToBooks, onOpenChat }: Virtu
   }, [cabinets, selectedCabinet]);
 
   const hoveredPainting = PAINTING_SLOTS.find(p => p.id === hoveredId);
-  const hoveredCabinet  = DEFAULT_CABINETS.find(c => c.id === hoveredId);
+  const hoveredCabinet  = cabinets.find(c => c.id === hoveredId) || DEFAULT_CABINETS.find(c => c.id === hoveredId);
   const portalLabel: Record<string,string> = { 'portal-chat':'🤖 Robot Hướng dẫn viên AI' };
 
   // ═════════════════════════════════════════════════════════════════════════════
@@ -1239,21 +1471,32 @@ export default function VirtualMuseumGame({ onSwitchToBooks, onOpenChat }: Virtu
       <input ref={cabUploadRef}  type="file" accept="image/*" className="hidden" onChange={onCabFileChange} />
       <input ref={wallUploadRef} type="file" accept="image/*" className="hidden" onChange={onWallFileChange} />
       <input ref={bgUploadRef}   type="file" accept="image/*" className="hidden" onChange={onBgFileChange} />
+      <input ref={newExUploadRef} type="file" accept="image/*" className="hidden" onChange={onNewExFileChange} />
 
       {/* ── CANVAS ── */}
       <div className="relative w-full flex-1 min-h-0">
         <canvas ref={canvasRef} className="w-full h-full block outline-none touch-none" style={{ touchAction: 'none' }} />
 
-        {/* Change Background Button */}
-        <div className="absolute top-4 left-4 z-20">
+        {/* Change Background & Add Exhibit Buttons */}
+        <div className="absolute top-4 left-4 z-20 flex items-center gap-2">
           <button
             onClick={() => setShowBgModal(true)}
             className="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-bold px-3 py-1.5 rounded-xl border border-yellow-700/50 bg-black/60 hover:bg-yellow-950/50 text-yellow-300 hover:text-yellow-200 backdrop-blur-md shadow-lg transition-all duration-200 cursor-pointer active:scale-95"
             title="Đổi màu nền & ảnh tường không gian 3D"
           >
             <Palette className="w-3.5 h-3.5 text-yellow-400" />
-            <span className="hidden sm:inline">Đổi nền không gian 3D</span>
-            <span className="sm:hidden">Đổi nền</span>
+            <span className="hidden sm:inline">Đổi nền 3D</span>
+            <span className="sm:hidden">Nền 3D</span>
+          </button>
+
+          <button
+            onClick={() => setShowAddExhibitModal(true)}
+            className="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-bold px-3 py-1.5 rounded-xl border border-yellow-500/50 bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-300 hover:text-yellow-100 backdrop-blur-md shadow-lg transition-all duration-200 cursor-pointer active:scale-95"
+            title="Thêm hiện vật, mẫu vật trưng bày mới vào không gian 3D"
+          >
+            <Plus className="w-3.5 h-3.5 text-yellow-400" />
+            <span className="hidden sm:inline">Thêm mẫu vật</span>
+            <span className="sm:hidden">+ Mẫu vật</span>
           </button>
         </div>
 
@@ -1505,6 +1748,18 @@ export default function VirtualMuseumGame({ onSwitchToBooks, onOpenChat }: Virtu
                       onClick={()=>{ const u={...tributeCounts,[cab.id]:(tributeCounts[cab.id]||0)+1}; saveTribute(u); setActiveTributeId(cab.id); setTimeout(()=>setActiveTributeId(null),1100); }}
                       className="flex-1 py-2 rounded-xl bg-red-950/50 border border-red-800/35 hover:bg-red-900/60 hover:border-red-700/50 text-red-400 font-bold text-[11px] flex items-center justify-center gap-1.5 duration-200 cursor-pointer"
                     ><Heart className={`w-3.5 h-3.5 ${activeTributeId===cab.id?'fill-red-500':''}`} /> Tri ân ({tributeCounts[cab.id]||0})</button>
+
+                    {cab.id.startsWith('cab-custom-') && (
+                      <button
+                        onClick={() => handleDeleteCustomCabinet(cab.id)}
+                        className="py-2 px-3 rounded-xl bg-red-900/40 hover:bg-red-900/70 border border-red-700/50 text-red-300 font-bold text-[11px] flex items-center justify-center gap-1.5 duration-200 cursor-pointer"
+                        title="Xoá mẫu vật này"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">Xoá</span>
+                      </button>
+                    )}
+
                     <button
                       onClick={()=>{ setSelectedCabinet(null); setScanLayer('optical'); }}
                       className="flex-1 py-2 rounded-xl bg-yellow-700/30 hover:bg-yellow-700/50 border border-yellow-700/30 text-yellow-300 font-extrabold text-[11px] duration-200 cursor-pointer"
@@ -1699,6 +1954,182 @@ export default function VirtualMuseumGame({ onSwitchToBooks, onOpenChat }: Virtu
                   </button>
                 </div>
               </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* ═══ ADD EXHIBIT MODAL ══════════════════════════════════════════════ */}
+      <AnimatePresence>
+        {showAddExhibitModal && (
+          <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md overflow-y-auto">
+            <motion.div
+              initial={{ scale: 0.94, opacity: 0, y: 10 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.94, opacity: 0, y: 10 }}
+              transition={{ type: 'spring', stiffness: 350, damping: 28 }}
+              className="bg-[#0e1220]/98 border border-yellow-800/40 rounded-2xl w-full max-w-lg shadow-2xl p-5 overflow-hidden flex flex-col gap-4 text-white my-6"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between pb-3 border-b border-yellow-800/20">
+                <div className="flex items-center gap-2">
+                  <Plus className="w-4 h-4 text-yellow-400" />
+                  <h3 className="text-sm font-extrabold text-yellow-100 uppercase tracking-wider">
+                    Thêm mẫu vật trưng bày mới
+                  </h3>
+                </div>
+                <button
+                  onClick={() => setShowAddExhibitModal(false)}
+                  className="p-1.5 text-gray-400 hover:text-white rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Form */}
+              <form onSubmit={handleCreateExhibit} className="space-y-3.5 text-xs">
+                <div>
+                  <label className="text-[10px] font-mono text-yellow-600/90 uppercase tracking-wider block mb-1">
+                    Tên mẫu vật / Kỷ vật *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={newExName}
+                    onChange={(e) => setNewExName(e.target.value)}
+                    placeholder="VD: Bản Tuyên ngôn Độc lập 1945, Chiếc đồng hồ quả quýt..."
+                    className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-white placeholder-gray-500 outline-none focus:border-yellow-500/60"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[10px] font-mono text-yellow-600/90 uppercase tracking-wider block mb-1">
+                      Thể loại
+                    </label>
+                    <select
+                      value={newExCategory}
+                      onChange={(e) => setNewExCategory(e.target.value)}
+                      className="w-full bg-[#141a2e] border border-white/10 rounded-xl px-3 py-2 text-white outline-none focus:border-yellow-500/60"
+                    >
+                      <option value="Kỷ vật thiêng liêng">Kỷ vật thiêng liêng</option>
+                      <option value="Bảo vật Quốc gia">Bảo vật Quốc gia</option>
+                      <option value="Tư liệu & Thư từ">Tư liệu & Thư từ</option>
+                      <option value="Trang phục & Đồ dùng">Trang phục & Đồ dùng</option>
+                      <option value="Sách báo & Bản thảo">Sách báo & Bản thảo</option>
+                      <option value="Kỷ vật MTTQ Phường Chánh Hưng">Kỷ vật MTTQ Phường Chánh Hưng</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-mono text-yellow-600/90 uppercase tracking-wider block mb-1">
+                      Năm / Niên đại
+                    </label>
+                    <input
+                      type="text"
+                      value={newExYear}
+                      onChange={(e) => setNewExYear(e.target.value)}
+                      placeholder="VD: 1945, 1969, Hiện đại..."
+                      className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-white placeholder-gray-500 outline-none focus:border-yellow-500/60"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-mono text-yellow-600/90 uppercase tracking-wider block mb-1">
+                    Đơn vị / Nguồn gốc
+                  </label>
+                  <input
+                    type="text"
+                    value={newExSource}
+                    onChange={(e) => setNewExSource(e.target.value)}
+                    placeholder="VD: Ủy ban MTTQ Việt Nam Phường Chánh Hưng..."
+                    className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-white placeholder-gray-500 outline-none focus:border-yellow-500/60"
+                  />
+                </div>
+
+                {/* Image upload */}
+                <div>
+                  <label className="text-[10px] font-mono text-yellow-600/90 uppercase tracking-wider block mb-1">
+                    Hình ảnh mẫu vật
+                  </label>
+                  <div className="flex items-center gap-3">
+                    {newExImage ? (
+                      <div className="w-14 h-14 rounded-xl border border-yellow-500/40 overflow-hidden bg-black shrink-0 relative group">
+                        <img src={newExImage} alt="Preview" className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => setNewExImage('')}
+                          className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 text-red-400 transition-opacity cursor-pointer"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="w-14 h-14 rounded-xl border border-dashed border-white/20 bg-white/5 flex items-center justify-center text-gray-500 shrink-0 text-[10px]">
+                        Chưa có ảnh
+                      </div>
+                    )}
+                    <div className="flex-1 space-y-1.5">
+                      <button
+                        type="button"
+                        onClick={() => newExUploadRef.current?.click()}
+                        className="w-full py-1.5 px-3 bg-yellow-500/20 hover:bg-yellow-500/30 border border-yellow-500/40 rounded-xl text-yellow-300 text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                      >
+                        <Upload className="w-3.5 h-3.5" /> Tải ảnh từ thiết bị
+                      </button>
+                      <input
+                        type="text"
+                        placeholder="Hoặc dán URL ảnh..."
+                        value={newExImage}
+                        onChange={(e) => setNewExImage(e.target.value)}
+                        className="w-full bg-black/50 border border-white/10 rounded-xl px-2.5 py-1 text-[11px] text-white placeholder-gray-500 outline-none focus:border-yellow-500/50"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-mono text-yellow-600/90 uppercase tracking-wider block mb-1">
+                    Mô tả ngắn
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={newExDesc}
+                    onChange={(e) => setNewExDesc(e.target.value)}
+                    placeholder="Giới thiệu khái quát ý nghĩa của mẫu vật..."
+                    className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-white placeholder-gray-500 outline-none focus:border-yellow-500/60 resize-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-mono text-yellow-600/90 uppercase tracking-wider block mb-1">
+                    Đặc điểm chi tiết (mỗi ý một dòng)
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={newExDetails}
+                    onChange={(e) => setNewExDetails(e.target.value)}
+                    placeholder="Chất liệu: đồng mạ vàng...&#10;Kích thước: 15cm x 20cm...&#10;Ý nghĩa lịch sử đối với phong trào đại đoàn kết..."
+                    className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-white placeholder-gray-500 outline-none focus:border-yellow-500/60 resize-none"
+                  />
+                </div>
+
+                <div className="flex gap-2 pt-2 border-t border-yellow-800/20">
+                  <button
+                    type="button"
+                    onClick={() => setShowAddExhibitModal(false)}
+                    className="flex-1 py-2 rounded-xl bg-white/5 border border-white/10 text-white/60 font-bold hover:bg-white/10 transition-colors cursor-pointer"
+                  >
+                    Hủy
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 py-2 rounded-xl bg-gradient-to-r from-yellow-600 to-amber-600 hover:from-yellow-500 hover:to-amber-500 text-white font-extrabold shadow-lg shadow-yellow-900/30 transition-all cursor-pointer"
+                  >
+                    Lưu & Trưng bày 3D
+                  </button>
+                </div>
+              </form>
             </motion.div>
           </div>
         )}
