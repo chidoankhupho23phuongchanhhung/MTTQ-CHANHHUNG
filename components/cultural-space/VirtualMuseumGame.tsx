@@ -721,7 +721,7 @@ export default function VirtualMuseumGame({ onSwitchToBooks, onOpenChat }: Virtu
     cEdge(3.44,0.03,0.12,0,-9.06); cEdge(3.44,0.03,0.12,0,5.06);
 
     // ═══ WALL PAINTINGS ═══════════════════════════════════════════════════════
-    const interactive: THREE.Object3D[] = [];
+    let interactive: THREE.Object3D[] = [];
     const frameMat = new THREE.MeshStandardMaterial({ color: 0xb8881e, roughness: 0.15, metalness: 0.92 });
     const innerFrameMat = new THREE.MeshStandardMaterial({ color: 0x7a5c12, roughness: 0.3, metalness: 0.7 });
 
