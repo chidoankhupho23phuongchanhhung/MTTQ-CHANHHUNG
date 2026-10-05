@@ -5,7 +5,7 @@ import { MapPin, Mail, ShieldCheck } from 'lucide-react';
 
 export default function CitizenFooter() {
   return (
-    <footer className="w-full bg-[#07152c]/90 text-white/90 border-t border-white/10 mt-12 py-10 px-4 sm:px-6 relative overflow-hidden backdrop-blur-md">
+    <footer className="w-full bg-[#07152c]/90 text-white/90 border-t border-white/10 mt-12 pt-10 pb-20 md:pb-10 px-4 sm:px-6 relative overflow-hidden backdrop-blur-md">
       {/* Decorative ambient gold glow */}
       <div className="absolute -bottom-10 -left-10 h-32 w-32 rounded-full bg-yellow-500/10 filter blur-2xl pointer-events-none" />
       
