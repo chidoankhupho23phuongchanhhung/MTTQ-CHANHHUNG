@@ -113,7 +113,11 @@ export async function POST(req: NextRequest) {
     } else if (type === 'phongtrao') {
       if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400, headers: NO_CACHE_HEADERS });
       current.phongtrao = current.phongtrao || {};
-      if (bg !== undefined) current.phongtrao[id] = bg;
+      const existing = current.phongtrao[id];
+      const existingObj = typeof existing === 'string' ? { bg: existing, url: '' } : { ...(existing || {}) };
+      if (bg !== undefined) existingObj.bg = bg;
+      if (url !== undefined) existingObj.url = url;
+      current.phongtrao[id] = existingObj;
     } else if (type === 'intro') {
       // Thay thế trực tiếp toàn bộ dữ liệu intro mới nhất, không shallow-merge dữ liệu cũ
       if (data) {

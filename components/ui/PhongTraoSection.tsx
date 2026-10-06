@@ -4,7 +4,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ImageIcon, Upload, X, Check, RotateCcw, Camera,
-  ExternalLink, Sparkles, CheckCircle2, Shield, Flower2, FileText, Info
+  ExternalLink, Sparkles, CheckCircle2, Shield, Flower2, FileText, Info,
+  Link as LinkIcon, Copy, ArrowRight, Globe, Edit3
 } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
 import { cn } from '@/lib/utils';
@@ -14,7 +15,10 @@ import {
   getPhongTraoIcon,
   getPhongTraoBg,
   setPhongTraoBg,
-  resetPhongTraoBg
+  resetPhongTraoBg,
+  getPhongTraoUrl,
+  setPhongTraoUrl,
+  resetPhongTraoUrl
 } from '@/lib/phongTrao';
 
 interface PhongTraoSectionProps {
@@ -26,23 +30,29 @@ export default function PhongTraoSection({ className }: PhongTraoSectionProps) {
   const { addNotification } = useAppStore();
 
   const [bgs, setBgs] = useState<Record<string, string>>({});
+  const [urls, setUrls] = useState<Record<string, string>>({});
   const [editingItem, setEditingItem] = useState<PhongTraoItem | null>(null);
   const [tempBg, setTempBg] = useState('');
+  const [tempUrl, setTempUrl] = useState('');
   const [uploading, setUploading] = useState(false);
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Sync backgrounds on mount & listen for custom storage update events
-  const loadBackgrounds = async () => {
+  // Sync backgrounds and URLs on mount & listen for custom storage update events
+  const loadData = async () => {
     if (typeof window !== 'undefined') {
       const savedBgs: Record<string, string> = {};
+      const savedUrls: Record<string, string> = {};
       DEFAULT_PHONG_TRAO.forEach(item => {
         const b = localStorage.getItem(`phongtrao_bg_${item.id}`);
         if (b) savedBgs[item.id] = b;
+        const u = localStorage.getItem(`phongtrao_url_${item.id}`);
+        if (u) savedUrls[item.id] = u;
       });
       setBgs(savedBgs);
+      setUrls(savedUrls);
 
       // Server settings sync
       try {
@@ -51,15 +61,26 @@ export default function PhongTraoSection({ className }: PhongTraoSectionProps) {
           const data = await res.json();
           if (data.phongtrao) {
             const serverBgs: Record<string, string> = {};
+            const serverUrls: Record<string, string> = {};
             Object.keys(data.phongtrao).forEach(k => {
-              if (data.phongtrao[k]) {
-                serverBgs[k] = data.phongtrao[k];
+              const ptItem = data.phongtrao[k];
+              const bgVal = typeof ptItem === 'string' ? ptItem : ptItem?.bg;
+              const urlVal = typeof ptItem === 'object' ? ptItem?.url : '';
+              if (bgVal) {
+                serverBgs[k] = bgVal;
                 try {
-                  localStorage.setItem(`phongtrao_bg_${k}`, data.phongtrao[k]);
+                  localStorage.setItem(`phongtrao_bg_${k}`, bgVal);
+                } catch (e) {}
+              }
+              if (urlVal) {
+                serverUrls[k] = urlVal;
+                try {
+                  localStorage.setItem(`phongtrao_url_${k}`, urlVal);
                 } catch (e) {}
               }
             });
             setBgs(prev => ({ ...prev, ...serverBgs }));
+            setUrls(prev => ({ ...prev, ...serverUrls }));
           }
         }
       } catch (err) {
@@ -69,21 +90,27 @@ export default function PhongTraoSection({ className }: PhongTraoSectionProps) {
   };
 
   useEffect(() => {
-    loadBackgrounds();
-    const handleUpdate = () => loadBackgrounds();
+    loadData();
+    const handleUpdate = () => loadData();
     window.addEventListener('phongtrao-bg-updated', handleUpdate);
+    window.addEventListener('phongtrao-url-updated', handleUpdate);
+    window.addEventListener('phongtrao-updated', handleUpdate);
     window.addEventListener('storage', handleUpdate);
     return () => {
       window.removeEventListener('phongtrao-bg-updated', handleUpdate);
+      window.removeEventListener('phongtrao-url-updated', handleUpdate);
+      window.removeEventListener('phongtrao-updated', handleUpdate);
       window.removeEventListener('storage', handleUpdate);
     };
   }, []);
 
   const getBg = (item: PhongTraoItem) => bgs[item.id] || item.defaultBg;
+  const getUrl = (item: PhongTraoItem) => urls[item.id] || item.defaultUrl || item.route;
 
   const handleOpenEdit = (item: PhongTraoItem) => {
     setEditingItem(item);
     setTempBg(getBg(item));
+    setTempUrl(getUrl(item));
     setUploadedFileName(null);
     setUploading(false);
   };
@@ -93,9 +120,12 @@ export default function PhongTraoSection({ className }: PhongTraoSectionProps) {
 
     try {
       const trimmedBg = tempBg.trim();
-      const isDefault = trimmedBg === editingItem.defaultBg || !trimmedBg;
+      const trimmedUrl = tempUrl.trim();
+      const defaultUrlVal = editingItem.defaultUrl || editingItem.route;
+      const isDefaultBg = trimmedBg === editingItem.defaultBg || !trimmedBg;
+      const isDefaultUrl = trimmedUrl === defaultUrlVal || !trimmedUrl;
 
-      if (isDefault) {
+      if (isDefaultBg) {
         resetPhongTraoBg(editingItem.id);
         const newBgs = { ...bgs };
         delete newBgs[editingItem.id];
@@ -103,6 +133,16 @@ export default function PhongTraoSection({ className }: PhongTraoSectionProps) {
       } else {
         setPhongTraoBg(editingItem.id, trimmedBg);
         setBgs({ ...bgs, [editingItem.id]: trimmedBg });
+      }
+
+      if (isDefaultUrl) {
+        resetPhongTraoUrl(editingItem.id);
+        const newUrls = { ...urls };
+        delete newUrls[editingItem.id];
+        setUrls(newUrls);
+      } else {
+        setPhongTraoUrl(editingItem.id, trimmedUrl);
+        setUrls({ ...urls, [editingItem.id]: trimmedUrl });
       }
 
       // Save to server API
@@ -113,19 +153,20 @@ export default function PhongTraoSection({ className }: PhongTraoSectionProps) {
           body: JSON.stringify({
             type: 'phongtrao',
             id: editingItem.id,
-            bg: isDefault ? '' : trimmedBg,
+            bg: isDefaultBg ? '' : trimmedBg,
+            url: isDefaultUrl ? '' : trimmedUrl,
           }),
         }).catch(err => console.warn('API save error:', err));
       } catch (e) {}
 
       if (typeof window !== 'undefined') {
-        window.dispatchEvent(new Event('phongtrao-bg-updated'));
+        window.dispatchEvent(new Event('phongtrao-updated'));
         window.dispatchEvent(new Event('storage'));
       }
 
       addNotification(
         'Cập nhật thành công',
-        `Đã lưu ảnh nền mới cho phong trào "${editingItem.shortLabel}"`,
+        `Đã lưu đường dẫn liên kết và ảnh nền cho phong trào "${editingItem.shortLabel}"`,
         'success'
       );
     } catch (err) {
@@ -138,11 +179,14 @@ export default function PhongTraoSection({ className }: PhongTraoSectionProps) {
   const handleResetToDefault = (item: PhongTraoItem) => {
     try {
       resetPhongTraoBg(item.id);
+      resetPhongTraoUrl(item.id);
       const newBgs = { ...bgs };
       delete newBgs[item.id];
       setBgs(newBgs);
+      const newUrls = { ...urls };
+      delete newUrls[item.id];
+      setUrls(newUrls);
 
-      // Save to server API
       try {
         fetch('/api/settings', {
           method: 'POST',
@@ -151,18 +195,19 @@ export default function PhongTraoSection({ className }: PhongTraoSectionProps) {
             type: 'phongtrao',
             id: item.id,
             bg: '',
+            url: '',
           }),
         }).catch(err => console.warn('API save error:', err));
       } catch (e) {}
 
       if (typeof window !== 'undefined') {
-        window.dispatchEvent(new Event('phongtrao-bg-updated'));
+        window.dispatchEvent(new Event('phongtrao-updated'));
         window.dispatchEvent(new Event('storage'));
       }
 
       addNotification(
-        'Đã khôi phục',
-        `Đã đặt lại ảnh nền mặc định cho "${item.shortLabel}"`,
+        'Khôi phục mặc định',
+        `Đã đặt lại đường dẫn và ảnh nền mặc định cho "${item.shortLabel}"`,
         'info'
       );
     } catch (err) {
@@ -285,10 +330,10 @@ export default function PhongTraoSection({ className }: PhongTraoSectionProps) {
           </div>
           <div>
             <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white tracking-tight uppercase">
-              Quản lý Ảnh nền Phong trào thi đua
+              Quản lý Phong trào thi đua & Đường dẫn liên kết
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Tùy chỉnh ảnh nền hiển thị của các phong trào ngoài trang chủ
+              Tùy chỉnh đường dẫn kết nối (URL / liên kết ngoài / trang nội bộ) và ảnh nền hiển thị của 3 phong trào ngoài trang chủ
             </p>
           </div>
         </div>
@@ -305,7 +350,11 @@ export default function PhongTraoSection({ className }: PhongTraoSectionProps) {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {DEFAULT_PHONG_TRAO.map((item, index) => {
           const currentBg = getBg(item);
-          const hasCustomBg = !!bgs[item.id];
+          const currentUrl = getUrl(item);
+          const defaultUrlVal = item.defaultUrl || item.route;
+          const hasCustomBg = !!bgs[item.id] && bgs[item.id] !== item.defaultBg;
+          const hasCustomUrl = !!urls[item.id] && urls[item.id] !== defaultUrlVal;
+          const hasCustom = hasCustomBg || hasCustomUrl;
           const Icon = getPhongTraoIcon(item.iconName);
 
           return (
@@ -329,9 +378,9 @@ export default function PhongTraoSection({ className }: PhongTraoSectionProps) {
                   <span className="text-[9px] font-black px-2 py-0.5 rounded-full border uppercase tracking-wide bg-purple-100 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800">
                     {item.tag}
                   </span>
-                  {hasCustomBg && (
+                  {hasCustom && (
                     <span className="text-[8px] font-bold px-1.5 py-0.5 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                      Tùy chỉnh
+                      Đã cấu hình
                     </span>
                   )}
                 </div>
@@ -361,25 +410,75 @@ export default function PhongTraoSection({ className }: PhongTraoSectionProps) {
                     {item.shortLabel}
                   </span>
                   <span className="text-[9px] font-semibold bg-black/40 px-1.5 py-0.5 rounded backdrop-blur-xs">
-                    Ảnh đang dùng
+                    Ảnh hiển thị
                   </span>
+                </div>
+              </div>
+
+              {/* Connecting Link Box */}
+              <div className="mb-3 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 flex flex-col gap-1.5">
+                <div className="flex items-center justify-between text-[10px]">
+                  <span className="font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                    <LinkIcon className="h-3 w-3 text-purple-600 dark:text-purple-400" />
+                    Đường dẫn kết nối:
+                  </span>
+                  {hasCustomUrl && (
+                    <span className="text-[8px] font-bold px-1.5 py-0.2 rounded bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
+                      Tùy chỉnh
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center justify-between gap-1.5">
+                  <span className="text-[11px] font-mono font-bold text-slate-800 dark:text-slate-200 truncate" title={currentUrl}>
+                    {currentUrl}
+                  </span>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        navigator.clipboard.writeText(currentUrl);
+                        setCopiedId(item.id);
+                        setTimeout(() => setCopiedId(null), 1500);
+                      }}
+                      title="Sao chép đường dẫn"
+                      className="p-1 rounded-lg text-slate-500 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+                    >
+                      {copiedId === item.id ? <Check className="h-3 w-3 text-emerald-500" /> : <Copy className="h-3 w-3" />}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (currentUrl.startsWith('http://') || currentUrl.startsWith('https://')) {
+                          window.open(currentUrl, '_blank', 'noopener,noreferrer');
+                        } else {
+                          window.open(currentUrl, '_blank');
+                        }
+                      }}
+                      title="Mở đường dẫn kết nối"
+                      className="p-1 rounded-lg text-slate-500 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+                    >
+                      <ExternalLink className="h-3 w-3" />
+                    </button>
+                  </div>
                 </div>
               </div>
 
               {/* Action Buttons */}
               <div className="flex items-center gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
                 <button
+                  type="button"
                   onClick={() => handleOpenEdit(item)}
                   className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-bold bg-purple-600 hover:bg-purple-700 text-white shadow-sm shadow-purple-500/20 transition-all cursor-pointer active:scale-95"
                 >
-                  <Camera className="h-3.5 w-3.5" />
-                  <span>Đổi ảnh nền</span>
+                  <Edit3 className="h-3.5 w-3.5" />
+                  <span>Cấu hình (Link & Ảnh)</span>
                 </button>
 
-                {hasCustomBg && (
+                {hasCustom && (
                   <button
+                    type="button"
                     onClick={() => handleResetToDefault(item)}
-                    title="Đặt lại ảnh mẫu ban đầu"
+                    title="Đặt lại đường dẫn và ảnh mẫu ban đầu"
                     className="p-2 rounded-xl text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all cursor-pointer"
                   >
                     <RotateCcw className="h-3.5 w-3.5" />
@@ -411,11 +510,11 @@ export default function PhongTraoSection({ className }: PhongTraoSectionProps) {
               <div className="flex items-center justify-between p-5 pb-3 border-b border-slate-100 dark:border-slate-800">
                 <div className="flex items-center gap-3 pr-2">
                   <div className="p-2 rounded-xl bg-purple-100 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400">
-                    <Camera className="h-5 w-5" />
+                    <Edit3 className="h-5 w-5" />
                   </div>
                   <div>
                     <h3 className="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase tracking-tight">
-                      Đổi ảnh nền phong trào
+                      Cấu hình Phong trào & Đường dẫn kết nối
                     </h3>
                     <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1">
                       {editingItem.label}
@@ -424,6 +523,7 @@ export default function PhongTraoSection({ className }: PhongTraoSectionProps) {
                 </div>
 
                 <button
+                  type="button"
                   onClick={() => setEditingItem(null)}
                   className="p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer"
                 >
@@ -433,7 +533,68 @@ export default function PhongTraoSection({ className }: PhongTraoSectionProps) {
 
               {/* Modal Body */}
               <div className="p-5 space-y-4 overflow-y-auto flex-1">
-                {/* Live Preview Box */}
+                {/* 1. Đường dẫn liên kết kết nối (Link Connection) */}
+                <div className="p-3.5 rounded-2xl bg-purple-50/70 dark:bg-purple-950/30 border border-purple-200/70 dark:border-purple-900/50 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
+                      <LinkIcon className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+                      Đường dẫn link kết nối vào phong trào:
+                    </label>
+                    {tempUrl && (
+                      <a
+                        href={tempUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[10px] font-bold text-purple-600 dark:text-purple-400 hover:underline flex items-center gap-1"
+                      >
+                        Mở thử link <ExternalLink className="w-2.5 h-2.5" />
+                      </a>
+                    )}
+                  </div>
+
+                  <input
+                    type="text"
+                    value={tempUrl}
+                    onChange={(e) => setTempUrl(e.target.value)}
+                    placeholder="VD: /hoat-dong-mttq hoặc https://facebook.com/..."
+                    className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-mono focus:outline-hidden focus:ring-2 focus:ring-purple-500"
+                  />
+
+                  {/* Quick URL Suggestions */}
+                  <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                    <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400">Gợi ý nhanh:</span>
+                    <button
+                      type="button"
+                      onClick={() => setTempUrl('/hoat-dong-mttq')}
+                      className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-purple-400 text-slate-700 dark:text-slate-300 transition-colors cursor-pointer"
+                    >
+                      /hoat-dong-mttq
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setTempUrl('/an-sinh-xa-hoi')}
+                      className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-purple-400 text-slate-700 dark:text-slate-300 transition-colors cursor-pointer"
+                    >
+                      /an-sinh-xa-hoi
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setTempUrl('/tin-tuc')}
+                      className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-purple-400 text-slate-700 dark:text-slate-300 transition-colors cursor-pointer"
+                    >
+                      /tin-tuc
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setTempUrl('https://www.facebook.com/profile.php?id=61580661372890')}
+                      className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-purple-400 text-slate-700 dark:text-slate-300 transition-colors cursor-pointer"
+                    >
+                      Fanpage MTTQ
+                    </button>
+                  </div>
+                </div>
+
+                {/* 2. Live Preview Box */}
                 <div>
                   <span className="text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 block">
                     Xem trước thẻ ngoài trang chủ:
@@ -452,8 +613,9 @@ export default function PhongTraoSection({ className }: PhongTraoSectionProps) {
                       <div className="p-1.5 bg-white/20 backdrop-blur-sm rounded-lg w-fit">
                         {React.createElement(getPhongTraoIcon(editingItem.iconName), { className: "h-4 w-4 text-white" })}
                       </div>
-                      <span className="text-[9px] font-black bg-black/40 text-white/90 px-2 py-0.5 rounded-md backdrop-blur-sm">
-                        Trực tiếp
+                      <span className="text-[9px] font-black bg-black/40 text-white/90 px-2 py-0.5 rounded-md backdrop-blur-sm flex items-center gap-1">
+                        <LinkIcon className="h-2.5 w-2.5 text-purple-300" />
+                        {tempUrl ? 'Có link kết nối' : 'Chưa có link'}
                       </span>
                     </div>
 
@@ -461,11 +623,15 @@ export default function PhongTraoSection({ className }: PhongTraoSectionProps) {
                       <span className="text-xs sm:text-[13px] font-black text-white drop-shadow leading-snug line-clamp-2">
                         {editingItem.label}
                       </span>
+                      <div className="flex items-center gap-1 text-[10px] font-bold text-purple-200 mt-1">
+                        <span>Truy cập phong trào</span>
+                        <ArrowRight className="h-3 w-3" />
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Presets Gallery */}
+                {/* 3. Presets Gallery */}
                 <div>
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-1.5">
                     <ImageIcon className="w-3.5 h-3.5 text-purple-500" />
@@ -498,7 +664,7 @@ export default function PhongTraoSection({ className }: PhongTraoSectionProps) {
                   </div>
                 </div>
 
-                {/* File Upload Zone */}
+                {/* 4. File Upload Zone */}
                 <div>
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
                     <Upload className="w-3.5 h-3.5 text-purple-500" />
@@ -564,7 +730,7 @@ export default function PhongTraoSection({ className }: PhongTraoSectionProps) {
                   </label>
                 </div>
 
-                {/* Custom Image URL */}
+                {/* 5. Custom Image URL */}
                 <div>
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
                     <ExternalLink className="w-3.5 h-3.5 text-purple-500" />
@@ -589,6 +755,7 @@ export default function PhongTraoSection({ className }: PhongTraoSectionProps) {
                   type="button"
                   onClick={() => {
                     setTempBg(editingItem.defaultBg);
+                    setTempUrl(editingItem.defaultUrl || editingItem.route);
                     setUploadedFileName(null);
                   }}
                   className="text-xs font-bold text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-colors flex items-center gap-1 cursor-pointer"
@@ -608,11 +775,11 @@ export default function PhongTraoSection({ className }: PhongTraoSectionProps) {
                   <button
                     type="button"
                     onClick={handleSave}
-                    disabled={uploading && !tempBg}
+                    disabled={uploading}
                     className="flex items-center gap-1.5 px-5 py-2 rounded-xl text-xs font-bold text-white bg-purple-600 hover:bg-purple-700 shadow-md shadow-purple-500/20 transition-all cursor-pointer active:scale-95 disabled:opacity-50"
                   >
                     <Check className="w-4 h-4" />
-                    <span>Lưu thay đổi</span>
+                    <span>Lưu cấu hình</span>
                   </button>
                 </div>
               </div>

@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 import {
   MessageSquare, Bot, Compass, BookOpen,
   Shield, Flower2, FileText,
-  Users, ArrowRight, Globe
+  Users, ArrowRight, Globe, ExternalLink
 } from 'lucide-react';
 import {
   DEFAULT_PHONG_TRAO,
@@ -133,6 +133,7 @@ export default function HomePage() {
   /* ─── Real-time synchronized backgrounds (Fanpages & Phong Trào) ─── */
   const [fanpageBgs, setFanpageBgs] = useState<Record<string, string>>({});
   const [phongTraoBgs, setPhongTraoBgs] = useState<Record<string, string>>({});
+  const [phongTraoUrls, setPhongTraoUrls] = useState<Record<string, string>>({});
   const [slogan, setSlogan] = useState(DEFAULT_SLOGAN);
   const [heroBannerUrl, setHeroBannerUrl] = useState<string>("https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=1400&auto=format&fit=crop&q=80");
 
@@ -175,11 +176,15 @@ export default function HomePage() {
         setFanpageBgs(fpBgs);
 
         const ptBgs: Record<string, string> = {};
+        const ptUrls: Record<string, string> = {};
         DEFAULT_PHONG_TRAO.forEach(item => {
           const b = localStorage.getItem(`phongtrao_bg_${item.id}`);
           if (b) ptBgs[item.id] = b;
+          const u = localStorage.getItem(`phongtrao_url_${item.id}`);
+          if (u) ptUrls[item.id] = u;
         });
         setPhongTraoBgs(ptBgs);
+        setPhongTraoUrls(ptUrls);
       }
 
       // 2. Server settings sync (persists across devices & restarts)
@@ -203,17 +208,30 @@ export default function HomePage() {
           }
           if (data.phongtrao) {
             const mergedPt: Record<string, string> = {};
+            const mergedPtUrls: Record<string, string> = {};
             Object.keys(data.phongtrao).forEach(k => {
-              if (data.phongtrao[k]) {
-                mergedPt[k] = data.phongtrao[k];
+              const ptItem = data.phongtrao[k];
+              const bgVal = typeof ptItem === 'string' ? ptItem : ptItem?.bg;
+              const urlVal = typeof ptItem === 'object' ? ptItem?.url : '';
+              if (bgVal) {
+                mergedPt[k] = bgVal;
                 if (typeof window !== 'undefined') {
                   try {
-                    localStorage.setItem(`phongtrao_bg_${k}`, data.phongtrao[k]);
+                    localStorage.setItem(`phongtrao_bg_${k}`, bgVal);
+                  } catch (e) {}
+                }
+              }
+              if (urlVal) {
+                mergedPtUrls[k] = urlVal;
+                if (typeof window !== 'undefined') {
+                  try {
+                    localStorage.setItem(`phongtrao_url_${k}`, urlVal);
                   } catch (e) {}
                 }
               }
             });
             setPhongTraoBgs(prev => ({ ...prev, ...mergedPt }));
+            setPhongTraoUrls(prev => ({ ...prev, ...mergedPtUrls }));
           }
         }
       } catch (e) {
@@ -224,10 +242,14 @@ export default function HomePage() {
     updateAllBgs();
     window.addEventListener('fanpage-bg-updated', updateAllBgs);
     window.addEventListener('phongtrao-bg-updated', updateAllBgs);
+    window.addEventListener('phongtrao-url-updated', updateAllBgs);
+    window.addEventListener('phongtrao-updated', updateAllBgs);
     window.addEventListener('storage', updateAllBgs);
     return () => {
       window.removeEventListener('fanpage-bg-updated', updateAllBgs);
       window.removeEventListener('phongtrao-bg-updated', updateAllBgs);
+      window.removeEventListener('phongtrao-url-updated', updateAllBgs);
+      window.removeEventListener('phongtrao-updated', updateAllBgs);
       window.removeEventListener('storage', updateAllBgs);
     };
   }, []);
@@ -489,6 +511,7 @@ export default function HomePage() {
                   {DEFAULT_PHONG_TRAO.map((item, i) => {
                     const Icon = getPhongTraoIcon(item.iconName);
                     const bg = phongTraoBgs[item.id] || item.defaultBg;
+                    const targetUrl = phongTraoUrls[item.id] || item.defaultUrl || item.route;
                     return (
                       <motion.button
                         key={item.id}
@@ -497,7 +520,14 @@ export default function HomePage() {
                         transition={{ delay: i * 0.03, duration: 0.2 }}
                         whileHover={{ scale: 1.02, y: -2 }}
                         whileTap={{ scale: 0.98 }}
-                        onClick={() => handleNav(item.route)}
+                        onClick={() => {
+                          if (targetUrl.startsWith('http://') || targetUrl.startsWith('https://')) {
+                            handleExternal(targetUrl);
+                          } else {
+                            handleNav(targetUrl);
+                          }
+                        }}
+                        title={`Kết nối phong trào: ${targetUrl}`}
                         className="relative overflow-hidden rounded-2xl min-h-[118px] sm:min-h-[128px] md:min-h-[135px] flex flex-col justify-between p-4 shadow-md cursor-pointer group border border-white/10 text-left transition-all"
                       >
                         <img
@@ -508,21 +538,30 @@ export default function HomePage() {
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-black/10 pointer-events-none" />
                         <div className={cn("absolute inset-0 bg-gradient-to-t pointer-events-none opacity-60", item.accent)} />
                         
-                        {/* Top: Icon + Badge tag */}
+                        {/* Top: Icon + Badge tag + Link Indicator */}
                         <div className="relative z-10 flex items-center justify-between w-full">
                           <div className="p-1.5 bg-black/40 backdrop-blur-md rounded-lg w-fit shadow-xs border border-white/20">
                             <Icon className="h-4 w-4 text-white" />
                           </div>
-                          <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-black/40 backdrop-blur-md text-white/95 border border-white/25">
-                            {item.tag}
-                          </span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-black/40 backdrop-blur-md text-white/95 border border-white/25">
+                              {item.tag}
+                            </span>
+                            <span className="p-1 rounded-full bg-black/40 backdrop-blur-md text-white/90 border border-white/25 group-hover:bg-purple-600/80 transition-colors">
+                              <ExternalLink className="h-2.5 w-2.5" />
+                            </span>
+                          </div>
                         </div>
 
-                        {/* Bottom: Official full title */}
+                        {/* Bottom: Official full title + Connecting Action */}
                         <div className="relative z-10 mt-3">
                           <span className="text-xs sm:text-[13px] font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.95)] leading-snug line-clamp-3">
                             {item.label}
                           </span>
+                          <div className="flex items-center gap-1 text-[11px] font-bold text-purple-200 mt-2 opacity-90 group-hover:opacity-100 group-hover:translate-x-1 transition-all">
+                            <span>Truy cập phong trào</span>
+                            <ArrowRight className="h-3 w-3" />
+                          </div>
                         </div>
                       </motion.button>
                     );

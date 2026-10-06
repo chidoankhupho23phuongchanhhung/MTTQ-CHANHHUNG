@@ -9,6 +9,7 @@ export interface PhongTraoItem {
   iconName: 'Shield' | 'Flower2' | 'FileText';
   accent: string;
   defaultBg: string;
+  defaultUrl: string;
   route: string;
   presets: string[];
 }
@@ -23,6 +24,7 @@ export const DEFAULT_PHONG_TRAO: PhongTraoItem[] = [
     iconName: 'Shield',
     accent: 'from-slate-950/75 via-slate-900/20 to-transparent',
     defaultBg: 'https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?w=800&auto=format&fit=crop&q=80',
+    defaultUrl: '/hoat-dong-mttq',
     route: '/hoat-dong-mttq',
     presets: [
       'https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?w=800&auto=format&fit=crop&q=80',
@@ -40,6 +42,7 @@ export const DEFAULT_PHONG_TRAO: PhongTraoItem[] = [
     iconName: 'Flower2',
     accent: 'from-rose-950/75 via-rose-900/20 to-transparent',
     defaultBg: 'https://images.unsplash.com/photo-1490750967868-88df5691cc52?w=800&auto=format&fit=crop&q=80',
+    defaultUrl: '/hoat-dong-mttq',
     route: '/hoat-dong-mttq',
     presets: [
       'https://images.unsplash.com/photo-1490750967868-88df5691cc52?w=800&auto=format&fit=crop&q=80',
@@ -57,6 +60,7 @@ export const DEFAULT_PHONG_TRAO: PhongTraoItem[] = [
     iconName: 'FileText',
     accent: 'from-purple-950/75 via-purple-900/20 to-transparent',
     defaultBg: 'https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=800&auto=format&fit=crop&q=80',
+    defaultUrl: '/an-sinh-xa-hoi',
     route: '/an-sinh-xa-hoi',
     presets: [
       'https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=800&auto=format&fit=crop&q=80',
@@ -98,6 +102,7 @@ export const setPhongTraoBg = (id: string, bg: string): void => {
       console.warn('localStorage quota exceeded, saving to memory/fallback', e);
     }
     window.dispatchEvent(new Event('phongtrao-bg-updated'));
+    window.dispatchEvent(new Event('phongtrao-updated'));
   }
 };
 
@@ -109,5 +114,41 @@ export const resetPhongTraoBg = (id: string): void => {
       console.warn('localStorage remove error', e);
     }
     window.dispatchEvent(new Event('phongtrao-bg-updated'));
+    window.dispatchEvent(new Event('phongtrao-updated'));
+  }
+};
+
+export const getPhongTraoUrl = (id: string, defaultUrl: string): string => {
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem(`phongtrao_url_${id}`) || defaultUrl;
+  }
+  return defaultUrl;
+};
+
+export const setPhongTraoUrl = (id: string, url: string): void => {
+  if (typeof window !== 'undefined') {
+    try {
+      if (url) {
+        localStorage.setItem(`phongtrao_url_${id}`, url);
+      } else {
+        localStorage.removeItem(`phongtrao_url_${id}`);
+      }
+    } catch (e) {
+      console.warn('localStorage error', e);
+    }
+    window.dispatchEvent(new Event('phongtrao-url-updated'));
+    window.dispatchEvent(new Event('phongtrao-updated'));
+  }
+};
+
+export const resetPhongTraoUrl = (id: string): void => {
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.removeItem(`phongtrao_url_${id}`);
+    } catch (e) {
+      console.warn('localStorage error', e);
+    }
+    window.dispatchEvent(new Event('phongtrao-url-updated'));
+    window.dispatchEvent(new Event('phongtrao-updated'));
   }
 };
